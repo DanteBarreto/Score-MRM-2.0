@@ -4,26 +4,16 @@ Sigue estos pasos cada vez que haya información de un nuevo mes.
 
 ## Antes de empezar
 
-Este repositorio es público. Si los archivos contienen información real, no los subas aquí: usa un repositorio privado o déjalos solo en tu equipo.
+Los archivos se actualizan en tu carpeta local, la de `carpeta_inputs` en `config.yaml`. El repositorio es público y no debe contener datos.
 
 ## Pasos
 
-1. **Input principal:** agrega al archivo de `data/` las filas del nuevo mes, sin borrar los meses anteriores. Mantén el nombre y el orden de las columnas.
+1. **Input principal:** agrega las filas del nuevo mes, sin borrar los meses anteriores. Mantén los nombres de las columnas.
 2. **Reporte de observaciones:** reemplaza el archivo por el del nuevo mes.
 3. **Tablón de coberturas:** reemplaza el archivo por el del nuevo mes.
-4. **Configuración:** si algún archivo cambió de nombre, actualiza su ruta en `config.yaml`. Por ejemplo, el tablón lleva la fecha en el nombre.
+4. **Configuración:** si algún archivo cambió de nombre, actualízalo en `archivos` de `config.yaml`.
 5. **Generación:** presiona `Ctrl+Shift+B` en Visual Studio Code.
 6. **Revisión:** lee los avisos de calidad en la terminal y revisa el reporte.
-7. **Versionado:** guarda los cambios en Git, si corresponde.
-
-Como el input tendrá más de una fecha, antes de la primera actualización real cambia esto en `config.yaml`:
-
-```yaml
-simulacion:
-  activa: false
-```
-
-Con eso, los evolutivos usan solo datos reales y desaparecen la línea punteada y el punto hueco.
 
 ## Qué cambia en el reporte
 
@@ -38,4 +28,4 @@ Con eso, los evolutivos usan solo datos reales y desaparecen la línea punteada 
 - [ ] Revisé los avisos de calidad de datos.
 - [ ] Los filtros Fecha, Tier y Modelo responden.
 - [ ] Validación y Observaciones muestran datos del nuevo mes.
-- [ ] No hay datos reales en un repositorio público.
+- [ ] `git status` no muestra Excel, `config.yaml` ni el reporte generado.

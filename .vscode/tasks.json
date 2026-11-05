@@ -3,11 +3,11 @@
   "tasks": [
     {
       "label": "1. Preparar entorno",
-      "detail": "Crea .venv e instala las dependencias (solo la primera vez)",
+      "detail": "Crea .venv, instala las dependencias y crea config.yaml (solo la primera vez)",
       "type": "shell",
-      "windows": { "command": "python -m venv .venv; if ($?) { .venv\\Scripts\\python -m pip install -r requirements.txt }" },
-      "linux": { "command": "python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt" },
-      "osx": { "command": "python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt" },
+      "windows": { "command": "python -m venv .venv; if ($?) { .venv\\Scripts\\python -m pip install -r requirements.txt }; if (-not (Test-Path config.yaml)) { Copy-Item config.ejemplo.yaml config.yaml }" },
+      "linux": { "command": "python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && { [ -f config.yaml ] || cp config.ejemplo.yaml config.yaml; }" },
+      "osx": { "command": "python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && { [ -f config.yaml ] || cp config.ejemplo.yaml config.yaml; }" },
       "problemMatcher": []
     },
     {

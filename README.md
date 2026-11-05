@@ -2,17 +2,18 @@
 
 Reporte HTML de indicadores de riesgo de modelo del COE Model Risk Management. Toma información de archivos Excel, calcula un puntaje de 0 a 100 por indicador, driver y modelo, y genera una sola página interactiva con filtros.
 
-> **Importante:** este repositorio es público y los datos incluidos son simulados, solo para pruebas. No subas información real. Para trabajar con datos reales, usa un repositorio privado o deja los archivos fuera de Git.
+> **Importante:** este repositorio es público y no incluye datos. Cada persona trabaja con los Excel de su carpeta local, que Git ignora. No subas esos archivos ni el reporte generado.
 
 ## Inicio rápido
 
-Necesitas [Python 3.10 o superior](https://www.python.org/downloads/) y [Visual Studio Code](https://code.visualstudio.com/).
+Necesitas [Python 3.10 o superior](https://www.python.org/downloads/), [Visual Studio Code](https://code.visualstudio.com/) y los tres Excel de entrada en una carpeta de tu equipo.
 
 1. Clona el repositorio y abre la carpeta en Visual Studio Code.
-2. Abre `Terminal > Run Task…` y ejecuta **1. Preparar entorno** (solo la primera vez).
-3. Presiona `Ctrl+Shift+B` para generar el reporte. Se abrirá en tu navegador.
+2. Abre `Terminal > Run Task…` y ejecuta **1. Preparar entorno** (solo la primera vez). Esto crea tu archivo `config.yaml`.
+3. Abre `config.yaml` e indica en `carpeta_inputs` la carpeta de tus Excel. Si los nombres de tus archivos son otros, ajústalos en `archivos`.
+4. Presiona `Ctrl+Shift+B` para generar el reporte. Se abrirá en tu navegador.
 
-El reporte queda en `output/reporte_mrm.html`. Necesita internet al abrirse, porque carga los estilos desde un CDN.
+El reporte queda en `output/reporte_mrm.html`. Incluye los datos, así que compártelo solo con quien corresponda. Necesita internet al abrirse, porque carga los estilos desde un CDN.
 
 La guía paso a paso, con la alternativa por terminal y la solución de errores frecuentes, está en [docs/guia_vscode.md](docs/guia_vscode.md).
 
@@ -32,9 +33,14 @@ La guía paso a paso, con la alternativa por terminal y la solución de errores 
 
 ```mermaid
 flowchart LR
-    A[Input principal] --> D[generar_reporte.py]
-    B[Reporte de observaciones] --> D
-    C[Tablón de coberturas] --> D
+    subgraph L[Carpeta local del usuario]
+      A[Input principal]
+      B[Reporte de observaciones]
+      C[Tablón de coberturas]
+    end
+    A --> D[generar_reporte.py]
+    B --> D
+    C --> D
     T[Plantilla HTML] --> D
     D --> R[output/reporte_mrm.html]
 ```
@@ -45,9 +51,8 @@ Python lee y valida los Excel, une la información por ID de modelo y la inserta
 
 ```text
 Score-MRM-2.0/
-├── config.yaml        Rutas de los archivos y opciones del proceso
+├── config.ejemplo.yaml  Plantilla de tu config.yaml local
 ├── requirements.txt   Dependencias de Python
-├── data/              Excel de entrada
 ├── docs/              Documentación
 ├── src/               Código del proceso
 │   ├── generar_reporte.py
@@ -55,6 +60,7 @@ Score-MRM-2.0/
 ├── templates/         Plantilla del reporte: diseño e indicadores
 ├── tests/             Pruebas automáticas
 ├── .vscode/           Tareas y configuración de Visual Studio Code
+├── config.yaml        Tu configuración local (no se sube a Git)
 └── output/            Reporte generado (no se sube a Git)
 ```
 
@@ -64,13 +70,13 @@ Score-MRM-2.0/
 |---|---|
 | [Guía de Visual Studio Code](docs/guia_vscode.md) | Instalar, correr el proceso y resolver errores |
 | [Proceso](docs/proceso.md) | Qué hace cada etapa, de los Excel al reporte |
-| [Datos de entrada](docs/datos.md) | Archivos, columnas, cruces y controles de calidad |
+| [Datos de entrada](docs/datos.md) | Carpeta local, archivos, columnas y controles de calidad |
 | [Indicadores](docs/indicadores.md) | Cálculo de indicadores, drivers, score y puntos por definir |
 | [Actualización mensual](docs/actualizacion_mensual.md) | Qué hacer cada mes para actualizar el reporte |
 
 ## Estado
 
-Primer MVP, con datos simulados. Mayo, junio y julio de 2026 se simulan a partir de agosto para probar los evolutivos. Las definiciones pendientes están en [docs/indicadores.md](docs/indicadores.md#puntos-por-definir).
+Primer MVP. Las definiciones pendientes están en [docs/indicadores.md](docs/indicadores.md#puntos-por-definir).
 
 ## Tecnologías
 

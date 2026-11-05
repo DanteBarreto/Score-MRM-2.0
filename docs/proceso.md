@@ -6,7 +6,7 @@ Este documento explica cómo se transforma la información de los Excel en el re
 
 ```mermaid
 flowchart TD
-    subgraph E[1. Información]
+    subgraph E[1. Carpeta local del usuario]
       A[Input principal<br>ID_MODELO]
       B[Reporte de observaciones<br>ID_Model]
       C[Tablón de coberturas<br>Modelo_ID]
@@ -27,7 +27,7 @@ flowchart TD
 
 ### 1. Información
 
-Los archivos y sus rutas se definen en `config.yaml`. El detalle de cada uno está en [Datos de entrada](datos.md).
+Cada usuario guarda los Excel en una carpeta de su equipo y la indica en su `config.yaml`. El repositorio no contiene datos. El detalle de cada archivo está en [Datos de entrada](datos.md).
 
 ### 2. Lectura y validación
 
@@ -69,17 +69,18 @@ Los indicadores se calculan en el navegador, como las medidas de un modelo semá
 
 En fechas anteriores, Validación y Observaciones muestran el evolutivo y un aviso, porque sus archivos corresponden solo a la última fecha.
 
-## Simulación del historial
+## Simulación del historial (solo pruebas)
 
-El input actual tiene un solo mes (agosto de 2026). Para probar los evolutivos, `src/simular_historico.py` crea mayo, junio y julio con variaciones aleatorias a partir de agosto. Usa una semilla fija, así que el resultado siempre es el mismo.
+Está desactivada por defecto. Con `simulacion.activa: true`, `src/simular_historico.py` crea mayo, junio y julio de 2026 con variaciones aleatorias a partir de un input de agosto de 2026, para probar los evolutivos cuando solo hay un mes. Usa una semilla fija, así que el resultado siempre es el mismo.
 
-Los meses simulados se marcan con `SIMULADO = 1` y aparecen en los gráficos con línea punteada y punto hueco. Sus tendencias no tienen significado de negocio. Cuando exista el historial real, se desactiva en `config.yaml`.
+Los meses simulados se marcan con `SIMULADO = 1` y aparecen en los gráficos con línea punteada y punto hueco. Sus tendencias no tienen significado de negocio, por lo que no debe usarse en un reporte oficial.
 
 ## Dónde hacer cada cambio
 
 | Quiero cambiar | Archivo |
 |---|---|
-| Rutas de los Excel | `config.yaml` |
+| Carpeta y nombres de mis Excel | `config.yaml` (local) |
+| Valores por defecto para nuevos usuarios | `config.ejemplo.yaml` |
 | Fórmula o nombre de un indicador | `templates/plantilla_reporte.html`, objeto `CFG` |
 | Umbrales del semáforo | `templates/plantilla_reporte.html`, constante `UMBRALES` |
 | Filtros | `templates/plantilla_reporte.html`, constante `DIMS` |
