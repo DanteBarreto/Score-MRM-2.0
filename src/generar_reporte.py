@@ -1,6 +1,7 @@
 """Genera el reporte HTML del Score MRM a partir de los Excel de insumos.
 
-Uso:  python src/generar_reporte.py [--config config.yaml] [--abrir]
+Los Excel se leen de la carpeta local indicada en config.yaml, que cada usuario crea a partir de
+config.ejemplo.yaml. Uso:  python src/generar_reporte.py [--config config.yaml] [--abrir]
 """
 import argparse
 import json
@@ -17,6 +18,7 @@ from openpyxl import load_workbook
 from simular_historico import simular
 
 RAIZ = Path(__file__).resolve().parents[1]
+PLANTILLA = RAIZ / "templates" / "plantilla_reporte.html"
 MARCA = "/*__DATOS__*/null"
 
 COLUMNAS = """FECHA ID_MODELO NOMBRE_MODELO TIER_MODELO ESTADO_MODELO TIPO_RIESGO PRODUCTO SUB_PRODUCTO BANCA PROCESO
@@ -58,7 +60,7 @@ def fecha_iso(texto):
 
 def leer(ruta, columnas=COLUMNAS):
     if not Path(ruta).exists():
-        sys.exit(f"No se encontró el Excel: {ruta}")
+        sys.exit(f"No se encontró el Excel: {ruta}\nRevisa carpeta_inputs y archivos en config.yaml")
     hoja = load_workbook(ruta, read_only=True, data_only=True).worksheets[0]
     filas = hoja.iter_rows(values_only=True)
     cab = [limpiar(c) for c in next(filas)]
@@ -124,10 +126,13 @@ def main():
     args.add_argument("--config", default=RAIZ / "config.yaml")
     args.add_argument("--abrir", action="store_true", help="abre el reporte en el navegador al terminar")
     args = args.parse_args()
+    if not Path(args.config).exists():
+        sys.exit("No existe config.yaml: copia config.ejemplo.yaml como config.yaml e indica la carpeta de tus inputs")
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
-    rutas = {k: RAIZ / v for k, v in cfg["rutas"].items()}
+    carpeta = Path(cfg["carpeta_inputs"])
+    salida = RAIZ / cfg["salida"]
 
-    ruta = rutas["input_principal"]
+    ruta = carpeta / cfg["archivos"]["input_principal"]
     if cfg["simulacion"]["activa"]:
         ruta = simular(ruta, RAIZ / cfg["simulacion"]["salida"])
     filas = leer(ruta)
@@ -140,8 +145,8 @@ def main():
     actuales = [f for f in filas if f["FECHA"] == corte]
     # Observaciones y coberturas solo corresponden a la última fecha del input
     ids = {f["ID_MODELO"] for f in actuales}
-    observaciones, obs_meta = leer_observaciones(rutas["observaciones"], ids)
-    coberturas, cob_meta = leer_coberturas(rutas["coberturas"], ids)
+    observaciones, obs_meta = leer_observaciones(carpeta / cfg["archivos"]["observaciones"], ids)
+    coberturas, cob_meta = leer_coberturas(carpeta / cfg["archivos"]["coberturas"], ids)
     sin_tablon = len(ids - {c["Modelo_ID"] for c in coberturas})
     avisos = avisos_calidad(actuales)
     if obs_meta["duplicadas"]:
@@ -155,19 +160,19 @@ def main():
         "fechas_simuladas": sorted({f["FECHA"] for f in filas if f.get("SIMULADO")}),
         "observaciones": observaciones, "obs_meta": obs_meta, "coberturas": coberturas, "cob_meta": cob_meta,
     }
-    plantilla = rutas["plantilla"].read_text(encoding="utf-8")
+    plantilla = PLANTILLA.read_text(encoding="utf-8")
     if MARCA not in plantilla:
         sys.exit(f"La plantilla no contiene la marca {MARCA}")
     json_datos = json.dumps(datos, ensure_ascii=False).replace("</", "<\\/")
-    rutas["salida"].parent.mkdir(parents=True, exist_ok=True)
-    rutas["salida"].write_text(plantilla.replace(MARCA, json_datos), encoding="utf-8")
-    print(f"{rutas['salida'].name}: {len(filas)} filas, fechas {fechas}, {len(observaciones)} observaciones, "
+    salida.parent.mkdir(parents=True, exist_ok=True)
+    salida.write_text(plantilla.replace(MARCA, json_datos), encoding="utf-8")
+    print(f"{salida.name}: {len(filas)} filas, fechas {fechas}, {len(observaciones)} observaciones, "
           f"{len(coberturas)} coberturas")
     print("Avisos de calidad de datos:")
     for aviso in avisos:
         print(f"  - {aviso}")
     if args.abrir:
-        webbrowser.open(rutas["salida"].resolve().as_uri())
+        webbrowser.open(salida.resolve().as_uri())
 
 
 if __name__ == "__main__":

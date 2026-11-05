@@ -3,8 +3,18 @@
 __pycache__/
 *.pyc
 
-# Resultados generados: se crean al correr el proceso
+# Resultados generados: se crean al correr el proceso e incluyen datos
 output/
+
+# Configuración local de cada usuario
+config.yaml
+
+# Inputs: viven en la carpeta local de cada usuario, nunca en el repositorio
+*.xlsx
+*.xlsm
+*.xls
+*.csv
+!docs/referencia/Indicadores.xlsx
 
 # Bloqueos temporales de Excel
 ~$*

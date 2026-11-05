@@ -1,0 +1,19 @@
+# Plantilla de configuración. Cópiala como config.yaml y ajústala a tu equipo.
+# config.yaml no se sube a Git: cada persona tiene el suyo.
+
+# Carpeta de tu equipo donde están los Excel. Usa comillas simples.
+carpeta_inputs: 'C:\Users\TU_USUARIO\Documents\Score MRM\Inputs'
+
+# Nombres de los archivos dentro de esa carpeta
+archivos:
+  input_principal: Input_principal_Score MRM.xlsx
+  observaciones: Reporte de observaciones.xlsx
+  coberturas: Tablón de coberturas.xlsx
+
+# Reporte generado, relativo a la carpeta del proyecto
+salida: output/reporte_mrm.html
+
+# Solo para pruebas: crea meses ficticios (mayo a julio de 2026) a partir de un input de agosto de 2026
+simulacion:
+  activa: false
+  salida: output/input_con_historico_simulado.xlsx

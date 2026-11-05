@@ -1,17 +1,22 @@
 # Datos de entrada
 
-Todos los archivos de `data/` son simulados y solo sirven para pruebas. El proceso lee la primera hoja de cada Excel, con los títulos en la primera fila.
+## Carpeta local
+
+El repositorio no contiene inputs. Cada persona guarda los tres Excel en una carpeta de su equipo y la indica en `carpeta_inputs` de su `config.yaml`. Git ignora `config.yaml`, los Excel y el reporte generado.
+
+El proceso lee la primera hoja de cada Excel, con los títulos en la primera fila.
 
 ## Archivos
 
 | Archivo | Contenido | Identificador | Periodicidad |
 |---|---|---|---|
-| `Input_principal_Score MRM.xlsx` | Inventario y campos de cada indicador | `ID_MODELO` | Una fila por modelo y `FECHA` |
-| `Reporte de observaciones.xlsx` | Detalle de observaciones pendientes | `ID_Model` | Solo última fecha |
-| `2026.10.05 - Tablón de coberturas.xlsx` | Cobertura por frente de validación | `Modelo_ID` | Solo última fecha |
-| `Indicadores.xlsx` | Definición de medidas en Power BI (DAX), variables y base de referencia | No aplica | Documento de referencia |
+| Input principal | Inventario y campos de cada indicador | `ID_MODELO` | Una fila por modelo y `FECHA` |
+| Reporte de observaciones | Detalle de observaciones pendientes | `ID_Model` | Solo última fecha |
+| Tablón de coberturas | Cobertura por frente de validación | `Modelo_ID` | Solo última fecha |
 
-`Indicadores.xlsx` no se lee en el proceso: las reglas están programadas en la plantilla. Si cambia una regla, hay que actualizar la plantilla y [Indicadores](indicadores.md).
+Los nombres de los archivos se definen en `archivos` de `config.yaml`.
+
+`docs/referencia/Indicadores.xlsx` documenta las medidas de Power BI (DAX) y no se lee en el proceso: las reglas están programadas en la plantilla. Si cambia una regla, hay que actualizar la plantilla y [Indicadores](indicadores.md).
 
 ## Input principal
 
@@ -54,25 +59,22 @@ Los días vencidos se calculan entre el compromiso vigente (`Fecha ampliada` si 
 
 ## Controles de calidad
 
-Al generar el reporte, la consola lista avisos que no detienen el proceso. Con los datos actuales son:
+Al generar el reporte, la consola lista avisos que no detienen el proceso:
 
-| Control | Casos |
-|---|---|
-| Modelos "Sin Seguimiento" con nota de completitud | 10 |
-| Modelos "Con Seguimiento" sin nota de completitud | 192 |
-| Modelos "Sin Seguimiento" marcados "En alerta" | 4 |
-| Modelos en alerta sin dato de mitigante | 3 |
-| Modelos sin alerta con dato de mitigante | 2 |
-| Mitigante "Si" con descripción "No aplica" | 5 |
-| Ambiente informado y plataforma sin información | 60 |
-| `NOTA_CALIDAD_DATOS` igual a 0 | 24 |
-| Filas repetidas en observaciones | 8 |
-| Modelos sin registro en el tablón | 5 |
-| Observaciones y coberturas fuera del inventario | 641 y 687 |
+- Modelos "Sin Seguimiento" con nota de completitud, o "Con Seguimiento" sin ella.
+- Modelos "Sin Seguimiento" marcados "En alerta".
+- Modelos en alerta sin dato de mitigante, o sin alerta con ese dato.
+- Mitigante "Si" con descripción "No aplica".
+- Ambiente informado con plataforma sin información.
+- `NOTA_CALIDAD_DATOS` igual a 0.
+- Más observaciones vencidas que pendientes.
+- Filas repetidas en observaciones.
+- Modelos sin registro en el tablón.
+- Observaciones y coberturas de modelos fuera del inventario.
 
 ## Diferencias conocidas entre fuentes
 
-En agosto de 2026:
+En la base de desarrollo de agosto de 2026 se encontró lo siguiente. Conviene revisarlo con los datos reales:
 
 | Dato | Input principal | Archivo de detalle |
 |---|---|---|

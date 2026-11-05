@@ -1,6 +1,6 @@
 # Indicadores
 
-Este documento describe la lógica programada en el reporte. Las medidas originales en DAX están en `data/Indicadores.xlsx`, hoja `Medidas`.
+Este documento describe la lógica programada en el reporte. Las medidas originales en DAX están en `docs/referencia/Indicadores.xlsx`, hoja `Medidas`.
 
 ## Cómo se construye el score
 
@@ -8,7 +8,7 @@ Este documento describe la lógica programada en el reporte. Las medidas origina
 2. **Driver:** promedio de sus indicadores que aplican.
 3. **Score:** promedio de los drivers que aplican, con igual peso.
 
-Las medidas se recalculan sobre los modelos filtrados. El score de un modelo es la misma medida evaluada solo para ese modelo. Por eso el score del portafolio (71,6 en agosto) no es el promedio de los scores de los modelos (82,2).
+Las medidas se recalculan sobre los modelos filtrados. El score de un modelo es la misma medida evaluada solo para ese modelo. Por eso el score del portafolio no es igual al promedio de los scores de los modelos.
 
 Lo marcado como "No aplica" se muestra en gris y no entra al promedio.
 
@@ -85,6 +85,8 @@ Son "No aplica" si no hay observaciones pendientes.
 - **Driver y score:** no están definidos en la documentación, así que se usa promedio simple.
 
 ## Puntos por definir
+
+Las cifras corresponden a la base de desarrollo de agosto de 2026.
 
 | Tema | Situación actual | Decisión pendiente |
 |---|---|---|

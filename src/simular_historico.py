@@ -75,6 +75,8 @@ def simular_fila(base, fecha, r):
 
 
 def simular(ruta, salida):
+    if not Path(ruta).exists():
+        sys.exit(f"No se encontró el Excel: {ruta}\nRevisa carpeta_inputs y archivos en config.yaml")
     filas = load_workbook(ruta, read_only=True, data_only=True).worksheets[0].iter_rows(values_only=True)
     cab = list(next(filas))
     agosto = [dict(zip(cab, f)) for f in filas if any(c is not None for c in f)]
