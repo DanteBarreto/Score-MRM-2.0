@@ -1,0 +1,13 @@
+# Configuración del reporte Score MRM. Las rutas son relativas a la raíz del proyecto.
+rutas:
+  input_principal: data/Input_principal_Score MRM.xlsx
+  observaciones: data/Reporte de observaciones.xlsx
+  coberturas: data/2026.10.05 - Tablón de coberturas.xlsx
+  plantilla: templates/plantilla_reporte.html
+  salida: output/reporte_mrm.html
+
+# Mientras el input principal tenga un solo mes, se simulan los meses previos para probar los evolutivos.
+# Cuando el input traiga el historial real, cambiar "activa" a false.
+simulacion:
+  activa: true
+  salida: output/input_con_historico_simulado.xlsx
