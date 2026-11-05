@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Score MRM</title>
+<!-- Plantilla base: Tabler 1.4 (MIT) sobre Bootstrap 5 · Íconos: Tabler Icons (MIT) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  /* Semáforo (alineado a la paleta de Tabler) + "No aplica" */
+  --g:#2fb344; --g-bg:#e6f6e9; --a:#e08900; --a-bg:#fff3dc; --r:#d63939; --r-bg:#fbe6e6; --n:#b5bcc6; --n-bg:#f1f3f6;
+  --track:#eef1f5; --drv-bg:#eef4fa;
+}
+body{background:#f6f8fb}
+/* Barra lateral */
+.marca{font-family:"Arial Black",Arial,Helvetica,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+.navbar-vertical{background:linear-gradient(180deg,#096AAD 0%,#FF6600 100%)!important;border-right:0;color:#fff}
+.navbar-vertical .navbar-brand,.navbar-vertical .nav-link,.navbar-vertical .nav-link-icon,.navbar-vertical .navbar-toggler{color:#fff!important}
+.side-label{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#fff;font-weight:600;padding:.75rem .75rem .35rem;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.filtros{padding:0 .75rem 1rem}
+.filtros .form-label{font-size:.75rem;color:#fff;font-weight:600;margin:.5rem 0 .2rem;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.filtros .on{border-color:#fff;box-shadow:0 0 0 .15rem rgba(255,255,255,.55)}
+#fcount{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.navbar-vertical .nav-link:hover{background:rgba(255,255,255,.12);border-radius:6px}
+.navbar-vertical .nav-item.active .nav-link{background:rgba(255,255,255,.24);border-radius:6px;font-weight:600}
+.navbar-vertical .navbar-nav{padding:0 .5rem}
+
+/* KPIs y tarjetas */
+.kpi .avatar{width:2.75rem;height:2.75rem;font-size:1.35rem}
+.kpi .h1{font-variant-numeric:tabular-nums}
+/* Gráficos */
+.lineas svg{display:block;width:100%;height:auto}
+.lineas text{font-family:inherit;fill:var(--tblr-secondary);font-size:12px}
+.lineas text.valor{fill:var(--tblr-body-color);font-size:14px;font-weight:700}
+.lineas text.sel{fill:var(--tblr-body-color);font-weight:700}
+.lineas .hit{fill:transparent;outline:none}
+.lineas .cruz{stroke:var(--tblr-secondary);stroke-width:1;opacity:0}
+.lineas .col:hover .cruz,.lineas .col:focus-within .cruz{opacity:.5}
+#tip{position:fixed;transform:translate(-50%,-100%);background:#fff;border:1px solid var(--tblr-border-color);border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:.4rem .6rem;font-size:.78rem;white-space:pre-line;pointer-events:none;z-index:2000}
+#tip::first-line{font-weight:700}
+.leg{display:flex;gap:12px;font-size:.75rem;color:var(--tblr-secondary);flex-wrap:wrap}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+.barras{display:flex;flex-direction:column;gap:.55rem}
+.barra{display:grid;grid-template-columns:minmax(90px,38%) 1fr 3.2rem;gap:.6rem;align-items:center;font-size:.82rem}
+.barra .et{line-height:1.15}
+.barra b{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.pista{display:flex;gap:2px;height:12px}
+.pista i{display:block;height:100%;min-width:3px}
+.pista i:last-child{border-radius:0 4px 4px 0}
+.grupo-fila{cursor:pointer}
+.grupo-fila button{all:unset;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.grupo-fila button:focus-visible{outline:2px solid var(--tblr-primary);outline-offset:2px}
+.heat tr.sub td:first-child{padding-left:2.1rem;color:var(--tblr-secondary)}
+
+/* Semáforo */
+.sem{display:inline-flex;align-items:center;gap:6px;padding:.2rem .6rem;border-radius:999px;font-size:.72rem;font-weight:600;white-space:nowrap}
+.sem::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.verde{color:var(--g);background:var(--g-bg)}.ambar{color:var(--a);background:var(--a-bg)}.rojo{color:var(--r);background:var(--r-bg)}.na{color:#8a93a0;background:var(--n-bg)}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+
+/* Tablero vertical de indicadores */
+.tablero{margin:0}
+.tablero thead th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tblr-secondary);background:#fff;border-bottom:2px solid var(--tblr-border-color)}
+.tablero td{vertical-align:middle;padding-top:.6rem;padding-bottom:.6rem}
+.tablero td:not(.drv){padding-left:1rem!important}
+.tablero td.drv{padding-left:1.25rem!important}
+.tablero tr.grupo td{border-top:2px solid var(--tblr-border-color)}
+.tablero td.drv{background:var(--drv-bg);width:190px;border-right:1px solid var(--tblr-border-color)}
+.tablero td.drv .nombre{font-weight:700;display:flex;align-items:center;gap:6px}
+.tablero td.drv .nombre i{color:var(--tblr-primary)}
+.tablero td.val{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;width:90px}
+.tablero td.luz{text-align:center;width:90px}
+.tablero td.pts{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;width:110px}
+.tablero tr.no-aplica td:not(.drv){color:#9aa3af}
+.score-actual{display:flex;align-items:center;gap:12px}
+.score-actual .num{font-size:2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.leyenda-umbral{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--tblr-border-color);font-size:.85rem}
+.leyenda-umbral div{display:flex;align-items:center;gap:8px}
+
+/* Tabla mapa de calor */
+.heat thead th{cursor:pointer;user-select:none;white-space:nowrap;vertical-align:middle}
+.heat td{white-space:nowrap}
+td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
+.macro-scroll{max-height:70vh;overflow:auto}
+.macro-scroll thead{position:sticky;top:0;z-index:3}
+.macro-scroll thead th{background:#fff}
+.macro-scroll thead tr.banda th{cursor:default;border-left:1px solid var(--tblr-border-color);color:var(--tblr-secondary)}
+.macro-scroll .fija{position:sticky;left:0;background:#fff;z-index:1;white-space:normal;min-width:240px;max-width:280px}
+.macro-scroll thead .fija{z-index:4}
+.chip{display:inline-flex;gap:6px;align-items:center;background:var(--tblr-primary-lt);color:var(--tblr-primary);border-radius:999px;padding:.15rem .3rem .15rem .7rem;font-size:.78rem;margin:0 .35rem .35rem 0}
+.chip button{border:0;background:none;color:inherit;padding:0 .3rem;font-size:1rem;line-height:1}
+.view{display:none}.view.active{display:block}
+.empty{padding:40px;text-align:center;color:var(--tblr-secondary)}
+.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.obs-fila{cursor:pointer}
+.obs-det td{background:var(--drv-bg);white-space:normal}
+/* Flujo de inputs */
+.flujo{display:grid;grid-template-columns:minmax(0,1.5fr) auto minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1.5fr);gap:.75rem;align-items:stretch}
+.flujo-paso{display:flex;flex-direction:column;gap:.6rem}
+.flujo-num{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--tblr-secondary)}
+.flujo-caja{border:1px solid var(--tblr-border-color);border-radius:8px;padding:.7rem .8rem;background:#fff;font-size:.82rem;line-height:1.35}
+.flujo-caja b{display:block;margin-bottom:.15rem;font-size:.86rem}
+.flujo-caja.ancha{flex:1;display:flex;flex-direction:column;justify-content:center}
+.flujo-caja.input{border-left:4px solid var(--input)}
+.flujo-flecha{display:flex;align-items:center;color:var(--tblr-secondary);font-size:1.4rem}
+.flujo-seccion{display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.flujo-origen{display:inline-flex;gap:4px;align-items:center;color:var(--tblr-secondary);font-size:.74rem}
+.flujo-origen i{width:9px;height:9px;border-radius:50%;background:var(--input)}
+@media (max-width:991px){.flujo{grid-template-columns:minmax(0,1fr)}.flujo-flecha{justify-content:center;transform:rotate(90deg)}}
+/* Detalle de alertas */
+.alertas-tabla td{vertical-align:middle}
+.alertas-tabla .desc{white-space:normal;min-width:280px;max-width:420px}
+.stat .h2{font-variant-numeric:tabular-nums}
+@media (max-width:640px){.tablero td.drv{width:auto}.tablero td.val,.tablero td.luz,.tablero td.pts{width:auto}}
+@media print{.navbar-vertical,.page-header .btn-list,.toolbar,#chips{display:none!important}.page-wrapper{margin-left:0!important}.view{display:block!important;page-break-after:always}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Barra lateral -->
+  <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="light">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Mostrar menú"><span class="navbar-toggler-icon"></span></button>
+      <div class="navbar-brand d-flex align-items-center gap-2">
+        <span class="marca">Score MRM</span>
+      </div>
+      <div class="collapse navbar-collapse" id="sidebar-menu">
+        <div class="w-100">
+          <div class="side-label">Secciones</div>
+          <ul class="navbar-nav" id="tabs">
+            <li class="nav-item active"><a class="nav-link" href="#" data-v="resumen"><span class="nav-link-icon"><i class="ti ti-chart-pie"></i></span><span class="nav-link-title">Reporte</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-v="macro"><span class="nav-link-icon"><i class="ti ti-table"></i></span><span class="nav-link-title">Macro</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-v="seguimiento"><span class="nav-link-icon"><i class="ti ti-activity-heartbeat"></i></span><span class="nav-link-title">Seguimiento</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-v="validacion"><span class="nav-link-icon"><i class="ti ti-shield-check"></i></span><span class="nav-link-title">Validación</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-v="obs"><span class="nav-link-icon"><i class="ti ti-clipboard-text"></i></span><span class="nav-link-title">Observaciones</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-v="implementacion"><span class="nav-link-icon"><i class="ti ti-server-2"></i></span><span class="nav-link-title">Implementación</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-v="gobierno"><span class="nav-link-icon"><i class="ti ti-sitemap"></i></span><span class="nav-link-title">Gobierno</span></a></li>
+          </ul>
+          <div class="side-label d-flex align-items-center gap-2">Filtros <span class="badge bg-primary text-white" id="nfil" hidden></span></div>
+          <div class="filtros" id="filtros"></div>
+          <div class="px-3 pb-3 small" id="fcount"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Contenido -->
+  <div class="page-wrapper">
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <div class="page-pretitle">COE Model Risk Management</div>
+            <h2 class="page-title">Reporte de indicadores de modelos</h2>
+            <div class="text-secondary small mt-1">Control de Riesgo de Modelo</div>
+          </div>
+          <div class="col-auto ms-auto">
+            <div class="btn-list">
+              <button class="btn btn-outline-secondary" id="exportar"><i class="ti ti-file-export me-1"></i>Exportar CSV</button>
+              <button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer me-1"></i>Imprimir / PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="container-xl">
+        <div id="chips"></div>
+        <div class="view active" id="v-resumen"></div>
+        <div class="view" id="v-macro"></div>
+        <div class="view" id="v-seguimiento"></div>
+        <div class="view" id="v-validacion"></div>
+        <div class="view" id="v-obs"></div>
+        <div class="view" id="v-implementacion"></div>
+        <div class="view" id="v-gobierno"></div>
+      </div>
+    </div>
+
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl small text-secondary">Uso interno · Model Risk Management · Puntaje 0–100</div>
+    </footer>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+<script>
+/* ===================== DATOS ===================== */
+// generar_reporte.py reemplaza esta marca con el contenido del Excel.
+const DATOS = /*__DATOS__*/null;
+
+/* ===================== UTILIDADES DE CÁLCULO ===================== */
+const UMBRALES = { rojo: 70, verde: 80 };
+const clamp = v => Math.max(0, Math.min(100, v));
+const sem = s => (s == null ? 'na' : s < UMBRALES.rojo ? 'rojo' : s > UMBRALES.verde ? 'verde' : 'ambar');
+const SEM_TXT = { verde: 'Verde', ambar: 'Ámbar', rojo: 'Rojo', na: 'No aplica' };
+const COLOR = { verde: 'g', ambar: 'a', rojo: 'r', na: 'n' };
+const fmt = v => (v == null ? '–' : (Math.round(v * 10) / 10).toLocaleString('es-PE', { maximumFractionDigits: 1 }));
+const fmt0 = v => (v == null ? '–' : Math.round(v).toLocaleString('es-PE'));
+const esSimulada = f => DATOS.fechas_simuladas.includes(f);
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const mesTxt = f => `${MESES[+f.slice(5, 7) - 1]}-${f.slice(2, 4)}`;
+const avg = a => a.reduce((x, y) => x + y, 0) / (a.length || 1);
+const avgN = a => { const v = a.filter(x => x != null); return v.length ? avg(v) : null; };
+const sum = (ms, k) => ms.reduce((a, m) => a + (+m[k] || 0), 0);
+const cuenta = (ms, f) => ms.filter(f).length;
+const es = (k, ...vals) => m => vals.includes(m[k]);
+const prom = (ms, k) => avgN(ms.map(m => m[k]));
+const ratio = (n, d) => (d ? clamp(100 * (1 - n / d)) : null);   // 1 - n/d en escala 0-100
+const NA = { v: null, p: null };                                 // valor "-" y puntuación "No aplica"
+
+/* ===================== MEDIDAS ===================== */
+// Cada medida recibe un conjunto de modelos y devuelve { v: valor, p: puntuación }.
+// Se evalúa igual sobre el portafolio filtrado o sobre un solo modelo.
+const notaProm = k => ms => { const a = prom(ms, k); return a == null ? NA : { v: a * 100, p: a * 100 }; };
+const medAlerta = ms => {
+  if (!cuenta(ms, es('ESTADO_ALERTA', 'En alerta', 'Sin alerta'))) return NA;
+  const v = cuenta(ms, es('ESTADO_ALERTA', 'En alerta'));
+  return { v, p: ratio(v, ms.length) };
+};
+const medAmbiente = (amb, rat) => ms => {
+  if (!cuenta(ms, es(amb, 'PRODUCTIVO', 'NO PRODUCTIVO', 'MIXTO'))) return NA;
+  const r = prom(ms, rat);
+  return { v: cuenta(ms, es(amb, 'NO PRODUCTIVO', 'MIXTO')), p: r == null ? null : r * 100 };
+};
+const medObs = (venc, pend) => ms => ({ v: sum(ms, venc), p: ratio(sum(ms, venc), sum(ms, pend)) });
+
+// lp: cómo se puntúa el indicador, explicado para el usuario en la sección Gobierno
+const CFG = {
+  drivers: [
+    { key: 'seguimiento', nombre: 'Seguimiento', icono: 'ti-activity', peso: 1, ind: [
+      { key: 'sin_seguimiento', nombre: '# Modelos sin seguimiento', tipo: 'conteo',
+        lp: 'Porcentaje de modelos que no figuran sin seguimiento.',
+        med: ms => {
+          if (!cuenta(ms, es('ESTADO_SEGUIMIENTO', 'Con Seguimiento', 'Sin Seguimiento'))) return NA;
+          const v = cuenta(ms, es('ESTADO_SEGUIMIENTO', 'Sin Seguimiento'));
+          return { v, p: ratio(v, ms.length) };
+        } },
+      { key: 'alerta_salud', nombre: '# Modelos con alerta de salud', tipo: 'conteo',
+        lp: 'Porcentaje de modelos que no están en alerta.', med: medAlerta },
+      { key: 'alerta_excede_tiempo', nombre: '# Modelos con alerta de salud que exceden el tiempo máximo de atención', tipo: 'conteo',
+        lp: 'De los modelos en alerta, porcentaje que no excede el tiempo máximo de atención. No aplica si no hay modelos en alerta.',
+        med: ms => {
+          const a = medAlerta(ms);
+          if (a.p == null || a.v === 0 || !cuenta(ms, es('EXCEDE_TTM', 'Excede TTM', 'No excede'))) return NA;
+          const v = cuenta(ms, es('EXCEDE_TTM', 'Excede TTM'));
+          return { v, p: ratio(v, a.v) };
+        } },
+      { key: 'alerta_sin_mitigantes', nombre: '# Modelos con alerta de salud sin mitigante temporal', tipo: 'conteo',
+        lp: 'De los modelos en alerta, porcentaje que no figura sin mitigante temporal. No aplica si no hay modelos en alerta.',
+        med: ms => {
+          const a = medAlerta(ms);
+          if (a.p == null || a.v === 0) return NA;
+          const v = cuenta(ms, m => m.ESTADO_ALERTA === 'En alerta' && m.PRESENCIA_MITIGANTE === 'No');
+          return { v, p: ratio(v, a.v) };
+        } },
+      { key: 'profundidad_seguimiento', nombre: 'Nivel de profundidad de seguimiento (%)', tipo: 'nota',
+        lp: 'Promedio de las notas de base de datos, gobierno, precisión y discriminación, granularidad y análisis univariado.', med: notaProm('_PROFUNDIDAD') } ] },
+    { key: 'validacion', nombre: 'Validación', icono: 'ti-checks', peso: 1, ind: [
+      { key: 'sin_val_inicial', nombre: '# Modelos sin validación de primera vez', tipo: 'conteo',
+        lp: 'Porcentaje de modelos que tienen validación de primera vez.',
+        med: ms => { const v = cuenta(ms, es('VALIDACION_COMPLETA', 'Sin validación')); return { v, p: ratio(v, ms.length) }; } },
+      { key: 'incumple_val_periodica', nombre: '# Modelos que incumplen la validación periódica', tipo: 'conteo',
+        lp: 'Porcentaje de modelos con la validación periódica vigente.',
+        med: ms => { const v = cuenta(ms, es('VALIDACION_PERIODICA', 'Descoberturado')); return { v, p: ratio(v, ms.length) }; } },
+      { key: 'nota_dinamica_validacion', nombre: 'Nota dinámica de validación (%)', tipo: 'nota',
+        lp: 'Promedio de la nota dinámica de validación.', med: notaProm('NOTA_DINAMICA_VALIDACION') } ] },
+    { key: 'observaciones', nombre: 'Observaciones', icono: 'ti-clipboard-list', peso: 1, ind: [
+      { key: 'obs_venc_validacion', nombre: '# Observaciones vencidas de validación (críticas, relevantes y moderadas)', tipo: 'conteo',
+        lp: 'De las observaciones pendientes críticas, relevantes y moderadas, porcentaje que aún no está vencido. No aplica si no hay pendientes.',
+        med: medObs('OBS_CRIT_RELE_MODE_VENCIDAS_VI', 'OBS_CRIT_RELE_MODE_PENDIENTES_VI') },
+      { key: 'obs_venc_reg_aud', nombre: '# Observaciones vencidas del regulador local, auditoría externa y auditoría interna', tipo: 'conteo',
+        lp: 'De las observaciones pendientes del regulador y auditoría, porcentaje que aún no está vencido. No aplica si no hay pendientes.',
+        med: medObs('OBS_SBS_AI_VENCIDAS', 'OBS_SBS_AI_PENDIENTES') } ] },
+    { key: 'implementacion', nombre: 'Implementación', icono: 'ti-server-2', peso: 1, ind: [
+      { key: 'impl_np_despliegue', nombre: '# Modelos implementados en ambientes no productivos en el despliegue', tipo: 'conteo',
+        lp: 'Promedio del nivel productivo del despliegue: productivo vale 100, mixto 50 y no productivo 0.', med: medAmbiente('AMBIENTE_DESPLIEGUE', 'RATIO_IMPLEMENTACION') },
+      { key: 'impl_np_data', nombre: '# Modelos implementados en ambientes no productivos en la data', tipo: 'conteo',
+        lp: 'Promedio del nivel productivo de la data: productivo vale 100, no productivo 0 y mixto según la parte que esté en producción.', med: medAmbiente('AMBIENTE_DATA', 'RATIO_DATA') },
+      { key: 'nota_calidad_datos', nombre: 'Nota de cumplimiento de la calidad de datos (%)', tipo: 'nota',
+        lp: 'Promedio de la nota de calidad de datos.', med: notaProm('NOTA_CALIDAD_DATOS') } ] },
+    { key: 'gobierno', nombre: 'Gobierno', icono: 'ti-scale', peso: 1, ind: [
+      { key: 'incidencias_inventario', nombre: '# Incidentes en el inventario de modelos', tipo: 'conteo',
+        lp: 'Compara los incidentes con el total de modelos: sin incidentes puntúa 100 y baja a medida que aumentan.',
+        med: ms => { const v = sum(ms, 'NUM_INCIDENTES'); return { v, p: ratio(v, ms.length) }; } },
+      { key: 'nota_documentacion', nombre: 'Nota de documentación (desarrollo, validación, estándares, políticas, waivers y uso de la calculadora de valorización) (%)', tipo: 'nota',
+        lp: 'Promedio de la nota de documentación.', med: notaProm('NOTA_GOBIERNO') } ] },
+    { key: 'desarrollo', nombre: 'Desarrollo', icono: 'ti-code', peso: 1, ind: [
+      { key: 'nota_lineamientos_desarrollo', nombre: 'Nota de 10 lineamientos de desarrollo (Transformación de Riesgos) (%)', tipo: 'nota',
+        lp: 'Promedio de la nota de cumplimiento de los 10 lineamientos.', med: notaProm('NOTA_10_LINEAMIENTOS') } ] }
+  ]
+};
+const IND = CFG.drivers.flatMap(d => d.ind);
+// Dimensiones del inventario usadas como filtros
+const DIMS = [
+  { k: 'TIER_MODELO', t: 'Tier' },
+  { k: 'BANCA', t: 'Banca' },
+  { k: 'PRODUCTO', t: 'Producto' },
+  { k: 'MODEL_DEVELOPER', t: 'Model developer' },
+  { k: 'MODEL_USER', t: 'Model user' },
+  { k: 'PO_USUARIO', t: 'PO / Usuario responsable' },
+  { k: 'PROCESO', t: 'Proceso' }
+];
+const OBS_GRUPOS = [
+  { t: 'Validación', p: 'OBS_CRIT_RELE_MODE_PENDIENTES_VI', v: 'OBS_CRIT_RELE_MODE_VENCIDAS_VI' },
+  { t: 'SBS y auditoría', p: 'OBS_SBS_AI_PENDIENTES', v: 'OBS_SBS_AI_VENCIDAS' },
+  { t: 'Entorno tecnológico', p: 'OBS_AMB_TEC_PENDIENTES', v: 'OBS_AMB_TEC_VENCIDOS' }
+];
+// Indicadores que la tabla de Macro muestra con la categoría del input en lugar de la puntuación
+const CATEGORIA = {
+  sin_seguimiento: 'ESTADO_SEGUIMIENTO', alerta_salud: 'ESTADO_ALERTA', alerta_excede_tiempo: 'EXCESO_MESES_TTM', alerta_sin_mitigantes: 'PRESENCIA_MITIGANTE',
+  sin_val_inicial: 'VALIDACION_COMPLETA', incumple_val_periodica: 'VALIDACION_PERIODICA', impl_np_despliegue: 'AMBIENTE_DESPLIEGUE',
+  impl_np_data: 'AMBIENTE_DATA', incidencias_inventario: 'NUM_INCIDENTES'
+};
+const META_COLS = ['FECHA', 'ID_MODELO', 'NOMBRE_MODELO', ...DIMS.map(d => d.k)];
+// Encabezados abreviados para la tabla de indicadores de Macro
+const CORTOS = {
+  sin_seguimiento: 'Seguimiento', alerta_salud: 'Estado de alerta', alerta_excede_tiempo: 'Exceso meses TTM', alerta_sin_mitigantes: 'Mitigante',
+  profundidad_seguimiento: 'Completitud de seguimiento', sin_val_inicial: 'Val. inicial', incumple_val_periodica: 'Val. periódica',
+  nota_dinamica_validacion: 'Nota dinámica', obs_venc_validacion: 'Crit/Relev/Mod venc. de val.', obs_venc_reg_aud: 'SBS y Auditoría Interna',
+  impl_np_despliegue: 'Despliegue', impl_np_data: 'Data', nota_calidad_datos: 'Calidad datos',
+  incidencias_inventario: 'Incidentes', nota_documentacion: 'Documentación', nota_lineamientos_desarrollo: 'Cumpl. 10 lineamientos'
+};
+
+/* ===================== CÁLCULO ===================== */
+function medidas(ms) {
+  const ind = {}, drv = {};
+  CFG.drivers.forEach(d => { drv[d.key] = avgN(d.ind.map(i => (ind[i.key] = i.med(ms)).p)); });
+  const ds = CFG.drivers.filter(d => drv[d.key] != null);
+  const peso = ds.reduce((a, d) => a + d.peso, 0);
+  return { ind, drv, global: peso ? ds.reduce((a, d) => a + d.peso * drv[d.key], 0) / peso : null };
+}
+function preparar(filas) {
+  return filas.map(f => {
+    const m = { ...f, ID_MODELO: String(f.ID_MODELO), _PROFUNDIDAD: avgN(['BBDD', 'GOB', 'PRECISION_DISCRIMINACION', 'GRANULARIDAD', 'UNIVARIADA'].map(k => f[k])) };
+    const r = medidas([m]);
+    m.ps = r.drv; m.global = r.global; m.pi = {}; m.vi = {};
+    IND.forEach(i => { m.pi[i.key] = r.ind[i.key].p; m.vi[i.key] = r.ind[i.key].v; });
+    return m;
+  });
+}
+const fmtVal = (i, r) => (r.v == null ? '–' : fmt0(r.v) + (i.tipo === 'nota' ? '%' : ''));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uniq = k => [...new Set(MODELOS.map(m => m[k]).filter(v => v !== '' && v != null))].sort((a, b) => String(a).localeCompare(String(b), 'es'));
+
+/* ===================== COMPONENTES ===================== */
+const col = s => COLOR[sem(s)];
+const pill = s => `<span class="sem ${sem(s)}">${SEM_TXT[sem(s)]}</span>`;
+const dot = s => `<span class="dot" style="background:var(--${col(s)})" title="${SEM_TXT[sem(s)]}"></span>`;
+const cellStyle = s => `background:var(--${col(s)}-bg);color:${s == null ? '#8a93a0' : `var(--${col(s)})`}`;
+const leyendaUmbral = () => `<div class="leyenda-umbral">
+  <div>${dot(0)}<b style="color:var(--r)">Rojo</b><span class="text-secondary">&lt; ${UMBRALES.rojo}</span></div>
+  <div>${dot(75)}<b style="color:var(--a)">Ámbar</b><span class="text-secondary">${UMBRALES.rojo} – ${UMBRALES.verde}</span></div>
+  <div>${dot(100)}<b style="color:var(--g)">Verde</b><span class="text-secondary">&gt; ${UMBRALES.verde}</span></div>
+  <div>${dot(null)}<b class="text-secondary">No aplica</b></div></div>`;
+
+// Tablero vertical: driver | indicador | valor | semáforo | puntuación
+// ms es el portafolio filtrado; con el filtro Modelo, un solo modelo.
+function tablero(ms, titulo, subtitulo) {
+  const R = medidas(ms), g = R.global;
+  const filas = CFG.drivers.map(dr => {
+    return dr.ind.map((i, j) => {
+      const r = R.ind[i.key], s = r.p;
+      const drv = j === 0 ? `<td class="drv" rowspan="${dr.ind.length}"><div class="nombre"><i class="ti ${dr.icono}"></i>${dr.nombre}</div></td>` : '';
+      return `<tr class="${j === 0 ? 'grupo' : ''} ${s == null ? 'no-aplica' : ''}">${drv}
+        <td>${esc(i.nombre)}</td>
+        <td class="val">${fmtVal(i, r)}</td>
+        <td class="luz">${dot(s)}</td>
+        <td class="pts" style="color:${s == null ? '#9aa3af' : `var(--${col(s)})`}">${s == null ? 'No aplica' : fmt0(s)}</td></tr>`;
+    }).join('');
+  }).join('');
+  return `<div class="card">
+    <div class="card-header flex-wrap gap-3">
+      <div><h3 class="card-title d-flex align-items-center gap-2"><i class="ti ti-list-details text-primary"></i>${titulo}</h3>
+        <div class="text-secondary small mt-1">${subtitulo}</div></div>
+      <div class="card-actions score-actual"><span class="text-secondary fw-semibold">Score actual</span>
+        <span class="num" style="color:var(--${col(g)})">${fmt(g)}</span>${pill(g)}</div>
+    </div>
+    <div class="table-responsive"><table class="table card-table tablero">
+      <thead><tr><th>Driver</th><th>Indicador</th><th class="text-center">Valor</th><th class="text-center">Semáforo</th><th class="text-center">Puntuación</th></tr></thead>
+      <tbody>${filas}</tbody></table></div>
+    ${leyendaUmbral()}
+  </div>`;
+}
+
+/* ===================== FILTROS GLOBALES ===================== */
+let TODOS = [], MODELOS = [], modoInd = 'puntuacion';
+let segDim = 'MODEL_USER', segFiltro = 'todas';
+const abiertos = new Set(), abiertosB = new Set();   // Filas desplegadas en los mapas de calor de Macro
+let ordenG = { k: 'global', asc: true }, ordenB = { k: 'global', asc: true }, ordenM = { k: 'global', asc: true };
+let FIL = {};
+const ULTIMA = DATOS.fechas[DATOS.fechas.length - 1];
+function resetFil() { FIL = { fecha: ULTIMA, q: '', modelo: '' }; DIMS.forEach(d => FIL[d.k] = ''); cambiarFecha(); }
+// La fecha elige la foto del inventario; el resto de filtros se aplica sobre esa foto
+function cambiarFecha() {
+  MODELOS = TODOS.filter(m => m.FECHA === FIL.fecha);
+  if (!MODELOS.some(m => m.ID_MODELO === FIL.modelo)) FIL.modelo = '';
+}
+const nombreModelo = id => (MODELOS.find(m => m.ID_MODELO === id) || {}).NOMBRE_MODELO || '';
+
+function construirFiltros() {
+  const el = document.getElementById('filtros');
+  el.innerHTML = `<label class="form-label" for="f-fecha">Fecha</label><select id="f-fecha" class="form-select form-select-sm" data-f="fecha">${[...DATOS.fechas].reverse().map(f => `<option value="${f}" ${FIL.fecha === f ? 'selected' : ''}>${mesTxt(f)}</option>`).join('')}</select>
+    <label class="form-label" for="fq">Buscar</label>
+    <div class="input-icon"><span class="input-icon-addon"><i class="ti ti-search"></i></span><input id="fq" type="search" class="form-control form-control-sm" data-f="q" placeholder="Modelo o ID…" value="${esc(FIL.q)}"></div>
+    <label class="form-label" for="f-modelo">Modelo</label><select id="f-modelo" class="form-select form-select-sm" data-f="modelo"><option value="">Todos</option>${[...MODELOS].sort((a, b) => a.ID_MODELO - b.ID_MODELO).map(m => `<option value="${esc(m.ID_MODELO)}" ${FIL.modelo === m.ID_MODELO ? 'selected' : ''}>${esc(m.ID_MODELO)} · ${esc(m.NOMBRE_MODELO)}</option>`).join('')}</select>
+    ${DIMS.map(d => `<label class="form-label" for="f-${d.k}">${d.t}</label><select id="f-${d.k}" class="form-select form-select-sm" data-f="${d.k}"><option value="">Todos</option>${uniq(d.k).map(v => `<option ${FIL[d.k] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>`).join('')}
+    <button id="limpiar" class="btn btn-sm w-100 mt-3"><i class="ti ti-eraser me-1"></i>Limpiar filtros</button>`;
+  el.querySelectorAll('[data-f]').forEach(c => c.addEventListener('input', () => {
+    FIL[c.dataset.f] = c.value;
+    if (c.dataset.f === 'fecha') { cambiarFecha(); construirFiltros(); }
+    aplicar();
+  }));
+  el.querySelector('#limpiar').onclick = () => { resetFil(); construirFiltros(); aplicar(); };
+  marcarFiltros();
+}
+function marcarFiltros() {
+  document.querySelectorAll('#filtros select').forEach(s => s.classList.toggle('on', !!s.value && s.value !== ULTIMA));
+  const activos = Object.entries(FIL).filter(([k, v]) => v && !(k === 'fecha' && v === ULTIMA));
+  const b = document.getElementById('nfil'); b.hidden = !activos.length; b.textContent = activos.length;
+  const nombre = k => k === 'q' ? 'Búsqueda' : k === 'modelo' ? 'Modelo' : k === 'fecha' ? 'Fecha' : DIMS.find(d => d.k === k).t;
+  const valor = (k, v) => k === 'modelo' ? `${v} · ${nombreModelo(v)}` : k === 'fecha' ? mesTxt(v) : v;
+  document.getElementById('chips').innerHTML = activos.map(([k, v]) => `<span class="chip">${nombre(k)}: <b>${esc(valor(k, v))}</b><button data-k="${k}" aria-label="Quitar filtro">×</button></span>`).join('');
+  document.querySelectorAll('#chips button').forEach(b => b.onclick = () => {
+    FIL[b.dataset.k] = b.dataset.k === 'fecha' ? ULTIMA : '';
+    cambiarFecha(); construirFiltros(); aplicar();
+  });
+}
+const pasaFiltros = m => {
+  const q = FIL.q.toLowerCase();
+  return (!q || [m.ID_MODELO, m.NOMBRE_MODELO].join(' ').toLowerCase().includes(q)) &&
+    (!FIL.modelo || m.ID_MODELO === FIL.modelo) &&
+    DIMS.every(d => !FIL[d.k] || m[d.k] === FIL[d.k]);
+};
+const filtrados = () => MODELOS.filter(pasaFiltros);
+function aplicar() {
+  marcarFiltros();
+  const ms = filtrados();
+  document.getElementById('fcount').textContent = `Mostrando ${ms.length} de ${MODELOS.length} modelos`;
+  vistaResumen(ms); vistaMacro(ms); vistaSeguimiento(ms); vistaValidacion(ms); vistaObs(ms); vistaImplementacion(ms);
+}
+const vacio = '<div class="card"><div class="card-body empty">Ningún modelo cumple los filtros seleccionados.</div></div>';
+
+/* ===================== CABECERA ===================== */
+function kpis(ms) {
+  const [val, sbs, tec] = OBS_GRUPOS.map(g => ({ p: sum(ms, g.p), v: sum(ms, g.v), mods: cuenta(ms, m => +m[g.p] > 0) }));
+  const box = (ic, color, t, v, s) => `<div class="col-sm-6 col-xl-3"><div class="card card-sm kpi"><div class="card-body"><div class="row align-items-center">
+    <div class="col-auto"><span class="avatar bg-${color}-lt"><i class="ti ${ic}"></i></span></div>
+    <div class="col"><div class="subheader">${t}</div><div class="h1 mb-0">${v.toLocaleString('es-PE')}</div><div class="text-secondary small">${s}</div></div>
+    </div></div></div></div>`;
+  return '<div class="row row-deck row-cards mb-3">' +
+    box('ti-stack-2', 'blue', '# Modelos', ms.length, `de ${MODELOS.length} en inventario`) +
+    box('ti-list-check', 'indigo', '# Observaciones pendientes', val.p + sbs.p + tec.p, `${val.p} de validación · vencidas: ${val.v + sbs.v + tec.v}`) +
+    box('ti-device-desktop-cog', 'cyan', '# Obs. entorno tecnológico pendientes', tec.p, `Vencidas: ${tec.v} · ${tec.mods} modelos`) +
+    box('ti-building-bank', 'azure', '# Obs. SBS y auditoría pendientes', sbs.p, `Vencidas: ${sbs.v} · ${sbs.mods} modelos`) + '</div>';
+}
+
+/* ===================== VISTAS ===================== */
+// Score por FECHA: respeta todos los filtros salvo la propia fecha
+function serieEvolutivo() {
+  return DATOS.fechas.map(f => {
+    const ms = TODOS.filter(m => m.FECHA === f && pasaFiltros(m));
+    return { f, n: ms.length, s: ms.length ? medidas(ms).global : null, sim: esSimulada(f) };
+  }).filter(p => p.s != null);
+}
+// Gráfico de líneas por fecha. series: [{ nombre, color, vals }]; op: { ymax, bandas, marcasY, valores, finales, tip }
+function lineas(fechas, series, op) {
+  const W = 900, H = 200, M = { t: 24, r: op.finales ? 170 : 30, b: 28, l: 34 };
+  const y = v => M.t + (op.ymax - v) / op.ymax * (H - M.t - M.b);
+  const x = i => (fechas.length < 2 ? (M.l + W - M.r) / 2 : M.l + 50 + i * (W - M.l - M.r - 100) / (fechas.length - 1));
+  const banda = ([de, a, c]) => `<rect x="${M.l}" y="${y(a)}" width="${W - M.l - M.r}" height="${y(de) - y(a)}" fill="var(--${c}-bg)"/>`;
+  const marcaY = v => `${op.bandas ? '' : `<line x1="${M.l}" x2="${W - M.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--tblr-border-color)"/>`}<text x="${M.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  const tramos = s => s.vals.slice(1).map((v, i) => `<line x1="${x(i)}" y1="${y(s.vals[i])}" x2="${x(i + 1)}" y2="${y(v)}" stroke="${s.color}" stroke-width="2" ${esSimulada(fechas[i]) || esSimulada(fechas[i + 1]) ? 'stroke-dasharray="6 5"' : ''}/>`).join('');
+  const puntos = s => s.vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="${esSimulada(fechas[i]) ? '#fff' : s.color}" stroke="${esSimulada(fechas[i]) ? s.color : '#fff'}" stroke-width="2"/>
+    ${op.valores ? `<text class="valor" x="${x(i)}" y="${y(v) - 12}" text-anchor="middle">${fmt(v)}</text>` : ''}`).join('');
+  // Etiquetas al final de cada línea, separadas para que no se pisen
+  let previo = -99;
+  const finales = !op.finales ? '' : series.map(s => ({ s, v: s.vals[s.vals.length - 1] })).sort((a, b) => b.v - a.v).map(({ s, v }) => {
+    previo = Math.max(y(v) + 4, previo + 14);
+    return `<text x="${x(fechas.length - 1) + 12}" y="${previo}">${esc(s.nombre)}: ${v}</text>`;
+  }).join('');
+  const ancho = fechas.length < 2 ? W - M.l - M.r : (W - M.l - M.r - 100) / (fechas.length - 1);
+  const columnas = fechas.map((f, i) => `<text class="${f === FIL.fecha ? 'sel' : ''}" x="${x(i)}" y="${H - 8}" text-anchor="middle">${mesTxt(f)}</text>
+    <g class="col"><line class="cruz" x1="${x(i)}" x2="${x(i)}" y1="${M.t}" y2="${H - M.b}"/><rect class="hit" x="${x(i) - ancho / 2}" y="${M.t}" width="${ancho}" height="${H - M.t - M.b}" tabindex="0" data-tip="${esc(op.tip(i))}" aria-label="${esc(op.tip(i))}"/></g>`).join('');
+  return `<div class="lineas"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(op.titulo)}">
+    ${(op.bandas || []).map(banda).join('')}${op.marcasY.map(marcaY).join('')}${series.map(tramos).join('')}${series.map(puntos).join('')}${finales}${columnas}</svg></div>`;
+}
+function evolutivo() {
+  const pts = serieEvolutivo(), fechas = pts.map(p => p.f);
+  const ult = pts[pts.length - 1], ant = pts[pts.length - 2];
+  const delta = ant ? ult.s - ant.s : null;
+  const extra = delta == null ? '' : `<span class="text-secondary small">${delta >= 0 ? '▲' : '▼'} ${fmt(Math.abs(delta))} pts vs ${mesTxt(ant.f)}</span>`;
+  const nota = pts.some(p => p.sim) ? ' · línea punteada y punto hueco: dato simulado' : '';
+  const tip = i => {
+    const p = pts[i], a = pts[i - 1];
+    return `${mesTxt(p.f)}\nScore: ${fmt(p.s)} · ${SEM_TXT[sem(p.s)]}\n${p.n} modelos${a ? `\nVariación: ${p.s >= a.s ? '+' : '−'}${fmt(Math.abs(p.s - a.s))} pts` : ''}`;
+  };
+  const grafico = lineas(fechas, [{ nombre: 'Score', color: 'var(--tblr-primary)', vals: pts.map(p => p.s) }], {
+    ymax: 100, valores: true, marcasY: [0, UMBRALES.rojo, UMBRALES.verde, 100], titulo: 'Evolutivo del score por fecha', tip,
+    bandas: [[0, UMBRALES.rojo, 'r'], [UMBRALES.rojo, UMBRALES.verde, 'a'], [UMBRALES.verde, 100, 'g']]
+  });
+  return `<div class="card mb-3"><div class="card-header"><div><h3 class="card-title d-flex align-items-center gap-2"><i class="ti ti-chart-line text-primary"></i>Evolutivo del score</h3>
+      <div class="text-secondary small mt-1">Score por fecha con los filtros aplicados${nota}</div></div><div class="card-actions">${extra}</div></div>
+    <div class="card-body py-2">${grafico}</div></div>`;
+}
+function vistaResumen(ms) {
+  const el = document.getElementById('v-resumen');
+  el.innerHTML = kpis(ms) + evolutivo() + (ms.length ? tablero(ms, 'Tablero de indicadores MRM', `Portafolio · ${ms.length} modelos · medidas recalculadas sobre los modelos filtrados`) : vacio);
+}
+
+const flecha = (o, k) => (o.k === k ? (o.asc ? ' ▲' : ' ▼') : '');
+const ordenar = (filas, o, val) => [...filas].sort((a, b) => {
+  const f = v => (v == null ? -1 : v), x = f(val(a, o.k)), y = f(val(b, o.k));
+  return (x > y ? 1 : x < y ? -1 : 0) * (o.asc ? 1 : -1);
+});
+// Mapas de calor de Macro: una fila por grupo, desplegable por su subnivel
+const MAPAS = {
+  g: { campo: 'MODEL_USER', titulo: 'Model User', sub: 'TIER_MODELO', subTxt: t => `Tier ${t}`, orden: ordenG, abiertos },
+  b: { campo: 'BANCA', titulo: 'Banca', sub: 'PRODUCTO', subTxt: t => t, orden: ordenB, abiertos: abiertosB }
+};
+function mapaCalor(ms, t) {
+  const op = MAPAS[t];
+  const resumen = de => { const R = medidas(de); return { n: de.length, drv: R.drv, global: R.global }; };
+  const grupos = [...new Set(ms.map(m => m[op.campo]))].map(u => ({ u, ...resumen(ms.filter(m => m[op.campo] === u)) }));
+  const val = (g, k) => (k in g.drv ? g.drv[k] : g[k]);
+  const th = (k, txt, cls = 'text-center') => `<th class="${cls}" data-t="${t}" data-k="${k}">${txt}${flecha(op.orden, k)}</th>`;
+  const celdas = g => `<td class="text-center">${g.n}</td>
+    ${CFG.drivers.map(d => `<td class="cell" style="${cellStyle(g.drv[d.key])}">${g.drv[d.key] == null ? '-' : fmt(g.drv[d.key])}</td>`).join('')}
+    <td class="cell" style="${cellStyle(g.global)}">${fmt(g.global)}</td>`;
+  const hijos = u => {
+    const de = ms.filter(m => m[op.campo] === u);
+    return [...new Set(de.map(m => m[op.sub]))].sort((a, b) => String(a).localeCompare(String(b), 'es')).map(s => `<tr class="sub"><td>${esc(op.subTxt(s))}</td>${celdas(resumen(de.filter(m => m[op.sub] === s)))}</tr>`).join('');
+  };
+  return `<div class="table-responsive"><table class="table table-vcenter table-sm card-table heat"><thead><tr>
+    ${th('u', op.titulo, '')}${th('n', '# Modelos')}${CFG.drivers.map(d => th(d.key, d.nombre)).join('')}${th('global', 'Score')}</tr></thead><tbody>
+    ${ordenar(grupos, op.orden, val).map(g => {
+      const abierto = op.abiertos.has(g.u);
+      return `<tr class="grupo-fila" data-t="${t}" data-u="${esc(g.u)}"><td><button aria-expanded="${abierto}"><i class="ti ti-chevron-${abierto ? 'down' : 'right'}"></i>${esc(g.u)}</button></td>${celdas(g)}</tr>${abierto ? hijos(g.u) : ''}`;
+    }).join('')}
+  </tbody></table></div>`;
+}
+const bandaDrivers = () => CFG.drivers.map(d => `<th class="text-center" colspan="${d.ind.length}">${d.nombre}</th>`).join('');
+function tablaIndicadores(ms) {
+  const dato = (m, k) => (modoInd === 'valor' ? m.vi[k] : m.pi[k]);
+  const val = (m, k) => (k === 'global' ? m.global : k === 'alerta_excede_tiempo' ? m.EXCESO_MESES_TTM ?? -999 : k in CATEGORIA ? m[CATEGORIA[k]] ?? '' : k in m.pi ? dato(m, k) : k === 'ID_MODELO' ? +m[k] : m[k]);
+  const th = (k, t, titulo, cls = 'text-center') => `<th class="${cls}" data-t="m" data-k="${k}" title="${esc(titulo || t)}" style="white-space:normal">${esc(t)}${flecha(ordenM, k)}</th>`;
+  const fuente = s => `color:${s == null ? '#8a93a0' : `var(--${col(s)})`}`;
+  const celda = (m, i) => {
+    const p = m.pi[i.key], cat = CATEGORIA[i.key];
+    if (cat) return `<td class="cell" style="${fuente(p)}"${p == null ? '' : ` title="Puntuación ${fmt0(p)}"`}>${esc(typeof m[cat] === 'number' ? fmt(m[cat]) : m[cat] ?? '-')}</td>`;
+    if (p == null) return `<td class="cell" style="${fuente(null)}">-</td>`;
+    return `<td class="cell" style="${fuente(p)}" title="Valor ${fmtVal(i, { v: m.vi[i.key] })} · Puntuación ${fmt0(p)}">${modoInd === 'valor' ? fmtVal(i, { v: m.vi[i.key] }) : fmt0(p)}</td>`;
+  };
+  return `<div class="macro-scroll"><table class="table table-vcenter table-hover table-sm card-table heat"><thead>
+    <tr class="banda"><th class="fija" colspan="1"></th><th></th>${bandaDrivers()}<th></th></tr>
+    <tr>${th('ID_MODELO', 'Modelo', '', 'fija')}${th('TIER_MODELO', 'Tier')}${IND.map(i => th(i.key, CORTOS[i.key], i.nombre)).join('')}${th('global', 'Score')}</tr></thead><tbody>
+    ${ordenar(ms, ordenM, val).map(m => `<tr><td class="fija"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td>
+      ${IND.map(i => celda(m, i)).join('')}<td class="cell" style="${fuente(m.global)}">${fmt(m.global)}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function vistaMacro(ms) {
+  const el = document.getElementById('v-macro');
+  if (!ms.length) { el.innerHTML = vacio; return; }
+  const boton = (m, t) => `<button class="btn btn-sm ${modoInd === m ? 'btn-primary' : 'btn-outline-primary'}" data-ind="${m}">${t}</button>`;
+  const encabezado = (ic, titulo, sub, extra = '') => `<div class="card-header"><div><h3 class="card-title d-flex align-items-center gap-2"><i class="ti ${ic} text-primary"></i>${titulo}</h3>
+    <div class="text-secondary small mt-1">${sub}</div></div>${extra ? `<div class="card-actions">${extra}</div>` : ''}</div>`;
+  el.innerHTML = `<div class="card mb-3">${encabezado('ti-users-group', 'Mapa de calor por Model User', 'Score por driver recalculado para cada Model User · clic en una fila para desplegar sus Tier · clic en el encabezado para ordenar')}${mapaCalor(ms, 'g')}</div>
+    <div class="card mb-3">${encabezado('ti-building-bank', 'Mapa de calor por Banca y Producto', 'Score por driver recalculado para cada Banca · clic en una fila para desplegar sus productos · clic en el encabezado para ordenar')}${mapaCalor(ms, 'b')}</div>
+
+    <div class="card">${encabezado('ti-table', 'Indicadores por modelo', `${ms.length} modelos · color según el semáforo de la puntuación`,
+      `<div class="btn-group toolbar" role="group" aria-label="Dato mostrado">${boton('puntuacion', 'Puntuación')}${boton('valor', 'Valor')}</div>`)}${tablaIndicadores(ms)}</div>`;
+  el.querySelectorAll('[data-ind]').forEach(b => b.onclick = () => { modoInd = b.dataset.ind; vistaMacro(filtrados()); });
+  el.querySelectorAll('.grupo-fila').forEach(tr => tr.onclick = () => {
+    const set = MAPAS[tr.dataset.t].abiertos, u = tr.dataset.u; set.has(u) ? set.delete(u) : set.add(u); vistaMacro(filtrados());
+  });
+  el.querySelectorAll('th[data-k]').forEach(h => h.onclick = () => {
+    const o = h.dataset.t === 'm' ? ordenM : MAPAS[h.dataset.t].orden;
+    o.asc = o.k === h.dataset.k ? !o.asc : true; o.k = h.dataset.k; vistaMacro(filtrados());
+  });
+}
+
+/* ===================== SEGUIMIENTO ===================== */
+const SEG_SERIES = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100'];
+const SEG_DIMS = [{ k: 'MODEL_USER', t: 'Model User' }, { k: 'TIER_MODELO', t: 'Tier' }, { k: 'BANCA', t: 'Banca' }, { k: 'RESPONSABLE_MONITORING', t: 'Responsable monitoring' }];
+const SEG_TTM = [{ n: 'Excede TTM', c: 'var(--r)' }, { n: 'No excede', c: 'var(--g)' }, { n: 'No tiene TTM', c: 'var(--n)' }];
+const enAlerta = es('ESTADO_ALERTA', 'En alerta');
+const sinMitigante = m => m.ESTADO_ALERTA === 'En alerta' && m.PRESENCIA_MITIGANTE === 'No';
+const excede = es('EXCEDE_TTM', 'Excede TTM');
+const mitigante = m => m.PRESENCIA_MITIGANTE || 'Sin dato';
+const fmtImpacto = s => (/^Monto: /.test(s || '') ? `Monto: ${Math.round(+s.slice(7)).toLocaleString('es-PE')}` : s);
+const prioridad = m => (excede(m) && sinMitigante(m) ? 0 : excede(m) ? 1 : sinMitigante(m) ? 2 : 3);
+const ordenAlertas = (a, b) => prioridad(a) - prioridad(b) || (b.EXCESO_MESES_TTM ?? -99) - (a.EXCESO_MESES_TTM ?? -99);
+const pctTxt = (n, d) => (d ? `${fmt0(100 * n / d)}%` : '–');
+const tile = (t, v, sub, ic, color) => `<div class="col-sm-6 col-lg-4 col-xl"><div class="card card-sm stat h-100"><div class="card-body d-flex align-items-center gap-3">
+  <span class="avatar bg-${color}-lt"><i class="ti ${ic}"></i></span><div><div class="subheader">${t}</div><div class="h2 mb-0">${v}</div><div class="text-secondary small">${sub}</div></div></div></div></div>`;
+const bloque = (cls, t, ic, cuerpo, sub = '', extra = '') => `<div class="${cls}"><div class="card h-100"><div class="card-header"><div><h3 class="card-title d-flex align-items-center gap-2"><i class="ti ${ic} text-primary"></i>${t}</h3>${sub ? `<div class="text-secondary small mt-1">${sub}</div>` : ''}</div>${extra ? `<div class="card-actions">${extra}</div>` : ''}</div>${cuerpo}</div></div>`;
+const cuerpo = h => `<div class="card-body">${h}</div>`;
+const selector = (id, etiqueta, ops, actual) => `<select id="${id}" class="form-select form-select-sm toolbar" style="width:auto" aria-label="${etiqueta}">${ops.map(([v, t]) => `<option value="${esc(v)}" ${v === actual ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
+const fechaCorta = f => (f ? `${f.slice(8, 10)}/${f.slice(5, 7)}/${f.slice(0, 4)}` : '–');
+const dias = (de, a) => Math.round((new Date(a) - new Date(de)) / 864e5);
+// Tablón de coberturas y Reporte de observaciones solo corresponden a la última fecha del input
+const soloUltimaFecha = el => { el.innerHTML = `<div class="card"><div class="card-body empty">Esta sección solo tiene información de ${mesTxt(ULTIMA)}. Selecciona esa fecha en el filtro.</div></div>`; };
+const verMas = (id, total, lim) => (total > lim ? `<div class="card-footer text-center"><button id="${id}" class="btn btn-sm">Ver más (${lim} de ${total})</button></div>` : '');
+
+const barras = (items, max) => `<div class="barras">${items.map(i => `<div class="barra" data-tip="${esc(i.tip || `${i.t}\n${i.txt ?? i.v}`)}"><span class="et">${esc(i.t)}</span>
+  <span class="pista"><i style="width:${max ? i.v / max * 100 : 0}%;background:${i.c}"></i></span><b>${i.txt ?? i.v}</b></div>`).join('')}</div>`;
+const apiladas = (filas, max) => `<div class="barras">${filas.map(f => `<div class="barra" data-tip="${esc(`${f.t}\n${f.segs.map(s => `${s.n}: ${s.v}`).join('\n')}`)}"><span class="et">${esc(f.t)}</span>
+  <span class="pista">${f.segs.filter(s => s.v).map(s => `<i style="width:${s.v / max * 100}%;background:${s.c}"></i>`).join('')}</span><b>${f.segs.reduce((a, s) => a + s.v, 0)}</b></div>`).join('')}</div>`;
+const leyendaColores = items => `<div class="leg">${items.map(i => `<span><i style="background:${i.c}"></i>${esc(i.n)}</span>`).join('')}</div>`;
+
+// Serie por fecha. defs: [[nombre, condición de modelo o columna a sumar]]; respeta todos los filtros salvo la fecha
+function evolutivoConteos(defs, titulo) {
+  const fechas = DATOS.fechas, por = fechas.map(f => TODOS.filter(m => m.FECHA === f && pasaFiltros(m)));
+  const series = defs.map(([nombre, f], i) => ({ nombre, color: SEG_SERIES[i], vals: por.map(ms => (typeof f === 'string' ? sum(ms, f) : cuenta(ms, f))) }));
+  const ymax = Math.max(5, Math.ceil(Math.max(...series.flatMap(s => s.vals)) / 5) * 5);
+  const tip = i => `${mesTxt(fechas[i])}\n${series.map(s => `${s.nombre}: ${s.vals[i]}`).join('\n')}`;
+  return lineas(fechas, series, { ymax, finales: true, marcasY: [0, Math.round(ymax / 2), ymax], titulo, tip })
+    + `<div class="mt-2">${leyendaColores(series.map(s => ({ n: s.nombre, c: s.color })))}</div>`;
+}
+const notaFechas = () => (DATOS.fechas_simuladas.length ? 'Modelos por fecha · línea punteada y punto hueco: dato simulado' : 'Modelos por fecha');
+const evolutivoAlertas = () => evolutivoConteos([['En alerta', enAlerta], ['Sin seguimiento', es('ESTADO_SEGUIMIENTO', 'Sin Seguimiento')], ['Exceden TTM', excede], ['Sin mitigante', sinMitigante]], 'Evolutivo de modelos en alerta y sin seguimiento');
+function bloqueSeguimiento(ms, alertas) {
+  const est = [['Con Seguimiento', 'var(--g)'], ['Sin Seguimiento', 'var(--r)'], ['Sin información', 'var(--n)'], ['No aplica', 'var(--n)']];
+  return barras(est.map(([t, c]) => { const v = cuenta(ms, es('ESTADO_SEGUIMIENTO', t)); return { t, v, c, tip: `${t}\n${v} modelos · ${pctTxt(v, ms.length)}` }; }), ms.length);
+}
+function alertasPor(alertas, dim) {
+  const vals = [...new Set(alertas.map(m => m[dim]))];
+  const filas = vals.map(v => ({ t: v, segs: SEG_TTM.map(s => ({ ...s, v: cuenta(alertas, m => m[dim] === v && m.EXCEDE_TTM === s.n) })) }));
+  const total = f => f.segs.reduce((a, s) => a + s.v, 0);
+  filas.sort((a, b) => total(b) - total(a));
+  return apiladas(filas, Math.max(...filas.map(total))) + `<div class="mt-3">${leyendaColores(SEG_TTM)}</div>`;
+}
+function tablaAlertas(lista) {
+  if (!lista.length) return '<div class="empty">No hay alertas para los criterios seleccionados.</div>';
+  const cls = { 'Excede TTM': 'bg-red-lt', 'No excede': 'bg-green-lt', 'No tiene TTM': 'bg-secondary-lt' };
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Resp. monitoring</th><th>TTM</th><th class="text-center">Exceso (meses)</th><th>Impacto</th><th>Mitigante</th><th>Descripción del mitigante</th></tr></thead><tbody>
+    ${lista.map(m => `<tr><td style="min-width:260px"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td>
+      <td class="text-center">${esc(m.TIER_MODELO)}</td><td>${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.RESPONSABLE_MONITORING)}</td>
+      <td><span class="badge ${cls[m.EXCEDE_TTM] || 'bg-secondary-lt'}">${esc(m.EXCEDE_TTM || 'Sin dato')}</span></td><td class="text-center">${fmt(m.EXCESO_MESES_TTM)}</td>
+      <td class="text-nowrap">${esc(fmtImpacto(m.IMPACTO) || '–')}</td><td>${esc(mitigante(m))}</td><td class="desc">${esc(m.DESCRIPCION_MITIGANTE || '–')}</td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+function tablaSinSeguimiento(lista) {
+  if (!lista.length) return '<div class="empty">Todos los modelos evaluables tienen seguimiento.</div>';
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Resp. monitoring</th><th>Alerta</th></tr></thead><tbody>
+    ${lista.map(m => `<tr><td style="white-space:normal"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td>
+      <td class="text-center">${esc(m.TIER_MODELO)}</td><td>${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.RESPONSABLE_MONITORING)}</td><td class="text-nowrap">${esc(m.ESTADO_ALERTA)}</td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+function vistaSeguimiento(ms) {
+  const el = document.getElementById('v-seguimiento');
+  if (!ms.length) { el.innerHTML = vacio; return; }
+  const R = medidas(ms), alertas = ms.filter(enAlerta), exc = alertas.filter(excede), sinMit = alertas.filter(sinMitigante);
+  const sinSeg = ms.filter(es('ESTADO_SEGUIMIENTO', 'Sin Seguimiento')), conSeg = cuenta(ms, es('ESTADO_SEGUIMIENTO', 'Con Seguimiento'));
+  const conTTM = cuenta(alertas, es('EXCEDE_TTM', 'Excede TTM', 'No excede')), excProm = avgN(exc.map(m => m.EXCESO_MESES_TTM));
+  const sd = R.drv.seguimiento;
+  const selDim = `<select id="seg-dim" class="form-select form-select-sm toolbar" style="width:auto" aria-label="Agrupar por">${SEG_DIMS.map(d => `<option value="${d.k}" ${segDim === d.k ? 'selected' : ''}>${d.t}</option>`).join('')}</select>`;
+  const selFil = `<div class="d-flex flex-wrap gap-2"><select id="seg-fil" class="form-select form-select-sm toolbar" style="width:auto" aria-label="Filtrar alertas">
+      ${[['todas', 'Todas las alertas'], ['excede', 'Exceden TTM'], ['sinmit', 'Sin mitigante'], ['prio', 'Exceden TTM y sin mitigante']].map(([v, t]) => `<option value="${v}" ${segFiltro === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
+    <button id="seg-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+  const lista = alertas.filter({ todas: () => true, excede, sinmit: sinMitigante, prio: m => prioridad(m) === 0 }[segFiltro]).sort(ordenAlertas);
+  const sinAlertas = '<div class="empty">No hay modelos en alerta.</div>';
+  el.innerHTML = `<div class="row row-cards mb-3">
+    ${tile('Score Seguimiento', sd == null ? '–' : fmt(sd), pill(sd), 'ti-gauge', 'blue')}
+    ${tile('Cobertura', pctTxt(conSeg, conSeg + sinSeg.length), `${conSeg} de ${conSeg + sinSeg.length} evaluables`, 'ti-eye-check', 'green')}
+    ${tile('Modelos en alerta', alertas.length, `${pctTxt(alertas.length, ms.length)} del inventario`, 'ti-alert-triangle', 'orange')}
+    ${tile('Exceden TTM', exc.length, `de ${conTTM} con TTM${excProm == null ? '' : ` · ${fmt(excProm)} meses en promedio`}`, 'ti-clock-exclamation', 'red')}
+    ${tile('Sin mitigante', sinMit.length, `de ${alertas.length} en alerta`, 'ti-shield-off', 'pink')}
+  </div>
+  <div class="row row-cards">
+    ${bloque('col-12', 'Evolutivo de alertas y seguimiento', 'ti-chart-line', cuerpo(evolutivoAlertas()), notaFechas())}
+    ${bloque('col-lg-4', 'Estado de seguimiento', 'ti-activity', cuerpo(bloqueSeguimiento(ms)), `${ms.length} modelos`)}
+    ${bloque('col-lg-8', 'Alertas por producto', 'ti-package', cuerpo(alertas.length ? alertasPor(alertas, 'PRODUCTO') : sinAlertas), 'Modelos en alerta según situación del TTM')}
+    ${bloque('col-12', 'Alertas por dimensión', 'ti-chart-bar', cuerpo(alertas.length ? alertasPor(alertas, segDim) : sinAlertas), 'Modelos en alerta según situación del TTM', selDim)}
+    ${bloque('col-12', 'Detalle de alertas', 'ti-list-details', tablaAlertas(lista), `${lista.length} modelos · ordenado por prioridad y exceso`, selFil)}
+    ${bloque('col-12', 'Modelos sin seguimiento', 'ti-eye-off', tablaSinSeguimiento(sinSeg), `${sinSeg.length} modelos`)}
+  </div>`;
+  el.querySelector('#seg-dim').onchange = e => { segDim = e.target.value; vistaSeguimiento(filtrados()); };
+  el.querySelector('#seg-fil').onchange = e => { segFiltro = e.target.value; vistaSeguimiento(filtrados()); };
+  el.querySelector('#seg-csv').onclick = () => {
+    const cols = ['ID_MODELO', 'NOMBRE_MODELO', 'TIER_MODELO', 'MODEL_USER', 'RESPONSABLE_MONITORING', 'EXCEDE_TTM', 'EXCESO_MESES_TTM', 'IMPACTO', 'PRESENCIA_MITIGANTE', 'DESCRIPCION_MITIGANTE'];
+    descargar('mrm_alertas.csv', [cols.join(';'), ...lista.map(m => cols.map(c => csvVal(m[c])).join(';'))].join('\n'));
+  };
+}
+
+/* ===================== VALIDACIÓN ===================== */
+const COB = Object.fromEntries(DATOS.coberturas.map(c => [String(c.Modelo_ID), c]));
+const COB_DIMS = [{ k: 'TIER_MODELO', t: 'Tier' }, { k: 'MODEL_USER', t: 'Model User' }, { k: 'BANCA', t: 'Banca' }, { k: 'PRODUCTO', t: 'Producto' }, { k: 'MODEL_DEVELOPER', t: 'Model developer' }];
+const COB_FILTROS = [['desc', 'Descoberturados'], ['prox', 'Descoberturan en 90 días'], ['met', 'Sin cobertura metodológica'], ['imp', 'Sin cobertura de implementación'], ['todos', 'Todos']];
+const CALIF = [['Satisfactorio', 'var(--g)'], ['Aceptable', '#9bd8a6'], ['Regular', 'var(--a)'], ['Deficiente', 'var(--r)']];
+const FRENTES = ['#2a78d6', '#eb6834'];
+let valDim = 'TIER_MODELO', valFiltro = 'desc', valLim = 50;
+const cubreMet = c => c.Cobertura_Metodologia === 'Coberturado';
+const cubreImp = c => c.Cobertura_Implementación === 'Coberturado';
+const cubreGlobal = c => c.Cobertura_Global === 'Coberturado';
+const proyGlobal = c => c.Proy_Cobertura_Global === 'Coberturado';
+// Días hasta que el modelo pierde cobertura en el primer frente que hoy sigue cubierto
+const proximaDesc = c => [cubreMet(c) && c.Fecha_descobertura_Met, cubreImp(c) && c.Fecha_descobertura_Imp].filter(Boolean).sort()[0] || null;
+const descEn90 = c => { const f = proximaDesc(c), d = f ? dias(DATOS.cob_meta.corte, f) : null; return d != null && d >= 0 && d <= 90; };
+const badgeCob = ok => `<span class="badge ${ok ? 'bg-green-lt' : 'bg-red-lt'}">${ok ? 'Sí' : 'No'}</span>`;
+const pctCelda = (n, d) => { const p = d ? 100 * n / d : null; return `<td class="cell" style="${cellStyle(p)}">${pctTxt(n, d)}</td>`; };
+
+function cobPorDim(fs) {
+  const vals = [...new Set(fs.map(f => f.m[valDim]))].sort((a, b) => String(a).localeCompare(String(b), 'es'));
+  const fila = (t, de, cls = '') => `<tr class="${cls}"><td>${esc(t)}</td><td class="text-center">${de.length}</td>${pctCelda(cuenta(de, cubreMet), de.length)}${pctCelda(cuenta(de, cubreImp), de.length)}${pctCelda(cuenta(de, cubreGlobal), de.length)}</tr>`;
+  return `<div class="table-responsive"><table class="table table-vcenter table-sm card-table"><thead><tr><th>${COB_DIMS.find(d => d.k === valDim).t}</th><th class="text-center"># Modelos</th><th class="text-center">Metodológica</th><th class="text-center">Implementación</th><th class="text-center">Global</th></tr></thead><tbody>
+    ${vals.map(v => fila(v, fs.filter(f => f.m[valDim] === v))).join('')}${fila('Total', fs, 'fw-bold')}</tbody></table></div>`;
+}
+function calendarioDesc(fs) {
+  const [a, mes0] = DATOS.cob_meta.corte.split('-').map(Number);
+  const meses = Array.from({ length: 12 }, (_, i) => { const n = mes0 - 1 + i; return `${a + Math.floor(n / 12)}-${String(n % 12 + 1).padStart(2, '0')}`; });
+  const de = (k, ok, ym) => cuenta(fs, c => ok(c) && (c[k] || '').startsWith(ym) && c[k] >= DATOS.cob_meta.corte);
+  const filas = meses.map(ym => ({ t: mesTxt(ym + '-01'), segs: [{ n: 'Metodológica', c: FRENTES[0], v: de('Fecha_descobertura_Met', cubreMet, ym) }, { n: 'Implementación', c: FRENTES[1], v: de('Fecha_descobertura_Imp', cubreImp, ym) }] }));
+  const max = Math.max(1, ...filas.map(f => f.segs[0].v + f.segs[1].v));
+  return apiladas(filas, max) + `<div class="mt-3">${leyendaColores([{ n: 'Metodológica', c: FRENTES[0] }, { n: 'Implementación', c: FRENTES[1] }])}</div>`;
+}
+function tablaCobertura(lista) {
+  if (!lista.length) return '<div class="empty">No hay modelos para los criterios seleccionados.</div>';
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Val. periódica</th><th class="text-center">Met.</th><th class="text-center">Imp.</th><th class="text-center">Global</th><th>Fech. Fin proy val. Met.</th><th>Fech. Fin proy val. Imp.</th><th>Calif. Met.</th><th>Calif. Imp.</th><th class="text-center">Nota</th><th>Manager Met.</th></tr></thead><tbody>
+    ${lista.slice(0, valLim).map(c => `<tr><td style="min-width:260px"><b>${esc(c.m.ID_MODELO)}</b><div class="text-secondary small">${esc(c.m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(c.m.TIER_MODELO)}</td><td class="text-nowrap">${esc(c.m.VALIDACION_PERIODICA)}</td>
+      <td class="text-center">${badgeCob(cubreMet(c))}</td><td class="text-center">${badgeCob(cubreImp(c))}</td><td class="text-center">${badgeCob(cubreGlobal(c))}</td>
+      <td class="text-nowrap">${fechaCorta(c.Met_Fecha_fin)}</td><td class="text-nowrap">${fechaCorta(c.Imp_Fecha_fin)}</td>
+      <td>${esc(c.Calificación_Metodología || '–')}</td><td>${esc(c.Calificación_Implementación || '–')}</td><td class="text-center">${fmt0(c.m.NOTA_DINAMICA_VALIDACION * 100)}%</td><td class="text-nowrap">${esc(c.Met_Manager || '–')}</td></tr>`).join('')}
+    </tbody></table></div>${verMas('val-mas', lista.length, valLim)}`;
+}
+function vistaValidacion(ms) {
+  const el = document.getElementById('v-validacion');
+  if (!ms.length) { el.innerHTML = vacio; return; }
+  // El evolutivo sale del input, así que se muestra en todas las fechas
+  const evo = `<div class="row row-cards mb-3">${bloque('col-12', 'Evolutivo de modelos sin validación', 'ti-chart-line',
+    cuerpo(evolutivoConteos([['Sin validación inicial', es('VALIDACION_COMPLETA', 'Sin validación')], ['Sin validación periódica', es('VALIDACION_PERIODICA', 'Descoberturado')]], 'Evolutivo de modelos sin validación')), notaFechas())}</div>`;
+  if (FIL.fecha !== ULTIMA) { soloUltimaFecha(el); el.insertAdjacentHTML('afterbegin', evo); return; }
+  const fs = ms.flatMap(m => (COB[m.ID_MODELO] ? [{ ...COB[m.ID_MODELO], m }] : []));
+  const N = fs.length;
+  if (!N) { el.innerHTML = evo + '<div class="card"><div class="card-body empty">Los modelos seleccionados no están en el tablón de coberturas.</div></div>'; return; }
+  const glob = cuenta(fs, cubreGlobal), met = cuenta(fs, cubreMet), imp = cuenta(fs, cubreImp), proy = cuenta(fs, proyGlobal);
+  const prox = fs.filter(descEn90), nota = prom(ms, 'NOTA_DINAMICA_VALIDACION');
+  const completa = cuenta(ms, es('VALIDACION_COMPLETA', 'Con validación'));
+  const actProy = barras([['Metodológica', met], ['Metodológica proyectada', cuenta(fs, c => c.Proy_Cobertura_Met === 'Coberturado')], ['Implementación', imp], ['Implementación proyectada', cuenta(fs, c => c.Proy_Cobertura_Imp === 'Coberturado')], ['Global', glob], ['Global proyectada', proy]]
+    .map(([t, n]) => ({ t, v: 100 * n / N, txt: pctTxt(n, N), c: `var(--${col(100 * n / N)})`, tip: `${t}\n${n} de ${N} modelos` })), 100);
+  const calif = apiladas([['Metodológica', 'Calificación_Metodología'], ['Implementación', 'Calificación_Implementación']].map(([t, k]) => ({ t, segs: CALIF.map(([n, c]) => ({ n, c, v: cuenta(fs, f => f[k] === n) })) })), N)
+    + `<div class="mt-3">${leyendaColores(CALIF.map(([n, c]) => ({ n, c })))}</div>`;
+  const notas = barras([[1, '100%'], [.75, '75%'], [.5, '50%'], [.25, '25%']].map(([v, t]) => ({ t, v: cuenta(ms, m => m.NOTA_DINAMICA_VALIDACION === v), c: `var(--${col(v * 100)})` })), ms.length);
+  const alcances = Object.entries(fs.reduce((a, c) => { const k = c.Met_Alcance || 'Sin dato'; a[k] = (a[k] || 0) + 1; return a; }, {})).sort((a, b) => b[1] - a[1]);
+  const alcance = barras(alcances.map(([t, v]) => ({ t, v, c: FRENTES[0] })), N);
+  const lista = fs.filter({ desc: c => !cubreGlobal(c), prox: descEn90, met: c => !cubreMet(c), imp: c => !cubreImp(c), todos: () => true }[valFiltro])
+    .sort((a, b) => String(a.m.TIER_MODELO).localeCompare(String(b.m.TIER_MODELO)) || String(a.Met_Fecha_fin).localeCompare(String(b.Met_Fecha_fin)));
+  const selFil = `<div class="d-flex flex-wrap gap-2">${selector('val-fil', 'Filtrar modelos', COB_FILTROS, valFiltro)}<button id="val-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+  el.innerHTML = `<div class="row row-cards mb-3">
+    ${tile('Cobertura global', pctTxt(glob, N), `${glob} de ${N} modelos`, 'ti-shield-check', 'blue')}
+    ${tile('Metodológica', pctTxt(met, N), `${met} modelos cubiertos`, 'ti-math-function', 'azure')}
+    ${tile('Implementación', pctTxt(imp, N), `${imp} modelos cubiertos`, 'ti-code', 'cyan')}
+    ${tile('Descoberturan en 90 días', prox.length, 'modelos hoy cubiertos', 'ti-calendar-exclamation', 'orange')}
+    ${tile('Nota dinámica', `${fmt0(nota * 100)}%`, `${completa} de ${ms.length} con validación completa`, 'ti-star', 'green')}
+  </div>${evo}<div class="row row-cards">
+    ${bloque('col-lg-8', 'Cobertura por dimensión', 'ti-table', cobPorDim(fs), 'Porcentaje de modelos cubiertos · color según umbrales del score', selector('val-dim', 'Agrupar por', COB_DIMS.map(d => [d.k, d.t]), valDim))}
+    ${bloque('col-lg-4', 'Cobertura actual y proyectada', 'ti-trending-up', cuerpo(actProy), 'Porcentaje de modelos')}
+    ${bloque('col-lg-3', 'Próximas descoberturas', 'ti-calendar-time', cuerpo(calendarioDesc(fs)), 'Modelos por mes y frente, próximos 12 meses')}
+    ${bloque('col-lg-3', 'Calificación por frente', 'ti-award', cuerpo(calif), 'Última validación')}
+    ${bloque('col-lg-3', 'Nota dinámica', 'ti-star', cuerpo(notas), 'NOTA_DINAMICA_VALIDACION')}
+    ${bloque('col-lg-3', 'Alcance metodológico', 'ti-list-search', cuerpo(alcance), 'Última validación')}
+    ${bloque('col-12', 'Detalle de cobertura por modelo', 'ti-list-details', tablaCobertura(lista), `${lista.length} modelos · ordenado por Tier y fecha fin del proyecto metodológico`, selFil)}
+  </div>`;
+  el.querySelector('#val-dim').onchange = e => { valDim = e.target.value; vistaValidacion(filtrados()); };
+  el.querySelector('#val-fil').onchange = e => { valFiltro = e.target.value; valLim = 50; vistaValidacion(filtrados()); };
+  const mas = el.querySelector('#val-mas'); if (mas) mas.onclick = () => { valLim += 50; vistaValidacion(filtrados()); };
+  el.querySelector('#val-csv').onclick = () => {
+    const cols = ['Cobertura_Metodologia', 'Cobertura_Implementación', 'Cobertura_Global', 'Proy_Cobertura_Met', 'Proy_Cobertura_Imp', 'Proy_Cobertura_Global', 'Met_Fecha_fin', 'Imp_Fecha_fin', 'Fecha_descobertura_Met', 'Fecha_descobertura_Imp', 'Calificación_Metodología', 'Calificación_Implementación', 'Met_Alcance', 'Imp_Alcance', 'Met_Manager', 'Imp_Manager'];
+    const base = ['ID_MODELO', 'NOMBRE_MODELO', 'TIER_MODELO', 'VALIDACION_COMPLETA', 'VALIDACION_PERIODICA', 'NOTA_DINAMICA_VALIDACION'];
+    descargar('mrm_coberturas.csv', [[...base, ...cols].join(';'), ...lista.map(c => [...base.map(k => c.m[k]), ...cols.map(k => c[k])].map(csvVal).join(';'))].join('\n'));
+  };
+}
+
+/* ===================== OBSERVACIONES ===================== */
+const OBS = DATOS.observaciones.map(o => ({ ...o, id_modelo: String(o.id_modelo), compromiso: o.fecha_ampliada || o.fecha_estimada }));
+const OBS_CRIT = ['Crítico', 'Relevante', 'Moderado', 'Bajo', 'Potencial', 'Nulo'];
+const CRIT_CLS = { 'Crítico': 'bg-red-lt', 'Relevante': 'bg-orange-lt', 'Moderado': 'bg-yellow-lt', 'Bajo': 'bg-blue-lt', 'Potencial': 'bg-secondary-lt', 'Nulo': 'bg-secondary-lt' };
+const OBS_PLAZO = [{ n: 'Vencidas', c: 'var(--r)' }, { n: 'Vencen en 30 días o menos', c: 'var(--a)' }, { n: 'Vencen en más de 30 días', c: 'var(--g)' }];
+const OBS_DIMS = [{ k: 'MODEL_USER', t: 'Model User' }, { k: 'TIER_MODELO', t: 'Tier' }, { k: 'manager', t: 'Manager de validación' }, { k: 'tipo_revision', t: 'Tipo de revisión' }, { k: 'area', t: 'Área' }];
+let obsDim = 'MODEL_USER', obsFil = { plazo: '', criticidad: '', ambito: '' }, obsLim = 50;
+const obsVencida = o => o.vencimiento === 'Vencido';
+const obsPlazo = o => (obsVencida(o) ? OBS_PLAZO[0].n : o.vencimiento === 'Por vencer > 30 días' ? OBS_PLAZO[2].n : OBS_PLAZO[1].n);
+const altaCrit = o => ['Crítico', 'Relevante'].includes(o.criticidad);
+const diasVencida = o => (obsVencida(o) ? dias(o.compromiso, DATOS.obs_meta.corte) : null);
+const obsDimVal = (o, mapa) => (o[obsDim] ?? mapa[o.id_modelo][obsDim]);
+const plazoSegs = os => OBS_PLAZO.map(p => ({ ...p, v: cuenta(os, o => obsPlazo(o) === p.n) }));
+const totalSegs = f => f.segs.reduce((a, s) => a + s.v, 0);
+const obsApiladas = (os, clave, orden) => {
+  const vals = orden || [...new Set(os.map(clave))];
+  const filas = vals.map(t => ({ t, segs: plazoSegs(os.filter(o => clave(o) === t)) })).filter(totalSegs);
+  if (!orden) filas.sort((a, b) => b.segs[0].v - a.segs[0].v || totalSegs(b) - totalSegs(a));
+  return apiladas(filas, Math.max(...filas.map(totalSegs))) + `<div class="mt-3">${leyendaColores(OBS_PLAZO)}</div>`;
+};
+function antiguedadObs(venc) {
+  const t = (a, b) => cuenta(venc, o => diasVencida(o) > a && diasVencida(o) <= b);
+  return barras([['Hasta 90 días', t(-1, 90)], ['91 a 180 días', t(90, 180)], ['181 a 365 días', t(180, 365)], ['1 a 2 años', t(365, 730)], ['Más de 2 años', t(730, Infinity)]]
+    .map(([e, v]) => ({ t: e, v, c: 'var(--r)', tip: `${e}\n${v} observaciones · ${pctTxt(v, venc.length)}` })), venc.length);
+}
+function topModelosObs(venc, mapa) {
+  const por = {}; venc.forEach(o => { por[o.id_modelo] = (por[o.id_modelo] || 0) + 1; });
+  const top = Object.entries(por).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  return barras(top.map(([id, v]) => ({ t: mapa[id].NOMBRE_MODELO, v, c: 'var(--r)', tip: `${id} · ${mapa[id].NOMBRE_MODELO}\n${v} vencidas` })), top.length ? top[0][1] : 0);
+}
+function tablaObs(os, mapa) {
+  if (!os.length) return '<div class="empty">No hay observaciones para los criterios seleccionados.</div>';
+  const plazo = o => (obsVencida(o) ? `<span style="color:var(--r);font-weight:600">${fmt0(diasVencida(o))} días</span>` : `<span class="text-secondary">${esc(o.vencimiento)}</span>`);
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>ID obs.</th><th>Modelo</th><th>Criticidad</th><th>Ámbito</th><th>Tipo de revisión</th><th>Observación</th><th>Compromiso</th><th>Vencimiento</th><th class="text-center">Ampliaciones</th><th>Validador</th><th>Propietario</th></tr></thead><tbody>
+    ${os.slice(0, obsLim).map(o => `<tr class="obs-fila" tabindex="0" title="Clic para ver el detalle"><td class="fw-bold">${esc(o.id)}</td><td style="min-width:220px;white-space:normal"><b>${esc(o.id_modelo)}</b><div class="text-secondary small">${esc(mapa[o.id_modelo].NOMBRE_MODELO)}</div></td>
+      <td><span class="badge ${CRIT_CLS[o.criticidad]}">${esc(o.criticidad)}</span></td><td class="text-nowrap">${esc(o.ambito)}</td><td class="text-nowrap">${esc(o.tipo_revision)}</td>
+      <td class="desc"><div class="clamp">${esc(o.observacion)}</div></td><td class="text-nowrap">${fechaCorta(o.compromiso)}</td><td class="text-nowrap">${plazo(o)}</td><td class="text-center">${o.ampliaciones}</td><td class="text-nowrap">${esc(o.validador)}</td><td class="text-nowrap">${esc(o.propietario)}</td></tr>
+      <tr class="obs-det" hidden><td colspan="11"><b>Observación:</b> ${esc(o.observacion)}<br><b>Recomendación:</b> ${esc(o.recomendacion)}<br><span class="text-secondary small">Proyecto: ${esc(o.proyecto)} · Manager: ${esc(o.manager)} · Área: ${esc(o.area)} · Fecha estimada: ${fechaCorta(o.fecha_estimada)}${o.fecha_ampliada ? ` · Fecha ampliada: ${fechaCorta(o.fecha_ampliada)}` : ''}</span></td></tr>`).join('')}
+    </tbody></table></div>${verMas('obs-mas', os.length, obsLim)}`;
+}
+function vistaObs(ms) {
+  const el = document.getElementById('v-obs');
+  if (!ms.length) { el.innerHTML = vacio; return; }
+  // El evolutivo sale del input, así que se muestra en todas las fechas
+  const evo = `<div class="row row-cards mb-3">${bloque('col-12', 'Evolutivo de observaciones vencidas', 'ti-chart-line',
+    cuerpo(evolutivoConteos([['Crít/Relev/Mod vencidas', 'OBS_CRIT_RELE_MODE_VENCIDAS_VI'], ['Entorno tecnológico vencidas', 'OBS_AMB_TEC_VENCIDOS']], 'Evolutivo de observaciones vencidas')),
+    notaFechas().replace('Modelos por fecha', 'Observaciones por fecha'))}</div>`;
+  if (FIL.fecha !== ULTIMA) { soloUltimaFecha(el); el.insertAdjacentHTML('afterbegin', evo); return; }
+  const mapa = Object.fromEntries(ms.map(m => [m.ID_MODELO, m]));
+  const base = OBS.filter(o => mapa[o.id_modelo]);
+  if (!base.length) { el.innerHTML = evo + '<div class="card"><div class="card-body empty">Los modelos seleccionados no tienen observaciones pendientes.</div></div>'; return; }
+  const venc = base.filter(obsVencida), criticas = venc.filter(altaCrit), prontas = base.filter(o => obsPlazo(o) === OBS_PLAZO[1].n);
+  const conAmp = cuenta(base, o => o.ampliaciones > 0);
+  const modelosVenc = new Set(venc.map(o => o.id_modelo));
+  const os = base.filter(o => (!obsFil.plazo || obsPlazo(o) === obsFil.plazo) && (!obsFil.criticidad || o.criticidad === obsFil.criticidad) && (!obsFil.ambito || o.ambito === obsFil.ambito))
+    .sort((a, b) => obsVencida(b) - obsVencida(a) || OBS_CRIT.indexOf(a.criticidad) - OBS_CRIT.indexOf(b.criticidad) || (diasVencida(b) ?? 0) - (diasVencida(a) ?? 0));
+  const filtros = `<div class="d-flex flex-wrap gap-2">
+    ${selector('o-plazo', 'Vencimiento', [['', 'Todo vencimiento'], ...OBS_PLAZO.map(p => [p.n, p.n])], obsFil.plazo)}
+    ${selector('o-crit', 'Criticidad', [['', 'Toda criticidad'], ...OBS_CRIT.map(c => [c, c])], obsFil.criticidad)}
+    ${selector('o-amb', 'Ámbito', [['', 'Todo ámbito'], ...[...new Set(base.map(o => o.ambito))].sort().map(a => [a, a])], obsFil.ambito)}
+    <button id="o-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+  el.innerHTML = `<div class="row row-cards mb-3">
+    ${tile('Pendientes', base.length, `en ${new Set(base.map(o => o.id_modelo)).size} modelos`, 'ti-folder-open', 'blue')}
+    ${tile('Vencidas', venc.length, `${pctTxt(venc.length, base.length)} · ${modelosVenc.size} modelos`, 'ti-alert-triangle', 'red')}
+    ${tile('Críticas y relevantes', criticas.length, 'vencidas', 'ti-flame', 'pink')}
+    ${tile('Vencen en 30 días', prontas.length, 'o menos', 'ti-clock', 'orange')}
+    ${tile('Con ampliación', conAmp, `${pctTxt(conAmp, base.length)} del total`, 'ti-calendar-plus', 'azure')}
+  </div>${evo}<div class="row row-cards">
+    ${bloque('col-lg-7', 'Observaciones por criticidad', 'ti-flame', cuerpo(obsApiladas(base, o => o.criticidad, OBS_CRIT)), 'Situación de vencimiento')}
+    ${bloque('col-lg-5', 'Antigüedad de las vencidas', 'ti-hourglass', cuerpo(antiguedadObs(venc)), 'Días desde el compromiso vigente')}
+    ${bloque('col-lg-7', 'Observaciones por ámbito', 'ti-category', cuerpo(obsApiladas(base, o => o.ambito)), 'Ordenado por vencidas')}
+    ${bloque('col-lg-5', 'Modelos con más vencidas', 'ti-list-numbers', cuerpo(topModelosObs(venc, mapa)), 'Top 10')}
+    ${bloque('col-12', 'Observaciones por dimensión', 'ti-chart-bar', cuerpo(obsApiladas(base, o => obsDimVal(o, mapa))), 'Ordenado por vencidas', selector('o-dim', 'Agrupar por', OBS_DIMS.map(d => [d.k, d.t]), obsDim))}
+    ${bloque('col-12', 'Detalle de observaciones', 'ti-clipboard-text', tablaObs(os, mapa), `${os.length} observaciones · clic en una fila para ver la observación y la recomendación`, filtros)}
+  </div>`;
+  el.querySelector('#o-dim').onchange = e => { obsDim = e.target.value; vistaObs(filtrados()); };
+  [['#o-plazo', 'plazo'], ['#o-crit', 'criticidad'], ['#o-amb', 'ambito']].forEach(([s, k]) => { el.querySelector(s).onchange = e => { obsFil[k] = e.target.value; obsLim = 50; vistaObs(filtrados()); }; });
+  const mas = el.querySelector('#obs-mas'); if (mas) mas.onclick = () => { obsLim += 50; vistaObs(filtrados()); };
+  el.querySelectorAll('.obs-fila').forEach(tr => { tr.onclick = () => { tr.nextElementSibling.hidden = !tr.nextElementSibling.hidden; }; });
+  el.querySelector('#o-csv').onclick = () => {
+    const cols = ['id', 'id_modelo', 'criticidad', 'ambito', 'tipo_revision', 'vencimiento', 'compromiso', 'ampliaciones', 'observacion', 'recomendacion', 'proyecto', 'manager', 'validador', 'propietario', 'area'];
+    descargar('mrm_observaciones.csv', [[...cols, 'dias_vencida'].join(';'), ...os.map(o => [...cols.map(c => o[c]), diasVencida(o)].map(csvVal).join(';'))].join('\n'));
+  };
+}
+
+/* ===================== IMPLEMENTACIÓN ===================== */
+const AMBIENTES = [{ n: 'PRODUCTIVO', c: 'var(--g)' }, { n: 'MIXTO', c: 'var(--a)' }, { n: 'NO PRODUCTIVO', c: 'var(--r)' }, { n: 'EN REVISIÓN', c: '#8a93a0' }, { n: 'Sin información', c: 'var(--n)' }];
+const AMB_CLS = { 'PRODUCTIVO': 'bg-green-lt', 'MIXTO': 'bg-yellow-lt', 'NO PRODUCTIVO': 'bg-red-lt' };
+const FRENTES_IMPL = {
+  despliegue: { t: 'Despliegue', amb: 'AMBIENTE_DESPLIEGUE', rat: 'RATIO_IMPLEMENTACION', plat: 'PLATAFORMA_IMPLEMENTACION' },
+  data: { t: 'Data', amb: 'AMBIENTE_DATA', rat: 'RATIO_DATA', plat: 'PLATAFORMA_DATA' }
+};
+const IMPL_DIMS = [{ k: 'BANCA', t: 'Banca' }, { k: 'TIER_MODELO', t: 'Tier' }, { k: 'MODEL_DEVELOPER', t: 'Model developer' }, { k: 'PROCESO', t: 'Proceso' }];
+const IMPL_FILTROS = [['todos', 'Todos los modelos'], ['desp', 'No productivo en despliegue'], ['data', 'No productivo en data'], ['info', 'Sin información de ambiente']];
+let implFrente = 'despliegue', implDim = 'BANCA', implFiltro = 'todos', implLim = 50;
+const noProductivo = amb => es(amb, 'NO PRODUCTIVO', 'MIXTO');
+const conAmbiente = amb => es(amb, 'PRODUCTIVO', 'NO PRODUCTIVO', 'MIXTO');
+const pctRatio = v => (v == null ? '-' : `${fmt0(v * 100)}%`);
+const segsAmbiente = (ms, amb) => AMBIENTES.map(a => ({ ...a, v: cuenta(ms, es(amb, a.n)) }));
+const totalAmb = f => f.segs.reduce((a, s) => a + s.v, 0);
+const noProdSegs = f => f.segs[1].v + f.segs[2].v;
+const apiladasAmb = filas => (filas.length ? apiladas(filas, Math.max(...filas.map(totalAmb))) + `<div class="mt-3">${leyendaColores(AMBIENTES)}</div>` : '<div class="empty">Sin datos para los modelos seleccionados.</div>');
+function implPor(ms, campo) {
+  const fr = FRENTES_IMPL[implFrente];
+  return apiladasAmb([...new Set(ms.map(m => m[campo]))].map(t => ({ t, segs: segsAmbiente(ms.filter(m => m[campo] === t), fr.amb) })).sort((a, b) => noProdSegs(b) - noProdSegs(a) || totalAmb(b) - totalAmb(a)));
+}
+// Una celda de plataforma puede traer varias separadas por coma: el modelo cuenta en cada una
+function plataformas(ms, fr) {
+  const por = {};
+  ms.forEach(m => new Set(String(m[fr.plat] || '').split(',').map(s => s.trim())).forEach(p => { if (p && p !== 'Sin información') (por[p] ||= []).push(m); }));
+  const filas = Object.entries(por).map(([t, de]) => ({ t, segs: segsAmbiente(de, fr.amb) })).sort((a, b) => totalAmb(b) - totalAmb(a)).slice(0, 10);
+  return apiladasAmb(filas) + `<div class="text-secondary small mt-2">${cuenta(ms, es(fr.plat, 'Sin información'))} modelos sin información de plataforma no se grafican.</div>`;
+}
+function ratiosPorDim(ms) {
+  const vals = [...new Set(ms.map(m => m[implDim]))].sort((a, b) => String(a).localeCompare(String(b), 'es'));
+  const celda = v => `<td class="cell" style="${cellStyle(v == null ? null : v * 100)}">${pctRatio(v)}</td>`;
+  const fila = (t, de, cls = '') => `<tr class="${cls}"><td>${esc(t)}</td><td class="text-center">${de.length}</td><td class="text-center">${cuenta(de, noProductivo('AMBIENTE_DESPLIEGUE'))}</td><td class="text-center">${cuenta(de, noProductivo('AMBIENTE_DATA'))}</td>${celda(prom(de, 'RATIO_IMPLEMENTACION'))}${celda(prom(de, 'RATIO_DATA'))}</tr>`;
+  return `<div class="table-responsive"><table class="table table-vcenter table-sm card-table"><thead><tr><th>${IMPL_DIMS.find(d => d.k === implDim).t}</th><th class="text-center"># Modelos</th><th class="text-center">No prod. desp.</th><th class="text-center">No prod. data</th><th class="text-center">Ratio impl.</th><th class="text-center">Ratio data</th></tr></thead><tbody>
+    ${vals.map(v => fila(v, ms.filter(m => m[implDim] === v))).join('')}${fila('Total', ms, 'fw-bold')}</tbody></table></div>`;
+}
+function tablaImplementacion(lista) {
+  if (!lista.length) return '<div class="empty">No hay modelos para los criterios seleccionados.</div>';
+  const amb = v => `<span class="badge ${AMB_CLS[v] || 'bg-secondary-lt'}">${esc(v)}</span>`;
+  const plat = v => `<td style="white-space:normal;min-width:170px;max-width:240px">${esc(String(v || '-').replace(/,\s*/g, ', '))}</td>`;
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Producto</th><th>Plataforma implementación</th><th>Ambiente despliegue</th><th class="text-center">Ratio implementación</th><th>Plataforma data</th><th>Ambiente data</th><th class="text-center">Ratio data</th></tr></thead><tbody>
+    ${lista.slice(0, implLim).map(m => `<tr><td style="min-width:260px;white-space:normal"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td><td class="text-nowrap">${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.PRODUCTO)}</td>
+      ${plat(m.PLATAFORMA_IMPLEMENTACION)}<td>${amb(m.AMBIENTE_DESPLIEGUE)}</td><td class="text-center">${pctRatio(m.RATIO_IMPLEMENTACION)}</td>${plat(m.PLATAFORMA_DATA)}<td>${amb(m.AMBIENTE_DATA)}</td><td class="text-center">${pctRatio(m.RATIO_DATA)}</td></tr>`).join('')}
+    </tbody></table></div>${verMas('impl-mas', lista.length, implLim)}`;
+}
+function vistaImplementacion(ms) {
+  const el = document.getElementById('v-implementacion');
+  if (!ms.length) { el.innerHTML = vacio; return; }
+  const R = medidas(ms), sd = R.drv.implementacion;
+  const npD = cuenta(ms, noProductivo('AMBIENTE_DESPLIEGUE')), npB = cuenta(ms, noProductivo('AMBIENTE_DATA'));
+  const evD = cuenta(ms, conAmbiente('AMBIENTE_DESPLIEGUE')), evB = cuenta(ms, conAmbiente('AMBIENTE_DATA'));
+  const evo = evolutivoConteos([['No productivo en despliegue', noProductivo('AMBIENTE_DESPLIEGUE')], ['No productivo en data', noProductivo('AMBIENTE_DATA')]], 'Evolutivo de modelos en ambientes no productivos');
+  const composicion = apiladasAmb(Object.values(FRENTES_IMPL).map(fr => ({ t: fr.t, segs: segsAmbiente(ms, fr.amb) })));
+  const boton = (k, t) => `<button class="btn btn-sm ${implFrente === k ? 'btn-primary' : 'btn-outline-primary'}" data-frente="${k}">${t}</button>`;
+  const frente = `<div class="btn-group toolbar" role="group" aria-label="Frente mostrado">${boton('despliegue', 'Despliegue')}${boton('data', 'Data')}</div>`;
+  const lista = ms.filter({ todos: () => true, desp: noProductivo('AMBIENTE_DESPLIEGUE'), data: noProductivo('AMBIENTE_DATA'), info: m => !conAmbiente('AMBIENTE_DESPLIEGUE')(m) || !conAmbiente('AMBIENTE_DATA')(m) }[implFiltro])
+    .sort((a, b) => (avgN([a.RATIO_IMPLEMENTACION, a.RATIO_DATA]) ?? 2) - (avgN([b.RATIO_IMPLEMENTACION, b.RATIO_DATA]) ?? 2));
+  const selFil = `<div class="d-flex flex-wrap gap-2">${selector('impl-fil', 'Filtrar modelos', IMPL_FILTROS, implFiltro)}<button id="impl-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+  el.innerHTML = `<div class="row row-cards mb-3">
+    ${tile('Score Implementación', sd == null ? '–' : fmt(sd), pill(sd), 'ti-gauge', 'blue')}
+    ${tile('No productivo en despliegue', npD, `${pctTxt(npD, evD)} de ${evD} con ambiente`, 'ti-rocket', 'red')}
+    ${tile('No productivo en data', npB, `${pctTxt(npB, evB)} de ${evB} con ambiente`, 'ti-database', 'orange')}
+    ${tile('Ratio implementación', pctRatio(prom(ms, 'RATIO_IMPLEMENTACION')), 'promedio', 'ti-percentage', 'azure')}
+    ${tile('Ratio data', pctRatio(prom(ms, 'RATIO_DATA')), 'promedio', 'ti-percentage', 'cyan')}
+  </div><div class="row row-cards mb-3">${bloque('col-12', 'Evolutivo de modelos en ambientes no productivos', 'ti-chart-line', cuerpo(evo), `${notaFechas()} · no productivo incluye MIXTO`)}</div>
+  <div class="row row-cards">
+    ${bloque('col-lg-4', 'Composición por ambiente', 'ti-stack-2', cuerpo(composicion), `${ms.length} modelos`)}
+    ${bloque('col-lg-8', 'Ratios por dimensión', 'ti-table', ratiosPorDim(ms), 'No productivo incluye MIXTO · color según umbrales del score', selector('impl-dim', 'Agrupar por', IMPL_DIMS.map(d => [d.k, d.t]), implDim))}
+    ${bloque('col-lg-6', 'Ambientes por Model User', 'ti-users-group', cuerpo(implPor(ms, 'MODEL_USER')), 'Ordenado por no productivo y mixto', frente)}
+    ${bloque('col-lg-6', 'Ambientes por Producto', 'ti-package', cuerpo(implPor(ms, 'PRODUCTO')), 'Ordenado por no productivo y mixto', frente)}
+    ${bloque('col-lg-6', 'Plataformas de implementación', 'ti-server-2', cuerpo(plataformas(ms, FRENTES_IMPL.despliegue)), 'Top 10 · modelos por ambiente de despliegue')}
+    ${bloque('col-lg-6', 'Plataformas de data', 'ti-database', cuerpo(plataformas(ms, FRENTES_IMPL.data)), 'Top 10 · modelos por ambiente de data')}
+    ${bloque('col-12', 'Detalle de implementación por modelo', 'ti-list-details', tablaImplementacion(lista), `${lista.length} modelos · ordenado de menor a mayor ratio promedio`, selFil)}
+  </div>`;
+  el.querySelector('#impl-dim').onchange = e => { implDim = e.target.value; vistaImplementacion(filtrados()); };
+  el.querySelector('#impl-fil').onchange = e => { implFiltro = e.target.value; implLim = 50; vistaImplementacion(filtrados()); };
+  el.querySelectorAll('[data-frente]').forEach(b => b.onclick = () => { implFrente = b.dataset.frente; vistaImplementacion(filtrados()); });
+  const mas = el.querySelector('#impl-mas'); if (mas) mas.onclick = () => { implLim += 50; vistaImplementacion(filtrados()); };
+  el.querySelector('#impl-csv').onclick = () => {
+    const cols = ['ID_MODELO', 'NOMBRE_MODELO', 'TIER_MODELO', 'MODEL_USER', 'PRODUCTO', 'PLATAFORMA_IMPLEMENTACION', 'AMBIENTE_DESPLIEGUE', 'RATIO_IMPLEMENTACION', 'PLATAFORMA_DATA', 'AMBIENTE_DATA', 'RATIO_DATA'];
+    descargar('mrm_implementacion.csv', [cols.join(';'), ...lista.map(m => cols.map(c => csvVal(m[c])).join(';'))].join('\n'));
+  };
+}
+
+const INPUTS = [
+  { c: '#096AAD', t: 'Input principal Score MRM', d: 'Una fila por modelo y fecha: inventario, seguimiento, alertas, validación, observaciones, implementación y gobierno. Guarda el historial mensual.', id: 'ID_MODELO' },
+  { c: '#FF6600', t: 'Reporte de observaciones', d: 'Detalle de cada observación pendiente. Corresponde solo a la última fecha.', id: 'ID_Model' },
+  { c: '#2fb344', t: 'Tablón de coberturas', d: 'Cobertura metodológica y de implementación de cada modelo. Corresponde solo a la última fecha.', id: 'Modelo_ID' }
+];
+const SECCIONES = [['Reporte', [0]], ['Macro', [0]], ['Seguimiento', [0]], ['Validación', [0, 2]], ['Observaciones', [0, 1]], ['Implementación', [0]]];
+function flujoInputs() {
+  const flecha = '<div class="flujo-flecha" aria-hidden="true"><i class="ti ti-arrow-right"></i></div>';
+  const paso = (n, t, cuerpo) => `<div class="flujo-paso"><div class="flujo-num">Paso ${n} · ${t}</div>${cuerpo}</div>`;
+  const inputs = INPUTS.map(i => `<div class="flujo-caja input" style="--input:${i.c}"><b>${i.t}</b>${i.d}<div class="text-secondary small mt-1">Identificador: ${i.id}</div></div>`).join('');
+  const origen = i => `<span class="flujo-origen" style="--input:${INPUTS[i].c}"><i></i>${INPUTS[i].t.replace(' Score MRM', '')}</span>`;
+  const secciones = SECCIONES.map(([t, os]) => `<div class="flujo-caja flujo-seccion"><span class="fw-bold">${t}</span><span class="d-inline-flex gap-2 flex-wrap">${os.map(origen).join('')}</span></div>`).join('');
+  return `<div class="flujo">
+    ${paso(1, 'Información', inputs)}${flecha}
+    ${paso(2, 'Unión', '<div class="flujo-caja ancha"><b>Se unen por modelo</b>Los tres archivos se relacionan con el ID del modelo. Solo se usan los modelos que están en el input principal.</div>')}${flecha}
+    ${paso(3, 'Cálculo', '<div class="flujo-caja ancha"><b>Se calculan indicadores y score</b>Cada indicador recibe un puntaje de 0 a 100 según las reglas definidas en el archivo Indicadores, y con ellos se obtiene el score.</div>')}${flecha}
+    ${paso(4, 'Reporte', secciones)}
+  </div>
+  <div class="text-secondary small mt-3"><b>Actualización mensual:</b> se agregan las filas del nuevo mes al input principal, se reemplazan el reporte de observaciones y el tablón de coberturas, y se vuelve a generar el reporte.</div>`;
+}
+function vistaGobierno() {
+  const tabla = `<div class="table-responsive"><table class="table table-vcenter card-table"><thead><tr><th>Driver</th><th>Indicador</th><th>¿Cómo se obtiene la puntuación?</th></tr></thead><tbody>
+    ${CFG.drivers.map(dr => dr.ind.map((i, j) => `<tr>${j === 0 ? `<td rowspan="${dr.ind.length}"><b>${dr.nombre}</b></td>` : ''}<td style="white-space:normal">${esc(i.nombre)}</td><td style="white-space:normal">${esc(i.lp)}</td></tr>`).join('')).join('')}
+    </tbody></table></div>`;
+  document.getElementById('v-gobierno').innerHTML = `<div class="row row-cards">
+    ${bloque('col-12', 'Flujo de información del reporte', 'ti-route', cuerpo(flujoInputs()), 'De dónde sale la información y cómo llega a cada sección')}
+    ${bloque('col-12', 'Puntuación de los indicadores', 'ti-list-details', tabla, 'Cada indicador va de 0 a 100, donde 100 es el mejor resultado')}
+  </div>`;
+}
+
+/* ===================== EXPORTAR ===================== */
+function descargar(nombre, txt) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv;charset=utf-8' })); a.download = nombre; a.click();
+}
+const csvVal = v => /[;"\n]/.test(String(v ?? '')) ? '"' + String(v).replace(/"/g, '""') + '"' : (v ?? '');
+function exportar() {
+  const dk = CFG.drivers.map(d => d.key);
+  const rows = filtrados().map(m => [...META_COLS.map(c => m[c]), ...IND.flatMap(i => [fmt(m.vi[i.key]), fmt(m.pi[i.key])]), ...dk.map(k => fmt(m.ps[k])), fmt(m.global), SEM_TXT[sem(m.global)]].map(csvVal).join(';'));
+  descargar('mrm_puntajes.csv', [[...META_COLS, ...IND.flatMap(i => ['valor_' + i.key, 'puntaje_' + i.key]), ...dk.map(k => 'puntaje_' + k), 'puntaje_global', 'semaforo'].join(';'), ...rows].join('\n'));
+}
+
+/* ===================== INICIO ===================== */
+function irA(v) {
+  document.querySelectorAll('#tabs .nav-link[data-v]').forEach(x => x.parentElement.classList.toggle('active', x.dataset.v === v));
+  document.querySelectorAll('.view').forEach(x => x.classList.toggle('active', x.id === 'v-' + v));
+  window.scrollTo(0, 0);
+}
+document.getElementById('tabs').onclick = e => {
+  const a = e.target.closest('.nav-link[data-v]'); if (!a) return;
+  e.preventDefault(); irA(a.dataset.v);
+};
+document.getElementById('exportar').onclick = exportar;
+// Tooltip compartido por los gráficos: lee data-tip del elemento bajo el cursor o con foco
+document.body.insertAdjacentHTML('beforeend', '<div id="tip" hidden></div>');
+const tipEl = document.getElementById('tip');
+const verTip = e => {
+  const t = e.target.closest && e.target.closest('[data-tip]');
+  if (!t) { tipEl.hidden = true; return; }
+  tipEl.textContent = t.dataset.tip; tipEl.hidden = false;
+  const r = t.getBoundingClientRect(), a = tipEl.offsetWidth / 2 + 8, h = tipEl.offsetHeight + 8;
+  tipEl.style.left = `${Math.min(innerWidth - a, Math.max(a, r.left + r.width / 2))}px`;
+  tipEl.style.top = `${Math.max(h, r.top - 6)}px`;
+};
+document.addEventListener('mouseover', verTip);
+document.addEventListener('focusin', verTip);
+TODOS = preparar(DATOS.modelos);
+resetFil();
+construirFiltros(); vistaGobierno(); aplicar();
+</script>
+</body>
+</html>

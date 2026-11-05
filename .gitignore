@@ -1,0 +1,10 @@
+# Entorno de Python
+.venv/
+__pycache__/
+*.pyc
+
+# Resultados generados: se crean al correr el proceso
+output/
+
+# Bloqueos temporales de Excel
+~$*
