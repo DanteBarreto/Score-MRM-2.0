@@ -25,6 +25,16 @@ https://github.com/DanteBarreto/Score-MRM-2.0.git
 
 Elige una carpeta y, cuando VS Code lo pregunte, abre el proyecto. Evita carpetas con rutas muy largas: en Windows pueden causar errores.
 
+## Opción rápida: ejecución guiada
+
+Abre la terminal integrada y ejecuta:
+
+```bash
+python ejecutar.py
+```
+
+El script explica cada paso, prepara el entorno, te pide la carpeta de tus Excel y genera el reporte. También puedes abrir `ejecutar.py` y presionar **Run Python File**. Si prefieres hacerlo por tareas, sigue los pasos de abajo.
+
 ## 3. Preparar el entorno (solo la primera vez)
 
 1. Abre `Terminal > Run Task…`.
