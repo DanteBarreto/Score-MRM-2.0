@@ -21,6 +21,7 @@ def paso(numero, titulo, explicacion):
 
 
 def correr(*comando):
+    sys.stdout.flush()
     if subprocess.run(comando, cwd=RAIZ).returncode != 0:
         sys.exit("\nEl paso falló. Revisa el mensaje anterior o docs/guia_vscode.md.")
 
