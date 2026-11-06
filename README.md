@@ -15,6 +15,12 @@ Necesitas [Python 3.10 o superior](https://www.python.org/downloads/), [Visual S
 
 El reporte queda en `output/reporte_mrm.html`. Incluye los datos, así que compártelo solo con quien corresponda. Necesita internet al abrirse, porque carga los estilos desde un CDN.
 
+También puedes hacerlo todo con un solo comando, que explica cada paso y te pide la carpeta de tus Excel:
+
+```bash
+python ejecutar.py
+```
+
 La guía paso a paso, con la alternativa por terminal y la solución de errores frecuentes, está en [docs/guia_vscode.md](docs/guia_vscode.md).
 
 ## Qué muestra el reporte
@@ -51,6 +57,7 @@ Python lee y valida los Excel, une la información por ID de modelo y la inserta
 
 ```text
 Score-MRM-2.0/
+├── ejecutar.py        Ejecución guiada, paso a paso
 ├── config.ejemplo.yaml  Plantilla de tu config.yaml local
 ├── requirements.txt   Dependencias de Python
 ├── docs/              Documentación
