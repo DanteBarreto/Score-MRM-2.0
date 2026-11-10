@@ -86,7 +86,7 @@ Son "No aplica" si no hay observaciones pendientes.
 
 ## Puntos por definir
 
-Las cifras corresponden a la base de desarrollo de agosto de 2026.
+Las cifras corresponden a la base de desarrollo de agosto de 2026 (versión 1).
 
 | Tema | Situación actual | Decisión pendiente |
 |---|---|---|

@@ -15,6 +15,7 @@ config.yaml
 *.xls
 *.csv
 !docs/referencia/Indicadores.xlsx
+!docs/referencia/Diccionario_de_datos.xlsx
 
 # Bloqueos temporales de Excel
 ~$*

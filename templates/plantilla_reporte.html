@@ -109,6 +109,27 @@ td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
 .flujo-origen{display:inline-flex;gap:4px;align-items:center;color:var(--tblr-secondary);font-size:.74rem}
 .flujo-origen i{width:9px;height:9px;border-radius:50%;background:var(--input)}
 @media (max-width:991px){.flujo{grid-template-columns:minmax(0,1fr)}.flujo-flecha{justify-content:center;transform:rotate(90deg)}}
+/* Tiempo de atención: barra del TTM real con una marca en el TTM de gobierno */
+.ttm{display:grid;grid-template-columns:minmax(120px,36%) 1fr 6.5rem;gap:.6rem;align-items:center;font-size:.82rem;margin-bottom:.55rem}
+.ttm .et{line-height:1.15}
+.ttm .pista{position:relative;display:block;height:14px;background:var(--track);border-radius:4px}
+.ttm .pista i{display:block;height:100%;border-radius:4px;min-width:3px}
+.ttm .pista u{position:absolute;top:-3px;bottom:-3px;width:3px;margin-left:-1px;background:var(--tblr-body-color);border-radius:2px}
+.ttm b{font-variant-numeric:tabular-nums;font-weight:600;text-align:right;white-space:nowrap}
+/* Mapa de insumos */
+.chip-m{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--tblr-border-color);border-radius:999px;padding:.1rem .55rem;font-size:.76rem;margin:.15rem .3rem .15rem 0;background:#fff;max-width:340px}
+.chip-m i{width:9px;height:9px;border-radius:50%;flex:none}
+.chip-m span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.insumos td{white-space:normal;vertical-align:middle}
+.insumos tr.proceso td{background:var(--drv-bg);font-weight:700;border-top:2px solid var(--tblr-border-color)}
+.mapa-insumos{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:.75rem;align-items:center}
+.mapa-col{display:flex;flex-direction:column;gap:.5rem}
+.mapa-col>.subheader{margin-bottom:.1rem}
+.nodo{border:1px solid var(--tblr-border-color);border-left:4px solid var(--c);border-radius:8px;padding:.45rem .65rem;font-size:.8rem;line-height:1.25;background:#fff}
+.nodo.centro{border-width:2px;border-left-width:6px;font-size:.88rem}
+.nodo small{display:block;color:var(--tblr-secondary)}
+.titulo-bloque{font-size:1.05rem;font-weight:700;margin:1.75rem 0 .75rem}
+@media (max-width:991px){.mapa-insumos{grid-template-columns:minmax(0,1fr)}}
 /* Detalle de alertas */
 .alertas-tabla td{vertical-align:middle}
 .alertas-tabla .desc{white-space:normal;min-width:280px;max-width:420px}
@@ -137,6 +158,7 @@ td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
             <li class="nav-item"><a class="nav-link" href="#" data-v="validacion"><span class="nav-link-icon"><i class="ti ti-shield-check"></i></span><span class="nav-link-title">Validación</span></a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-v="obs"><span class="nav-link-icon"><i class="ti ti-clipboard-text"></i></span><span class="nav-link-title">Observaciones</span></a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-v="implementacion"><span class="nav-link-icon"><i class="ti ti-server-2"></i></span><span class="nav-link-title">Implementación</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-v="inventario"><span class="nav-link-icon"><i class="ti ti-affiliate"></i></span><span class="nav-link-title">Inventario</span></a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-v="gobierno"><span class="nav-link-icon"><i class="ti ti-sitemap"></i></span><span class="nav-link-title">Gobierno</span></a></li>
           </ul>
           <div class="side-label d-flex align-items-center gap-2">Filtros <span class="badge bg-primary text-white" id="nfil" hidden></span></div>
@@ -176,6 +198,7 @@ td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
         <div class="view" id="v-validacion"></div>
         <div class="view" id="v-obs"></div>
         <div class="view" id="v-implementacion"></div>
+        <div class="view" id="v-inventario"></div>
         <div class="view" id="v-gobierno"></div>
       </div>
     </div>
@@ -200,8 +223,7 @@ const SEM_TXT = { verde: 'Verde', ambar: 'Ámbar', rojo: 'Rojo', na: 'No aplica'
 const COLOR = { verde: 'g', ambar: 'a', rojo: 'r', na: 'n' };
 const fmt = v => (v == null ? '–' : (Math.round(v * 10) / 10).toLocaleString('es-PE', { maximumFractionDigits: 1 }));
 const fmt0 = v => (v == null ? '–' : Math.round(v).toLocaleString('es-PE'));
-const esSimulada = f => DATOS.fechas_simuladas.includes(f);
-const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
 const mesTxt = f => `${MESES[+f.slice(5, 7) - 1]}-${f.slice(2, 4)}`;
 const avg = a => a.reduce((x, y) => x + y, 0) / (a.length || 1);
 const avgN = a => { const v = a.filter(x => x != null); return v.length ? avg(v) : null; };
@@ -216,8 +238,10 @@ const NA = { v: null, p: null };                                 // valor "-" y 
 // Cada medida recibe un conjunto de modelos y devuelve { v: valor, p: puntuación }.
 // Se evalúa igual sobre el portafolio filtrado o sobre un solo modelo.
 const notaProm = k => ms => { const a = prom(ms, k); return a == null ? NA : { v: a * 100, p: a * 100 }; };
+// "Saludable" y "Aceptable" son modelos evaluados sin alerta, igual que "Sin alerta"
+const SIN_ALERTA = ['Sin alerta', 'Saludable', 'Aceptable'];
 const medAlerta = ms => {
-  if (!cuenta(ms, es('ESTADO_ALERTA', 'En alerta', 'Sin alerta'))) return NA;
+  if (!cuenta(ms, es('ESTADO_ALERTA', 'En alerta', ...SIN_ALERTA))) return NA;
   const v = cuenta(ms, es('ESTADO_ALERTA', 'En alerta'));
   return { v, p: ratio(v, ms.length) };
 };
@@ -440,7 +464,7 @@ function aplicar() {
   marcarFiltros();
   const ms = filtrados();
   document.getElementById('fcount').textContent = `Mostrando ${ms.length} de ${MODELOS.length} modelos`;
-  vistaResumen(ms); vistaMacro(ms); vistaSeguimiento(ms); vistaValidacion(ms); vistaObs(ms); vistaImplementacion(ms);
+  vistaResumen(ms); vistaMacro(ms); vistaSeguimiento(ms); vistaValidacion(ms); vistaObs(ms); vistaImplementacion(ms); vistaInventario(ms); vistaGobierno(ms);
 }
 const vacio = '<div class="card"><div class="card-body empty">Ningún modelo cumple los filtros seleccionados.</div></div>';
 
@@ -463,7 +487,7 @@ function kpis(ms) {
 function serieEvolutivo() {
   return DATOS.fechas.map(f => {
     const ms = TODOS.filter(m => m.FECHA === f && pasaFiltros(m));
-    return { f, n: ms.length, s: ms.length ? medidas(ms).global : null, sim: esSimulada(f) };
+    return { f, n: ms.length, s: ms.length ? medidas(ms).global : null };
   }).filter(p => p.s != null);
 }
 // Gráfico de líneas por fecha. series: [{ nombre, color, vals }]; op: { ymax, bandas, marcasY, valores, finales, tip }
@@ -473,8 +497,8 @@ function lineas(fechas, series, op) {
   const x = i => (fechas.length < 2 ? (M.l + W - M.r) / 2 : M.l + 50 + i * (W - M.l - M.r - 100) / (fechas.length - 1));
   const banda = ([de, a, c]) => `<rect x="${M.l}" y="${y(a)}" width="${W - M.l - M.r}" height="${y(de) - y(a)}" fill="var(--${c}-bg)"/>`;
   const marcaY = v => `${op.bandas ? '' : `<line x1="${M.l}" x2="${W - M.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--tblr-border-color)"/>`}<text x="${M.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
-  const tramos = s => s.vals.slice(1).map((v, i) => `<line x1="${x(i)}" y1="${y(s.vals[i])}" x2="${x(i + 1)}" y2="${y(v)}" stroke="${s.color}" stroke-width="2" ${esSimulada(fechas[i]) || esSimulada(fechas[i + 1]) ? 'stroke-dasharray="6 5"' : ''}/>`).join('');
-  const puntos = s => s.vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="${esSimulada(fechas[i]) ? '#fff' : s.color}" stroke="${esSimulada(fechas[i]) ? s.color : '#fff'}" stroke-width="2"/>
+  const tramos = s => s.vals.slice(1).map((v, i) => `<line x1="${x(i)}" y1="${y(s.vals[i])}" x2="${x(i + 1)}" y2="${y(v)}" stroke="${s.color}" stroke-width="2"/>`).join('');
+  const puntos = s => s.vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="${s.color}" stroke="#fff" stroke-width="2"/>
     ${op.valores ? `<text class="valor" x="${x(i)}" y="${y(v) - 12}" text-anchor="middle">${fmt(v)}</text>` : ''}`).join('');
   // Etiquetas al final de cada línea, separadas para que no se pisen
   let previo = -99;
@@ -493,7 +517,6 @@ function evolutivo() {
   const ult = pts[pts.length - 1], ant = pts[pts.length - 2];
   const delta = ant ? ult.s - ant.s : null;
   const extra = delta == null ? '' : `<span class="text-secondary small">${delta >= 0 ? '▲' : '▼'} ${fmt(Math.abs(delta))} pts vs ${mesTxt(ant.f)}</span>`;
-  const nota = pts.some(p => p.sim) ? ' · línea punteada y punto hueco: dato simulado' : '';
   const tip = i => {
     const p = pts[i], a = pts[i - 1];
     return `${mesTxt(p.f)}\nScore: ${fmt(p.s)} · ${SEM_TXT[sem(p.s)]}\n${p.n} modelos${a ? `\nVariación: ${p.s >= a.s ? '+' : '−'}${fmt(Math.abs(p.s - a.s))} pts` : ''}`;
@@ -503,7 +526,7 @@ function evolutivo() {
     bandas: [[0, UMBRALES.rojo, 'r'], [UMBRALES.rojo, UMBRALES.verde, 'a'], [UMBRALES.verde, 100, 'g']]
   });
   return `<div class="card mb-3"><div class="card-header"><div><h3 class="card-title d-flex align-items-center gap-2"><i class="ti ti-chart-line text-primary"></i>Evolutivo del score</h3>
-      <div class="text-secondary small mt-1">Score por fecha con los filtros aplicados${nota}</div></div><div class="card-actions">${extra}</div></div>
+      <div class="text-secondary small mt-1">Score por fecha con los filtros aplicados</div></div><div class="card-actions">${extra}</div></div>
     <div class="card-body py-2">${grafico}</div></div>`;
 }
 function vistaResumen(ms) {
@@ -590,7 +613,7 @@ const enAlerta = es('ESTADO_ALERTA', 'En alerta');
 const sinMitigante = m => m.ESTADO_ALERTA === 'En alerta' && m.PRESENCIA_MITIGANTE === 'No';
 const excede = es('EXCEDE_TTM', 'Excede TTM');
 const mitigante = m => m.PRESENCIA_MITIGANTE || 'Sin dato';
-const fmtImpacto = s => (/^Monto: /.test(s || '') ? `Monto: ${Math.round(+s.slice(7)).toLocaleString('es-PE')}` : s);
+const fmtImpacto = s => (typeof s === 'number' ? Math.round(s).toLocaleString('es-PE') : s);
 const prioridad = m => (excede(m) && sinMitigante(m) ? 0 : excede(m) ? 1 : sinMitigante(m) ? 2 : 3);
 const ordenAlertas = (a, b) => prioridad(a) - prioridad(b) || (b.EXCESO_MESES_TTM ?? -99) - (a.EXCESO_MESES_TTM ?? -99);
 const pctTxt = (n, d) => (d ? `${fmt0(100 * n / d)}%` : '–');
@@ -601,7 +624,10 @@ const cuerpo = h => `<div class="card-body">${h}</div>`;
 const selector = (id, etiqueta, ops, actual) => `<select id="${id}" class="form-select form-select-sm toolbar" style="width:auto" aria-label="${etiqueta}">${ops.map(([v, t]) => `<option value="${esc(v)}" ${v === actual ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
 const fechaCorta = f => (f ? `${f.slice(8, 10)}/${f.slice(5, 7)}/${f.slice(0, 4)}` : '–');
 const dias = (de, a) => Math.round((new Date(a) - new Date(de)) / 864e5);
-// Tablón de coberturas y Reporte de observaciones solo corresponden a la última fecha del input
+// Los archivos de detalle solo corresponden a la última fecha del input principal
+const esUltima = () => FIL.fecha === ULTIMA;
+const notaDetalle = que => `<div class="col-12"><div class="card"><div class="card-body text-secondary"><i class="ti ti-calendar-off me-1"></i>${que} solo está disponible para ${mesTxt(ULTIMA)}. Selecciona esa fecha en el filtro.</div></div></div>`;
+const porModelo = (filas, k = 'id_modelo') => (filas ? Object.fromEntries(filas.map(f => [String(f[k]), f])) : null);
 const soloUltimaFecha = el => { el.innerHTML = `<div class="card"><div class="card-body empty">Esta sección solo tiene información de ${mesTxt(ULTIMA)}. Selecciona esa fecha en el filtro.</div></div>`; };
 const verMas = (id, total, lim) => (total > lim ? `<div class="card-footer text-center"><button id="${id}" class="btn btn-sm">Ver más (${lim} de ${total})</button></div>` : '');
 
@@ -620,7 +646,7 @@ function evolutivoConteos(defs, titulo) {
   return lineas(fechas, series, { ymax, finales: true, marcasY: [0, Math.round(ymax / 2), ymax], titulo, tip })
     + `<div class="mt-2">${leyendaColores(series.map(s => ({ n: s.nombre, c: s.color })))}</div>`;
 }
-const notaFechas = () => (DATOS.fechas_simuladas.length ? 'Modelos por fecha · línea punteada y punto hueco: dato simulado' : 'Modelos por fecha');
+const notaFechas = () => 'Modelos por fecha';
 const evolutivoAlertas = () => evolutivoConteos([['En alerta', enAlerta], ['Sin seguimiento', es('ESTADO_SEGUIMIENTO', 'Sin Seguimiento')], ['Exceden TTM', excede], ['Sin mitigante', sinMitigante]], 'Evolutivo de modelos en alerta y sin seguimiento');
 function bloqueSeguimiento(ms, alertas) {
   const est = [['Con Seguimiento', 'var(--g)'], ['Sin Seguimiento', 'var(--r)'], ['Sin información', 'var(--n)'], ['No aplica', 'var(--n)']];
@@ -633,14 +659,31 @@ function alertasPor(alertas, dim) {
   filas.sort((a, b) => total(b) - total(a));
   return apiladas(filas, Math.max(...filas.map(total))) + `<div class="mt-3">${leyendaColores(SEG_TTM)}</div>`;
 }
-function tablaAlertas(lista) {
+/* Detalle del archivo TTM: una fila por modelo en alerta, solo del último mes */
+const TTM = porModelo(DATOS.ttm);
+function graficoTTM(alertas) {
+  const filas = alertas.filter(m => TTM[m.ID_MODELO]).map(m => ({ m, t: TTM[m.ID_MODELO] })).sort((a, b) => (b.t.holgura ?? -99) - (a.t.holgura ?? -99));
+  if (!filas.length) return '<div class="empty">Los modelos en alerta seleccionados no están en el archivo TTM.</div>';
+  const max = Math.max(1, ...filas.flatMap(f => [f.t.ttm_real || 0, f.t.ttm_gobierno || 0]));
+  const color = m => (SEG_TTM.find(s => s.n === m.EXCEDE_TTM) || SEG_TTM[2]).c;
+  return filas.map(({ m, t }) => `<div class="ttm" data-tip="${esc(`${m.ID_MODELO} · ${m.NOMBRE_MODELO}\nAlerta desde: ${fechaCorta(t.fecha_alerta)}\nTTM real: ${fmt(t.ttm_real)} meses\nTTM de gobierno: ${t.ttm_gobierno == null ? 'no tiene' : fmt(t.ttm_gobierno) + ' meses'}\n${m.EXCEDE_TTM || 'Sin dato'}${t.plan ? `\nPlan: ${t.plan}` : ''}`)}">
+      <span class="et">${esc(m.NOMBRE_MODELO)}</span>
+      <span class="pista"><i style="width:${(t.ttm_real || 0) / max * 100}%;background:${color(m)}"></i>${t.ttm_gobierno == null ? '' : `<u style="left:${t.ttm_gobierno / max * 100}%"></u>`}</span>
+      <b>${fmt(t.ttm_real)} / ${t.ttm_gobierno == null ? '–' : fmt(t.ttm_gobierno)}</b></div>`).join('')
+    + `<div class="leg mt-3">${SEG_TTM.map(s => `<span><i style="background:${s.c}"></i>${s.n}</span>`).join('')}<span><i style="background:var(--tblr-body-color);width:3px"></i>TTM de gobierno</span><span>Cifras: TTM real / TTM de gobierno, en meses</span></div>`;
+}
+function tablaAlertas(lista, det) {
   if (!lista.length) return '<div class="empty">No hay alertas para los criterios seleccionados.</div>';
   const cls = { 'Excede TTM': 'bg-red-lt', 'No excede': 'bg-green-lt', 'No tiene TTM': 'bg-secondary-lt' };
-  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Resp. monitoring</th><th>TTM</th><th class="text-center">Exceso (meses)</th><th>Impacto</th><th>Mitigante</th><th>Descripción del mitigante</th></tr></thead><tbody>
+  const t = m => (det && TTM[m.ID_MODELO]) || {};
+  const th = det ? '<th>Alerta desde</th><th>Plan de acción</th><th class="text-center">TTM gobierno</th><th class="text-center">TTM real</th>' : '';
+  const td = m => (det ? `<td class="text-nowrap">${fechaCorta(t(m).fecha_alerta)}</td><td>${esc(t(m).plan || '–')}</td><td class="text-center">${fmt(t(m).ttm_gobierno)}</td><td class="text-center">${fmt(t(m).ttm_real)}</td>` : '');
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Resp. monitoring</th>${th}<th>TTM</th><th class="text-center">Exceso (meses)</th><th>Impacto</th><th>Mitigante</th><th>Descripción del mitigante</th>${det ? '<th>Pidió ampliación</th><th>Comentarios</th>' : ''}</tr></thead><tbody>
     ${lista.map(m => `<tr><td style="min-width:260px"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td>
-      <td class="text-center">${esc(m.TIER_MODELO)}</td><td>${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.RESPONSABLE_MONITORING)}</td>
+      <td class="text-center">${esc(m.TIER_MODELO)}</td><td>${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.RESPONSABLE_MONITORING)}</td>${td(m)}
       <td><span class="badge ${cls[m.EXCEDE_TTM] || 'bg-secondary-lt'}">${esc(m.EXCEDE_TTM || 'Sin dato')}</span></td><td class="text-center">${fmt(m.EXCESO_MESES_TTM)}</td>
-      <td class="text-nowrap">${esc(fmtImpacto(m.IMPACTO) || '–')}</td><td>${esc(mitigante(m))}</td><td class="desc">${esc(m.DESCRIPCION_MITIGANTE || '–')}</td></tr>`).join('')}
+      <td class="text-nowrap">${esc(fmtImpacto(m.IMPACTO) || '–')}</td><td>${esc(mitigante(m))}</td><td class="desc">${esc(m.DESCRIPCION_MITIGANTE || '–')}</td>
+      ${det ? `<td class="text-center">${esc(t(m).ampliacion || '–')}${t(m).nueva_fecha ? `<div class="small text-secondary">${fechaCorta(t(m).nueva_fecha)}</div>` : ''}</td><td class="desc">${esc(t(m).comentarios || '–')}</td>` : ''}</tr>`).join('')}
     </tbody></table></div>`;
 }
 function tablaSinSeguimiento(lista) {
@@ -663,6 +706,9 @@ function vistaSeguimiento(ms) {
     <button id="seg-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
   const lista = alertas.filter({ todas: () => true, excede, sinmit: sinMitigante, prio: m => prioridad(m) === 0 }[segFiltro]).sort(ordenAlertas);
   const sinAlertas = '<div class="empty">No hay modelos en alerta.</div>';
+  const det = esUltima() && !!TTM;
+  const atencion = det ? bloque('col-12', 'Tiempo de atención por modelo', 'ti-hourglass', cuerpo(alertas.length ? graficoTTM(alertas) : sinAlertas), 'TTM real frente al TTM de gobierno · ordenado de mayor a menor exceso')
+    : TTM ? notaDetalle('El tiempo de atención por modelo (archivo TTM)') : '';
   el.innerHTML = `<div class="row row-cards mb-3">
     ${tile('Score Seguimiento', sd == null ? '–' : fmt(sd), pill(sd), 'ti-gauge', 'blue')}
     ${tile('Cobertura', pctTxt(conSeg, conSeg + sinSeg.length), `${conSeg} de ${conSeg + sinSeg.length} evaluables`, 'ti-eye-check', 'green')}
@@ -675,14 +721,16 @@ function vistaSeguimiento(ms) {
     ${bloque('col-lg-4', 'Estado de seguimiento', 'ti-activity', cuerpo(bloqueSeguimiento(ms)), `${ms.length} modelos`)}
     ${bloque('col-lg-8', 'Alertas por producto', 'ti-package', cuerpo(alertas.length ? alertasPor(alertas, 'PRODUCTO') : sinAlertas), 'Modelos en alerta según situación del TTM')}
     ${bloque('col-12', 'Alertas por dimensión', 'ti-chart-bar', cuerpo(alertas.length ? alertasPor(alertas, segDim) : sinAlertas), 'Modelos en alerta según situación del TTM', selDim)}
-    ${bloque('col-12', 'Detalle de alertas', 'ti-list-details', tablaAlertas(lista), `${lista.length} modelos · ordenado por prioridad y exceso`, selFil)}
+    ${atencion}
+    ${bloque('col-12', 'Detalle de alertas', 'ti-list-details', tablaAlertas(lista, det), `${lista.length} modelos · ordenado por prioridad y exceso`, selFil)}
     ${bloque('col-12', 'Modelos sin seguimiento', 'ti-eye-off', tablaSinSeguimiento(sinSeg), `${sinSeg.length} modelos`)}
   </div>`;
   el.querySelector('#seg-dim').onchange = e => { segDim = e.target.value; vistaSeguimiento(filtrados()); };
   el.querySelector('#seg-fil').onchange = e => { segFiltro = e.target.value; vistaSeguimiento(filtrados()); };
   el.querySelector('#seg-csv').onclick = () => {
     const cols = ['ID_MODELO', 'NOMBRE_MODELO', 'TIER_MODELO', 'MODEL_USER', 'RESPONSABLE_MONITORING', 'EXCEDE_TTM', 'EXCESO_MESES_TTM', 'IMPACTO', 'PRESENCIA_MITIGANTE', 'DESCRIPCION_MITIGANTE'];
-    descargar('mrm_alertas.csv', [cols.join(';'), ...lista.map(m => cols.map(c => csvVal(m[c])).join(';'))].join('\n'));
+    const extra = det ? ['fecha_alerta', 'plan', 'ttm_gobierno', 'ttm_real', 'ampliacion', 'nueva_fecha', 'comentarios'] : [];
+    descargar('mrm_alertas.csv', [[...cols, ...extra].join(';'), ...lista.map(m => [...cols.map(c => m[c]), ...extra.map(c => (TTM[m.ID_MODELO] || {})[c])].map(csvVal).join(';'))].join('\n'));
   };
 }
 
@@ -814,49 +862,107 @@ function tablaObs(os, mapa) {
       <tr class="obs-det" hidden><td colspan="11"><b>Observación:</b> ${esc(o.observacion)}<br><b>Recomendación:</b> ${esc(o.recomendacion)}<br><span class="text-secondary small">Proyecto: ${esc(o.proyecto)} · Manager: ${esc(o.manager)} · Área: ${esc(o.area)} · Fecha estimada: ${fechaCorta(o.fecha_estimada)}${o.fecha_ampliada ? ` · Fecha ampliada: ${fechaCorta(o.fecha_ampliada)}` : ''}</span></td></tr>`).join('')}
     </tbody></table></div>${verMas('obs-mas', os.length, obsLim)}`;
 }
+/* Observaciones de SBS y auditoría interna: una fila por observación y modelo, solo del último mes */
+const SBS = DATOS.sbs ? DATOS.sbs.map(o => ({ ...o, id_modelo: o.id_modelo == null ? null : String(o.id_modelo) })) : null;
+const SBS_ESTADOS = [{ n: 'Pendiente', c: '#eb6834' }, { n: 'En Proceso', c: '#2a78d6' }, { n: 'Implementada Por Verificar', c: '#1baf7a' }];
+const SBS_RIESGOS = ['de Atención Prioritaria', 'de Atención', 'Alto', 'Relevante', 'Moderado', 'Bajo'];
+const SBS_CLS = { 'Pendiente': 'bg-orange-lt', 'En Proceso': 'bg-blue-lt', 'Implementada Por Verificar': 'bg-green-lt' };
+let sbsFil = { tipo: '', estado: '' }, sbsLim = 50;
+// Solo el estado "Pendiente" cuenta como pendiente; vence si su fecha es anterior al corte del input principal
+const sbsPendiente = o => o.estado === 'Pendiente';
+const sbsVencida = o => sbsPendiente(o) && o.vencimiento < DATOS.corte;
+const sbsSegs = os => SBS_ESTADOS.map(e => ({ ...e, v: cuenta(os, o => o.estado === e.n) }));
+function sbsApiladas(os, clave, orden) {
+  const filas = orden.map(t => ({ t, segs: sbsSegs(os.filter(o => clave(o) === t)) })).filter(totalSegs);
+  return filas.length ? apiladas(filas, Math.max(...filas.map(totalSegs))) + `<div class="mt-3">${leyendaColores(SBS_ESTADOS)}</div>` : '<div class="empty">Sin observaciones.</div>';
+}
+function tablaSBS(os, mapa, lim, idMas) {
+  if (!os.length) return '<div class="empty">No hay observaciones para los criterios seleccionados.</div>';
+  const modelo = o => (o.id_modelo ? `<b>${esc(o.id_modelo)}</b><div class="text-secondary small">${esc(mapa[o.id_modelo].NOMBRE_MODELO)}</div>` : esc(o.alcance));
+  const plazo = o => (sbsVencida(o) ? `<span style="color:var(--r);font-weight:600">${fechaCorta(o.vencimiento)} · vencida</span>` : fechaCorta(o.vencimiento));
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>ID obs.</th><th>Origen</th><th>${os[0].id_modelo ? 'Modelo' : 'Alcance'}</th><th>Riesgo</th><th>Estado</th><th>Título</th><th>Vencimiento</th><th class="text-center">Ampliaciones</th><th>Propietario</th><th>Unidad responsable</th></tr></thead><tbody>
+    ${os.slice(0, lim).map(o => `<tr class="obs-fila" tabindex="0" title="Clic para ver el detalle"><td class="fw-bold">${esc(o.id)}</td><td class="text-nowrap">${esc(o.tipo)}</td><td style="min-width:200px;white-space:normal">${modelo(o)}</td>
+      <td class="text-nowrap">${esc(o.riesgo)}</td><td><span class="badge ${SBS_CLS[o.estado] || 'bg-secondary-lt'}">${esc(o.estado)}</span></td><td class="desc"><div class="clamp">${esc(o.titulo)}</div></td>
+      <td class="text-nowrap">${plazo(o)}</td><td class="text-center">${o.ampliaciones}</td><td class="text-nowrap">${esc(o.propietario)}</td><td style="white-space:normal;min-width:180px">${esc(o.unidad)}</td></tr>
+      <tr class="obs-det" hidden><td colspan="10"><b>Observación:</b> ${esc(o.observacion)}<br><b>Recomendación:</b> ${esc(o.recomendacion)}<br><span class="text-secondary small">Proyecto: ${esc(o.codigo)} · ${esc(o.proyecto)} · Emisión: ${fechaCorta(o.emision)}</span></td></tr>`).join('')}
+    </tbody></table></div>${verMas(idMas, os.length, lim)}`;
+}
+function bloqueSBS(mapa) {
+  if (!SBS) return '';
+  const base = SBS.filter(o => o.id_modelo && mapa[o.id_modelo]), trans = SBS.filter(o => !o.id_modelo);
+  const pend = base.filter(sbsPendiente), venc = base.filter(sbsVencida);
+  const os = base.filter(o => (!sbsFil.tipo || o.tipo === sbsFil.tipo) && (!sbsFil.estado || o.estado === sbsFil.estado))
+    .sort((a, b) => sbsVencida(b) - sbsVencida(a) || SBS_ESTADOS.findIndex(e => e.n === a.estado) - SBS_ESTADOS.findIndex(e => e.n === b.estado) || a.vencimiento.localeCompare(b.vencimiento));
+  const filtros = `<div class="d-flex flex-wrap gap-2">
+    ${selector('s-tipo', 'Origen', [['', 'SBS y auditoría interna'], ...[...new Set(SBS.map(o => o.tipo))].sort().map(t => [t, t])], sbsFil.tipo)}
+    ${selector('s-estado', 'Estado', [['', 'Todos los estados'], ...SBS_ESTADOS.map(e => [e.n, e.n])], sbsFil.estado)}
+    <button id="s-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+  return `<h3 class="titulo-bloque">Observaciones de SBS y auditoría interna</h3>
+  <div class="row row-cards mb-3">
+    ${tile('Pendientes', pend.length, `en ${new Set(pend.map(o => o.id_modelo)).size} modelos`, 'ti-folder-open', 'orange')}
+    ${tile('Vencidas', venc.length, 'pendientes con plazo vencido', 'ti-alert-triangle', 'red')}
+    ${tile('En proceso', cuenta(base, o => o.estado === 'En Proceso'), 'no cuentan como pendientes', 'ti-progress', 'blue')}
+    ${tile('Implementadas por verificar', cuenta(base, o => o.estado === 'Implementada Por Verificar'), 'no cuentan como pendientes', 'ti-circle-check', 'green')}
+  </div><div class="row row-cards">
+    ${bloque('col-lg-5', 'Por origen', 'ti-building-bank', cuerpo(sbsApiladas(base, o => o.tipo, [...new Set(SBS.map(o => o.tipo))].sort())), 'Observaciones por estado')}
+    ${bloque('col-lg-7', 'Por nivel de riesgo', 'ti-flame', cuerpo(sbsApiladas(base, o => o.riesgo, [...SBS_RIESGOS, ...new Set(base.map(o => o.riesgo).filter(r => !SBS_RIESGOS.includes(r)))])), 'SBS y auditoría interna usan escalas distintas')}
+    ${bloque('col-12', 'Detalle de observaciones de SBS y auditoría interna', 'ti-clipboard-text', tablaSBS(os, mapa, sbsLim, 'sbs-mas'), `${os.length} observaciones · una fila por observación y modelo · clic en una fila para ver el detalle`, filtros)}
+    ${trans.length ? bloque('col-12', 'Observaciones transversales', 'ti-arrows-split', tablaSBS(trans, mapa, 999, 'sbs-t'), `${trans.length} observaciones que no pertenecen a un modelo · no cambian con los filtros`) : ''}
+  </div>`;
+}
 function vistaObs(ms) {
   const el = document.getElementById('v-obs');
   if (!ms.length) { el.innerHTML = vacio; return; }
   // El evolutivo sale del input, así que se muestra en todas las fechas
   const evo = `<div class="row row-cards mb-3">${bloque('col-12', 'Evolutivo de observaciones vencidas', 'ti-chart-line',
-    cuerpo(evolutivoConteos([['Crít/Relev/Mod vencidas', 'OBS_CRIT_RELE_MODE_VENCIDAS_VI'], ['Entorno tecnológico vencidas', 'OBS_AMB_TEC_VENCIDOS']], 'Evolutivo de observaciones vencidas')),
-    notaFechas().replace('Modelos por fecha', 'Observaciones por fecha'))}</div>`;
-  if (FIL.fecha !== ULTIMA) { soloUltimaFecha(el); el.insertAdjacentHTML('afterbegin', evo); return; }
+    cuerpo(evolutivoConteos([['Crít/Relev/Mod vencidas', 'OBS_CRIT_RELE_MODE_VENCIDAS_VI'], ['Entorno tecnológico vencidas', 'OBS_AMB_TEC_VENCIDOS'], ['SBS y auditoría vencidas', 'OBS_SBS_AI_VENCIDAS']], 'Evolutivo de observaciones vencidas')),
+    'Observaciones por fecha')}</div>`;
+  if (!esUltima()) { soloUltimaFecha(el); el.insertAdjacentHTML('afterbegin', evo); return; }
   const mapa = Object.fromEntries(ms.map(m => [m.ID_MODELO, m]));
   const base = OBS.filter(o => mapa[o.id_modelo]);
-  if (!base.length) { el.innerHTML = evo + '<div class="card"><div class="card-body empty">Los modelos seleccionados no tienen observaciones pendientes.</div></div>'; return; }
-  const venc = base.filter(obsVencida), criticas = venc.filter(altaCrit), prontas = base.filter(o => obsPlazo(o) === OBS_PLAZO[1].n);
-  const conAmp = cuenta(base, o => o.ampliaciones > 0);
-  const modelosVenc = new Set(venc.map(o => o.id_modelo));
   const os = base.filter(o => (!obsFil.plazo || obsPlazo(o) === obsFil.plazo) && (!obsFil.criticidad || o.criticidad === obsFil.criticidad) && (!obsFil.ambito || o.ambito === obsFil.ambito))
     .sort((a, b) => obsVencida(b) - obsVencida(a) || OBS_CRIT.indexOf(a.criticidad) - OBS_CRIT.indexOf(b.criticidad) || (diasVencida(b) ?? 0) - (diasVencida(a) ?? 0));
-  const filtros = `<div class="d-flex flex-wrap gap-2">
-    ${selector('o-plazo', 'Vencimiento', [['', 'Todo vencimiento'], ...OBS_PLAZO.map(p => [p.n, p.n])], obsFil.plazo)}
-    ${selector('o-crit', 'Criticidad', [['', 'Toda criticidad'], ...OBS_CRIT.map(c => [c, c])], obsFil.criticidad)}
-    ${selector('o-amb', 'Ámbito', [['', 'Todo ámbito'], ...[...new Set(base.map(o => o.ambito))].sort().map(a => [a, a])], obsFil.ambito)}
-    <button id="o-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
-  el.innerHTML = `<div class="row row-cards mb-3">
-    ${tile('Pendientes', base.length, `en ${new Set(base.map(o => o.id_modelo)).size} modelos`, 'ti-folder-open', 'blue')}
-    ${tile('Vencidas', venc.length, `${pctTxt(venc.length, base.length)} · ${modelosVenc.size} modelos`, 'ti-alert-triangle', 'red')}
-    ${tile('Críticas y relevantes', criticas.length, 'vencidas', 'ti-flame', 'pink')}
-    ${tile('Vencen en 30 días', prontas.length, 'o menos', 'ti-clock', 'orange')}
-    ${tile('Con ampliación', conAmp, `${pctTxt(conAmp, base.length)} del total`, 'ti-calendar-plus', 'azure')}
-  </div>${evo}<div class="row row-cards">
-    ${bloque('col-lg-7', 'Observaciones por criticidad', 'ti-flame', cuerpo(obsApiladas(base, o => o.criticidad, OBS_CRIT)), 'Situación de vencimiento')}
-    ${bloque('col-lg-5', 'Antigüedad de las vencidas', 'ti-hourglass', cuerpo(antiguedadObs(venc)), 'Días desde el compromiso vigente')}
-    ${bloque('col-lg-7', 'Observaciones por ámbito', 'ti-category', cuerpo(obsApiladas(base, o => o.ambito)), 'Ordenado por vencidas')}
-    ${bloque('col-lg-5', 'Modelos con más vencidas', 'ti-list-numbers', cuerpo(topModelosObs(venc, mapa)), 'Top 10')}
-    ${bloque('col-12', 'Observaciones por dimensión', 'ti-chart-bar', cuerpo(obsApiladas(base, o => obsDimVal(o, mapa))), 'Ordenado por vencidas', selector('o-dim', 'Agrupar por', OBS_DIMS.map(d => [d.k, d.t]), obsDim))}
-    ${bloque('col-12', 'Detalle de observaciones', 'ti-clipboard-text', tablaObs(os, mapa), `${os.length} observaciones · clic en una fila para ver la observación y la recomendación`, filtros)}
-  </div>`;
-  el.querySelector('#o-dim').onchange = e => { obsDim = e.target.value; vistaObs(filtrados()); };
-  [['#o-plazo', 'plazo'], ['#o-crit', 'criticidad'], ['#o-amb', 'ambito']].forEach(([s, k]) => { el.querySelector(s).onchange = e => { obsFil[k] = e.target.value; obsLim = 50; vistaObs(filtrados()); }; });
-  const mas = el.querySelector('#obs-mas'); if (mas) mas.onclick = () => { obsLim += 50; vistaObs(filtrados()); };
+  let validacion = evo + '<div class="card"><div class="card-body empty">Los modelos seleccionados no tienen observaciones de validación pendientes.</div></div>';
+  if (base.length) {
+    const venc = base.filter(obsVencida), criticas = venc.filter(altaCrit), prontas = base.filter(o => obsPlazo(o) === OBS_PLAZO[1].n);
+    const conAmp = cuenta(base, o => o.ampliaciones > 0);
+    const filtros = `<div class="d-flex flex-wrap gap-2">
+      ${selector('o-plazo', 'Vencimiento', [['', 'Todo vencimiento'], ...OBS_PLAZO.map(p => [p.n, p.n])], obsFil.plazo)}
+      ${selector('o-crit', 'Criticidad', [['', 'Toda criticidad'], ...OBS_CRIT.map(c => [c, c])], obsFil.criticidad)}
+      ${selector('o-amb', 'Ámbito', [['', 'Todo ámbito'], ...[...new Set(base.map(o => o.ambito))].sort().map(a => [a, a])], obsFil.ambito)}
+      <button id="o-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+    validacion = `<div class="row row-cards mb-3">
+      ${tile('Pendientes', base.length, `en ${new Set(base.map(o => o.id_modelo)).size} modelos`, 'ti-folder-open', 'blue')}
+      ${tile('Vencidas', venc.length, `${pctTxt(venc.length, base.length)} · ${new Set(venc.map(o => o.id_modelo)).size} modelos`, 'ti-alert-triangle', 'red')}
+      ${tile('Críticas y relevantes', criticas.length, 'vencidas', 'ti-flame', 'pink')}
+      ${tile('Vencen en 30 días', prontas.length, 'o menos', 'ti-clock', 'orange')}
+      ${tile('Con ampliación', conAmp, `${pctTxt(conAmp, base.length)} del total`, 'ti-calendar-plus', 'azure')}
+    </div>${evo}<h3 class="titulo-bloque">Observaciones de validación</h3><div class="row row-cards">
+      ${bloque('col-lg-7', 'Observaciones por criticidad', 'ti-flame', cuerpo(obsApiladas(base, o => o.criticidad, OBS_CRIT)), 'Situación de vencimiento')}
+      ${bloque('col-lg-5', 'Antigüedad de las vencidas', 'ti-hourglass', cuerpo(antiguedadObs(venc)), 'Días desde el compromiso vigente')}
+      ${bloque('col-lg-7', 'Observaciones por ámbito', 'ti-category', cuerpo(obsApiladas(base, o => o.ambito)), 'Ordenado por vencidas')}
+      ${bloque('col-lg-5', 'Modelos con más vencidas', 'ti-list-numbers', cuerpo(topModelosObs(venc, mapa)), 'Top 10')}
+      ${bloque('col-12', 'Observaciones por dimensión', 'ti-chart-bar', cuerpo(obsApiladas(base, o => obsDimVal(o, mapa))), 'Ordenado por vencidas', selector('o-dim', 'Agrupar por', OBS_DIMS.map(d => [d.k, d.t]), obsDim))}
+      ${bloque('col-12', 'Detalle de observaciones', 'ti-clipboard-text', tablaObs(os, mapa), `${os.length} observaciones · clic en una fila para ver la observación y la recomendación`, filtros)}
+    </div>`;
+  }
+  el.innerHTML = validacion + bloqueSBS(mapa);
+  const al = (sel, f) => { const x = el.querySelector(sel); if (x) f(x); };
+  al('#o-dim', x => { x.onchange = e => { obsDim = e.target.value; vistaObs(filtrados()); }; });
+  [['#o-plazo', 'plazo'], ['#o-crit', 'criticidad'], ['#o-amb', 'ambito']].forEach(([s, k]) => al(s, x => { x.onchange = e => { obsFil[k] = e.target.value; obsLim = 50; vistaObs(filtrados()); }; }));
+  [['#s-tipo', 'tipo'], ['#s-estado', 'estado']].forEach(([s, k]) => al(s, x => { x.onchange = e => { sbsFil[k] = e.target.value; sbsLim = 50; vistaObs(filtrados()); }; }));
+  al('#obs-mas', x => { x.onclick = () => { obsLim += 50; vistaObs(filtrados()); }; });
+  al('#sbs-mas', x => { x.onclick = () => { sbsLim += 50; vistaObs(filtrados()); }; });
   el.querySelectorAll('.obs-fila').forEach(tr => { tr.onclick = () => { tr.nextElementSibling.hidden = !tr.nextElementSibling.hidden; }; });
-  el.querySelector('#o-csv').onclick = () => {
+  al('#o-csv', x => { x.onclick = () => {
     const cols = ['id', 'id_modelo', 'criticidad', 'ambito', 'tipo_revision', 'vencimiento', 'compromiso', 'ampliaciones', 'observacion', 'recomendacion', 'proyecto', 'manager', 'validador', 'propietario', 'area'];
     descargar('mrm_observaciones.csv', [[...cols, 'dias_vencida'].join(';'), ...os.map(o => [...cols.map(c => o[c]), diasVencida(o)].map(csvVal).join(';'))].join('\n'));
-  };
+  }; });
+  al('#s-csv', x => { x.onclick = () => {
+    const cols = ['id', 'tipo', 'id_modelo', 'alcance', 'riesgo', 'estado', 'titulo', 'emision', 'vencimiento', 'ampliaciones', 'propietario', 'unidad', 'codigo', 'proyecto', 'observacion', 'recomendacion'];
+    const todas = [...SBS.filter(o => o.id_modelo && mapa[o.id_modelo]), ...SBS.filter(o => !o.id_modelo)];
+    descargar('mrm_observaciones_sbs_ai.csv', [cols.join(';'), ...todas.map(o => cols.map(c => csvVal(o[c])).join(';'))].join('\n'));
+  }; });
 }
 
 /* ===================== IMPLEMENTACIÓN ===================== */
@@ -903,6 +1009,40 @@ function tablaImplementacion(lista) {
       ${plat(m.PLATAFORMA_IMPLEMENTACION)}<td>${amb(m.AMBIENTE_DESPLIEGUE)}</td><td class="text-center">${pctRatio(m.RATIO_IMPLEMENTACION)}</td>${plat(m.PLATAFORMA_DATA)}<td>${amb(m.AMBIENTE_DATA)}</td><td class="text-center">${pctRatio(m.RATIO_DATA)}</td></tr>`).join('')}
     </tbody></table></div>${verMas('impl-mas', lista.length, implLim)}`;
 }
+/* Detalle del indicador de calidad de datos: una fila por modelo evaluado, solo del último mes */
+const CAL = porModelo(DATOS.calidad);
+const CRIT = DATOS.cal_criterios;
+let calLim = 50;
+function bloqueCalidad(ms) {
+  if (!CAL) return '';
+  const titulo = '<h3 class="titulo-bloque">Calidad de datos</h3>';
+  if (!esUltima()) return `${titulo}<div class="row row-cards">${notaDetalle('El detalle del indicador de calidad de datos')}</div>`;
+  const ev = ms.filter(m => CAL[m.ID_MODELO]).map(m => ({ m, c: CAL[m.ID_MODELO] })).sort((a, b) => a.c.indicador - b.c.indicador);
+  if (!ev.length) return `${titulo}<div class="card"><div class="card-body empty">Ninguno de los modelos seleccionados tiene evaluación de calidad de datos.</div></div>`;
+  // Cumplimiento de un criterio: puntos obtenidos sobre el peso máximo del criterio
+  const pct = (c, i) => c.valores[i] / CRIT[i].peso * 100;
+  const criterios = barras(CRIT.map((k, i) => { const v = avg(ev.map(e => pct(e.c, i))); return { t: k.t, v: clamp(v), txt: `${fmt0(v)}%`, c: `var(--${col(v)})`, tip: `${k.t}\nCumplimiento promedio: ${fmt0(v)}%\nPeso en el indicador: ${fmt0(k.peso * 100)}%` }; }), 100);
+  const cobertura = barras([...new Set(ms.map(m => m.TIER_MODELO))].sort().map(t => {
+    const N = cuenta(ms, es('TIER_MODELO', t)), n = cuenta(ev, e => e.m.TIER_MODELO === t);
+    return { t: `Tier ${t} (${n} de ${N})`, v: 100 * n / N, txt: pctTxt(n, N), c: FRENTES[0], tip: `Tier ${t}\n${n} de ${N} modelos evaluados` };
+  }), 100);
+  const celda = v => `<td class="cell" style="${cellStyle(v)}">${fmt0(v)}%</td>`;
+  const tabla = `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th class="text-center">Indicador</th><th>Rango</th>
+    ${CRIT.map(k => `<th class="text-center" style="white-space:normal;min-width:110px" title="Peso: ${fmt0(k.peso * 100)}%">${esc(k.t)}</th>`).join('')}</tr></thead><tbody>
+    ${ev.slice(0, calLim).map(({ m, c }) => `<tr><td style="min-width:240px;white-space:normal"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td><td class="text-nowrap">${esc(m.MODEL_USER)}</td>
+      ${celda(c.indicador * 100)}<td class="text-nowrap">${esc(c.rango)}</td>${CRIT.map((_, i) => celda(pct(c, i))).join('')}</tr>`).join('')}
+    </tbody></table></div>${verMas('cal-mas', ev.length, calLim)}`;
+  return `${titulo}<div class="row row-cards mb-3">
+    ${tile('Modelos evaluados', ev.length, `de ${ms.length} · ${pctTxt(ev.length, ms.length)}`, 'ti-clipboard-check', 'blue')}
+    ${tile('Indicador promedio', `${fmt0(avg(ev.map(e => e.c.indicador)) * 100)}%`, 'de los modelos evaluados', 'ti-percentage', 'azure')}
+    ${tile('Indicador hasta 50%', cuenta(ev, e => e.c.indicador <= 0.5), 'modelos evaluados', 'ti-alert-triangle', 'red')}
+    ${tile('Todos los criterios en 0', cuenta(ev, e => !e.c.valores.some(v => v)), 'confirmar si fueron evaluados', 'ti-help-circle', 'orange')}
+  </div><div class="row row-cards">
+    ${bloque('col-lg-7', 'Cumplimiento por criterio', 'ti-list-check', cuerpo(criterios), 'Promedio de los modelos evaluados · puntos obtenidos sobre el peso del criterio')}
+    ${bloque('col-lg-5', 'Cobertura de la evaluación', 'ti-target', cuerpo(cobertura), 'Modelos evaluados por Tier')}
+    ${bloque('col-12', 'Detalle de calidad de datos por modelo', 'ti-list-details', tabla, `${ev.length} modelos evaluados · ordenado de menor a mayor indicador · cada criterio como porcentaje de su peso`)}
+  </div>`;
+}
 function vistaImplementacion(ms) {
   const el = document.getElementById('v-implementacion');
   if (!ms.length) { el.innerHTML = vacio; return; }
@@ -931,7 +1071,8 @@ function vistaImplementacion(ms) {
     ${bloque('col-lg-6', 'Plataformas de implementación', 'ti-server-2', cuerpo(plataformas(ms, FRENTES_IMPL.despliegue)), 'Top 10 · modelos por ambiente de despliegue')}
     ${bloque('col-lg-6', 'Plataformas de data', 'ti-database', cuerpo(plataformas(ms, FRENTES_IMPL.data)), 'Top 10 · modelos por ambiente de data')}
     ${bloque('col-12', 'Detalle de implementación por modelo', 'ti-list-details', tablaImplementacion(lista), `${lista.length} modelos · ordenado de menor a mayor ratio promedio`, selFil)}
-  </div>`;
+  </div>${bloqueCalidad(ms)}`;
+  const masCal = el.querySelector('#cal-mas'); if (masCal) masCal.onclick = () => { calLim += 50; vistaImplementacion(filtrados()); };
   el.querySelector('#impl-dim').onchange = e => { implDim = e.target.value; vistaImplementacion(filtrados()); };
   el.querySelector('#impl-fil').onchange = e => { implFiltro = e.target.value; implLim = 50; vistaImplementacion(filtrados()); };
   el.querySelectorAll('[data-frente]').forEach(b => b.onclick = () => { implFrente = b.dataset.frente; vistaImplementacion(filtrados()); });
@@ -942,31 +1083,119 @@ function vistaImplementacion(ms) {
   };
 }
 
+/* ===================== INVENTARIO: MAPA DE INSUMOS ===================== */
+// Del inventario solo se usan los modelos insumo. El estado y los demás datos del modelo salen del input principal.
+const INV = porModelo(DATOS.inventario);
+let invSel = null;
+const insumosDe = id => ((INV[id] || {}).insumos || []).map(String);
+function vistaInventario(ms) {
+  const el = document.getElementById('v-inventario');
+  if (!ms.length) { el.innerHTML = vacio; return; }
+  if (!INV) { el.innerHTML = '<div class="card"><div class="card-body empty">No se cargó el archivo Inventario de modelos.</div></div>'; return; }
+  if (!esUltima()) { soloUltimaFecha(el); return; }
+  const SCORE = Object.fromEntries(MODELOS.map(m => [m.ID_MODELO, m]));   // todos los modelos del mes, sin filtros
+  const nombre = id => (SCORE[id] ? SCORE[id].NOMBRE_MODELO : (DATOS.inv_nombres[id] || {}).n || id);
+  const colorDe = id => (SCORE[id] ? `var(--${col(SCORE[id].global)})` : 'var(--n)');
+  const estado = id => (SCORE[id] ? `Score ${fmt(SCORE[id].global)} · ${SEM_TXT[sem(SCORE[id].global)]}` : `Fuera del score · ${(DATOS.inv_nombres[id] || {}).p || 'sin perímetro'}`);
+  const chip = id => `<span class="chip-m" data-tip="${esc(`${id} · ${nombre(id)}\n${estado(id)}`)}"><i style="background:${colorDe(id)}"></i><span>${esc(id)} · ${esc(nombre(id))}</span></span>`;
+  const nodo = (id, cls = '') => `<div class="nodo ${cls}" style="--c:${colorDe(id)}"><b>${esc(id)}</b> · ${esc(nombre(id))}<small>${estado(id)}</small></div>`;
+  const con = ms.filter(m => insumosDe(m.ID_MODELO).length);
+  const usos = {};   // insumo -> modelos seleccionados que lo usan
+  con.forEach(m => insumosDe(m.ID_MODELO).forEach(i => (usos[i] ||= []).push(m.ID_MODELO)));
+  const distintos = Object.keys(usos), fuera = distintos.filter(i => !SCORE[i]);
+  const consumidores = id => MODELOS.filter(m => insumosDe(m.ID_MODELO).includes(id)).map(m => m.ID_MODELO);
+  const leyenda = `<div class="leg"><span><i style="background:var(--g)"></i>Insumo en verde</span><span><i style="background:var(--a)"></i>en ámbar</span><span><i style="background:var(--r)"></i>en rojo</span><span><i style="background:var(--n)"></i>Fuera del score</span></div>`;
+
+  // Mapa por proceso: cada modelo con sus insumos
+  const procesos = [...new Set(ms.map(m => m.PROCESO))].sort((a, b) => a.localeCompare(b, 'es'));
+  const mapa = con.length ? `<div class="table-responsive"><table class="table table-sm card-table insumos"><thead><tr><th>Modelo</th><th class="text-center">Tier</th><th class="text-center">Score</th><th>Modelos que usa como insumo</th></tr></thead><tbody>
+    ${procesos.map(p => {
+      const de = ms.filter(m => m.PROCESO === p), conP = de.filter(m => insumosDe(m.ID_MODELO).length).sort((a, b) => insumosDe(b.ID_MODELO).length - insumosDe(a.ID_MODELO).length);
+      return `<tr class="proceso"><td colspan="4">${esc(p)} <span class="text-secondary fw-normal">· ${conP.length} de ${de.length} modelos usan otros modelos como insumo</span></td></tr>`
+        + conP.map(m => `<tr><td style="min-width:260px"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td>
+          <td class="cell" style="${cellStyle(m.global)}">${fmt(m.global)}</td><td>${insumosDe(m.ID_MODELO).map(chip).join('')}</td></tr>`).join('');
+    }).join('')}</tbody></table></div><div class="card-body pt-2">${leyenda}</div>` : '<div class="empty">Ninguno de los modelos seleccionados declara modelos insumo.</div>';
+
+  // Explorador: insumos -> modelo -> modelos que lo usan
+  const opciones = ms.filter(m => insumosDe(m.ID_MODELO).length || consumidores(m.ID_MODELO).length);
+  if (!opciones.some(m => m.ID_MODELO === invSel)) invSel = opciones.length ? [...opciones].sort((a, b) => insumosDe(b.ID_MODELO).length - insumosDe(a.ID_MODELO).length)[0].ID_MODELO : null;
+  const flecha = '<div class="flujo-flecha" aria-hidden="true"><i class="ti ti-arrow-right"></i></div>';
+  const columna = (t, ids, sin) => `<div class="mapa-col"><div class="subheader">${t} (${ids.length})</div>${ids.length ? ids.map(i => nodo(i)).join('') : `<div class="text-secondary small">${sin}</div>`}</div>`;
+  const explorador = invSel ? `<div class="mapa-insumos">${columna('Insumos', insumosDe(invSel), 'No declara insumos')}${flecha}
+    <div class="mapa-col"><div class="subheader">Modelo · ${esc(SCORE[invSel].PROCESO)}</div>${nodo(invSel, 'centro')}</div>${flecha}
+    ${columna('Modelos que lo usan', consumidores(invSel), 'Ningún modelo del score lo usa')}</div>` : '<div class="empty">Sin modelos con relaciones de insumo.</div>';
+  const selModelo = invSel ? `<select id="inv-sel" class="form-select form-select-sm toolbar" style="width:auto;max-width:100%" aria-label="Modelo">${opciones.map(m => `<option value="${esc(m.ID_MODELO)}" ${m.ID_MODELO === invSel ? 'selected' : ''}>${esc(m.ID_MODELO)} · ${esc(m.NOMBRE_MODELO)}</option>`).join('')}</select>` : '';
+
+  const top = distintos.map(i => ({ i, n: usos[i].length })).sort((a, b) => b.n - a.n).slice(0, 10);
+  const masUsados = top.length ? barras(top.map(({ i, n }) => ({ t: nombre(i), v: n, c: colorDe(i), tip: `${i} · ${nombre(i)}\n${estado(i)}\nLo usan ${n} modelos` })), top[0].n) + `<div class="mt-3">${leyenda}</div>` : '<div class="empty">Sin insumos.</div>';
+  const exportar = '<button id="inv-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button>';
+  el.innerHTML = `<div class="row row-cards mb-3">
+    ${tile('Modelos con insumos', con.length, `de ${ms.length} · ${pctTxt(con.length, ms.length)}`, 'ti-affiliate', 'blue')}
+    ${tile('Modelos insumo distintos', distintos.length, 'usados por los modelos seleccionados', 'ti-stack-2', 'azure')}
+    ${tile('Insumos dentro del score', distintos.length - fuera.length, 'tienen score propio', 'ti-gauge', 'green')}
+    ${tile('Insumos fuera del score', fuera.length, 'módulos o modelos sin score', 'ti-eye-off', 'orange')}
+    ${tile('Insumos en rojo', cuenta(distintos, i => SCORE[i] && sem(SCORE[i].global) === 'rojo'), 'con score menor que ' + UMBRALES.rojo, 'ti-alert-triangle', 'red')}
+  </div><div class="row row-cards">
+    ${bloque('col-12', 'Explorador de insumos', 'ti-route', cuerpo(`<div class="mb-3">${selModelo}</div>${explorador}`), 'Elige un modelo para ver qué modelos usa como insumo y qué modelos lo usan a él')}
+    ${bloque('col-12', 'Insumos más usados', 'ti-list-numbers', cuerpo(masUsados), 'Top 10 por número de modelos que los usan')}
+    ${bloque('col-12', 'Mapa de insumos por proceso', 'ti-sitemap', mapa, `${con.length} modelos con insumos en ${procesos.length} procesos · el color de cada insumo es el semáforo de su score`, exportar)}
+  </div>`;
+  const sel = el.querySelector('#inv-sel'); if (sel) sel.onchange = e => { invSel = e.target.value; vistaInventario(filtrados()); };
+  el.querySelector('#inv-csv').onclick = () => {
+    const filas = con.flatMap(m => insumosDe(m.ID_MODELO).map(i => [m.PROCESO, m.ID_MODELO, m.NOMBRE_MODELO, m.TIER_MODELO, fmt(m.global), i, nombre(i), SCORE[i] ? 'Sí' : 'No', SCORE[i] ? fmt(SCORE[i].global) : '']));
+    descargar('mrm_insumos.csv', [['proceso', 'id_modelo', 'modelo', 'tier', 'score', 'id_insumo', 'insumo', 'insumo_en_score', 'score_insumo'].join(';'), ...filas.map(f => f.map(csvVal).join(';'))].join('\n'));
+  };
+}
+
+/* ===================== GOBIERNO ===================== */
+// La nota se asigna a cada modelo por PO usuario y model developer (ver generar_reporte.py)
+const GOB = DATOS.gobierno;
+function notaGobierno(ms) {
+  if (!GOB) return '';
+  if (!esUltima()) return notaDetalle('El detalle de la nota de gobierno');
+  const grupos = {}; let sin = 0;
+  ms.forEach(m => { const i = DATOS.gob_de[m.ID_MODELO]; if (i == null) sin++; else (grupos[i] ||= []).push(m); });
+  const filas = Object.entries(grupos).map(([i, de]) => ({ g: GOB[i], n: de.length })).sort((a, b) => a.g.nota - b.g.nota);
+  if (!filas.length) return bloque('col-12', 'Nota de gobierno por PO usuario', 'ti-scale', '<div class="empty">Los modelos seleccionados no tienen nota de gobierno.</div>');
+  const celda = v => (v == null ? `<td class="cell" style="${cellStyle(null)}">-</td>` : `<td class="cell" style="${cellStyle(v)}">${fmt0(v)}</td>`);
+  const tabla = `<div class="table-responsive"><table class="table table-vcenter table-sm card-table"><thead><tr><th>PO usuario</th><th>Model developer</th><th>Model User</th><th class="text-center"># Modelos</th><th class="text-center">Nota</th>
+    ${DATOS.gob_componentes.map(c => `<th class="text-center">${esc(c)}</th>`).join('')}</tr></thead><tbody>
+    ${filas.map(({ g, n }) => `<tr><td class="fw-bold">${esc(g.po)}</td><td>${esc(g.dev)}</td><td>${esc(g.user)}</td><td class="text-center">${n}</td>${celda(g.nota)}${g.comp.map(celda).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+  return bloque('col-12', 'Nota de gobierno por PO usuario', 'ti-scale', tabla,
+    `La nota es el promedio de los componentes con dato · "-" indica que el componente no aplica${sin ? ` · ${sin} modelos seleccionados no tienen nota` : ''}`);
+}
 const INPUTS = [
-  { c: '#096AAD', t: 'Input principal Score MRM', d: 'Una fila por modelo y fecha: inventario, seguimiento, alertas, validación, observaciones, implementación y gobierno. Guarda el historial mensual.', id: 'ID_MODELO' },
-  { c: '#FF6600', t: 'Reporte de observaciones', d: 'Detalle de cada observación pendiente. Corresponde solo a la última fecha.', id: 'ID_Model' },
-  { c: '#2fb344', t: 'Tablón de coberturas', d: 'Cobertura metodológica y de implementación de cada modelo. Corresponde solo a la última fecha.', id: 'Modelo_ID' }
+  { c: '#096AAD', t: 'Input principal histórico', d: 'Una fila por modelo y mes. Con él se calculan los indicadores, el score y los evolutivos.' },
+  { c: '#FF6600', t: 'Inventario de modelos', d: 'Modelos que cada modelo usa como insumo.' },
+  { c: '#2fb344', t: 'TTM', d: 'Plan de acción y tiempo de atención de los modelos en alerta.' },
+  { c: '#6250d6', t: 'Tablón de coberturas', d: 'Cobertura metodológica y de implementación.' },
+  { c: '#e87ba4', t: 'Reporte de observaciones', d: 'Detalle de las observaciones de validación.' },
+  { c: '#eda100', t: 'Observaciones SBS & AI', d: 'Detalle de las observaciones de SBS y auditoría interna.' },
+  { c: '#1baf7a', t: 'Calidad de Datos', d: 'Criterios del indicador de calidad de datos.' },
+  { c: '#e34948', t: 'Nota de Gobierno', d: 'Componentes de la nota, por PO usuario.' }
 ];
-const SECCIONES = [['Reporte', [0]], ['Macro', [0]], ['Seguimiento', [0]], ['Validación', [0, 2]], ['Observaciones', [0, 1]], ['Implementación', [0]]];
+const SECCIONES = [['Reporte', [0]], ['Macro', [0]], ['Seguimiento', [0, 2]], ['Validación', [0, 3]], ['Observaciones', [0, 4, 5]], ['Implementación', [0, 6]], ['Inventario', [0, 1]], ['Gobierno', [7]]];
 function flujoInputs() {
   const flecha = '<div class="flujo-flecha" aria-hidden="true"><i class="ti ti-arrow-right"></i></div>';
   const paso = (n, t, cuerpo) => `<div class="flujo-paso"><div class="flujo-num">Paso ${n} · ${t}</div>${cuerpo}</div>`;
-  const inputs = INPUTS.map(i => `<div class="flujo-caja input" style="--input:${i.c}"><b>${i.t}</b>${i.d}<div class="text-secondary small mt-1">Identificador: ${i.id}</div></div>`).join('');
-  const origen = i => `<span class="flujo-origen" style="--input:${INPUTS[i].c}"><i></i>${INPUTS[i].t.replace(' Score MRM', '')}</span>`;
+  const inputs = INPUTS.map(i => `<div class="flujo-caja input" style="--input:${i.c}"><b>${i.t}</b>${i.d}</div>`).join('');
+  const origen = i => `<span class="flujo-origen" style="--input:${INPUTS[i].c}"><i></i>${INPUTS[i].t}</span>`;
   const secciones = SECCIONES.map(([t, os]) => `<div class="flujo-caja flujo-seccion"><span class="fw-bold">${t}</span><span class="d-inline-flex gap-2 flex-wrap">${os.map(origen).join('')}</span></div>`).join('');
   return `<div class="flujo">
     ${paso(1, 'Información', inputs)}${flecha}
-    ${paso(2, 'Unión', '<div class="flujo-caja ancha"><b>Se unen por modelo</b>Los tres archivos se relacionan con el ID del modelo. Solo se usan los modelos que están en el input principal.</div>')}${flecha}
+    ${paso(2, 'Unión', '<div class="flujo-caja ancha"><b>Se validan y se unen por modelo</b>Se revisa la calidad de cada archivo y todos se relacionan con el ID del modelo. La Nota de Gobierno se une por PO usuario. Los archivos de detalle corresponden solo al último mes.</div>')}${flecha}
     ${paso(3, 'Cálculo', '<div class="flujo-caja ancha"><b>Se calculan indicadores y score</b>Cada indicador recibe un puntaje de 0 a 100 según las reglas definidas en el archivo Indicadores, y con ellos se obtiene el score.</div>')}${flecha}
     ${paso(4, 'Reporte', secciones)}
   </div>
-  <div class="text-secondary small mt-3"><b>Actualización mensual:</b> se agregan las filas del nuevo mes al input principal, se reemplazan el reporte de observaciones y el tablón de coberturas, y se vuelve a generar el reporte.</div>`;
+  <div class="text-secondary small mt-3"><b>Actualización mensual:</b> se agregan las filas del nuevo mes al input principal, se reemplazan los siete archivos de detalle y se vuelve a generar el reporte. El detalle solo se muestra con el último mes seleccionado.</div>`;
 }
-function vistaGobierno() {
+function vistaGobierno(ms) {
   const tabla = `<div class="table-responsive"><table class="table table-vcenter card-table"><thead><tr><th>Driver</th><th>Indicador</th><th>¿Cómo se obtiene la puntuación?</th></tr></thead><tbody>
     ${CFG.drivers.map(dr => dr.ind.map((i, j) => `<tr>${j === 0 ? `<td rowspan="${dr.ind.length}"><b>${dr.nombre}</b></td>` : ''}<td style="white-space:normal">${esc(i.nombre)}</td><td style="white-space:normal">${esc(i.lp)}</td></tr>`).join('')).join('')}
     </tbody></table></div>`;
   document.getElementById('v-gobierno').innerHTML = `<div class="row row-cards">
+    ${notaGobierno(ms)}
     ${bloque('col-12', 'Flujo de información del reporte', 'ti-route', cuerpo(flujoInputs()), 'De dónde sale la información y cómo llega a cada sección')}
     ${bloque('col-12', 'Puntuación de los indicadores', 'ti-list-details', tabla, 'Cada indicador va de 0 a 100, donde 100 es el mejor resultado')}
   </div>`;
@@ -1009,7 +1238,7 @@ document.addEventListener('mouseover', verTip);
 document.addEventListener('focusin', verTip);
 TODOS = preparar(DATOS.modelos);
 resetFil();
-construirFiltros(); vistaGobierno(); aplicar();
+construirFiltros(); aplicar();
 </script>
 </body>
 </html>
