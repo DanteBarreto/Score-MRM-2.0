@@ -75,7 +75,7 @@ Se aplican a todos los archivos, según `src/esquema.py`.
 | `EXCEDE_TTM` no coincide con el signo de `EXCESO_MESES_TTM` | ALERTA |
 | `NOTA_CALIDAD_DATOS` igual a 0 | ALERTA |
 | Más observaciones vencidas que pendientes | ALERTA |
-| "Sin Seguimiento" con nota de completitud, o "Con Seguimiento" sin ella | AVISO |
+| "Sin Seguimiento" con nota de profundidad del seguimiento, o "Con Seguimiento" sin ella | AVISO |
 | Mitigante "Si" con descripción "No aplica" | AVISO |
 | Ambiente informado con plataforma sin información | AVISO |
 | `IMPACTO` con texto en lugar de un monto | AVISO |
@@ -86,10 +86,10 @@ Se aplican a todos los archivos, según `src/esquema.py`.
 |---|---|---|
 | Inventario | ID repetido | ERROR |
 | Inventario | Modelos del score que no están en el inventario | ALERTA |
-| Inventario | Modelo declarado como insumo de sí mismo (se ignora) | ALERTA |
-| Inventario | Modelos insumo que no existen en el inventario | ALERTA |
+| Inventario | Modelo declarado como modelo input de sí mismo (se ignora) | ALERTA |
+| Inventario | Modelos input que no existen en el inventario | ALERTA |
 | Inventario | Estado distinto al del input principal (se usa el del input) | AVISO |
-| Inventario | Modelos sin insumo declarado o sin descripción | AVISO |
+| Inventario | Modelos sin modelo input declarado o sin descripción | AVISO |
 | TTM | Modelos en alerta sin fila en el archivo, o filas de modelos que no están en alerta | ALERTA |
 | TTM | Holgura distinta de `EXCESO_MESES_TTM` del input | ALERTA |
 | TTM | "No tiene TTM" en el input pero con TTM de gobierno en el archivo | ALERTA |

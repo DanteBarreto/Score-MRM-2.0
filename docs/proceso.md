@@ -9,9 +9,11 @@ flowchart TD
     subgraph E[1. Carpeta local del usuario]
       A[Input principal histórico]
       D[Siete archivos de detalle<br>del último mes]
+      G[Gobierno de modelos.yaml]
     end
     A --> L[2. Lectura y control de estructura]
     D --> L
+    G --> P
     L --> H[3. Limpieza y homologación]
     H --> U[4. Unión por ID de modelo]
     U --> C[5. Controles de coherencia]
@@ -37,7 +39,7 @@ Cada usuario guarda los Excel en una carpeta de su equipo y la indica en su `con
 - Falta una columna que el reporte necesita.
 - Un modelo se repite en una misma fecha o no tiene ID con número.
 
-Si falta un archivo de detalle, el proceso continúa y su bloque no se muestra.
+Si falta un archivo de detalle, el proceso continúa y su bloque no se muestra. `Gobierno de modelos.yaml` no pasa por estos controles: se lee tal cual y, si está mal formado, el proceso se detiene.
 
 ### 3. Limpieza y homologación
 
@@ -69,7 +71,7 @@ Los indicadores se calculan en el navegador, como las medidas de un modelo semá
 | Observaciones | Input principal, Reporte de observaciones y Observaciones SBS & AI | Solo el evolutivo |
 | Implementación | Input principal y Calidad de Datos | Todo, salvo el bloque de calidad de datos |
 | Inventario | Input principal e Inventario de modelos | Solo se muestra en el último mes |
-| Gobierno | Nota de Gobierno | La tabla de notas solo se muestra en el último mes |
+| Gobierno | Gobierno de modelos.yaml y Nota de Gobierno | La tabla de notas solo se muestra en el último mes. La definición de indicadores usa la puntuación de la fecha elegida |
 
 En fechas anteriores, los bloques que vienen de archivos de detalle muestran un aviso, porque esos archivos corresponden solo al último mes.
 
@@ -84,6 +86,7 @@ En fechas anteriores, los bloques que vienen de archivos de detalle muestran un 
 | Controles de calidad | `src/calidad.py` |
 | Lectura y unión de un archivo | `src/generar_reporte.py` |
 | Fórmula o nombre de un indicador | `templates/plantilla_reporte.html`, objeto `CFG` |
-| Umbrales del semáforo | `templates/plantilla_reporte.html`, constante `UMBRALES` |
+| Umbrales del semáforo | `templates/plantilla_reporte.html`, constantes `UMBRAL_BASE`, `UMBRAL_TIER` y `UMBRAL_MIX` |
 | Filtros | `templates/plantilla_reporte.html`, constante `DIMS` |
 | Secciones, gráficos y estilos | `templates/plantilla_reporte.html` |
+| Flujos, aprobaciones, comités, definiciones, mapa normativo y flujo de información de Gobierno | `Gobierno de modelos.yaml` (carpeta de inputs) |

@@ -14,11 +14,23 @@ Lo marcado como "No aplica" se muestra en gris y no entra al promedio.
 
 ## Semáforo
 
-| Color | Puntaje |
-|---|---|
-| Rojo | Menor que 70 |
-| Ámbar | De 70 a 80 |
-| Verde | Mayor que 80 |
+Rojo si el puntaje es menor que el umbral inferior, verde si es mayor que el superior y ámbar entre ambos.
+Los umbrales dependen de los Tier elegidos en el filtro Tier:
+
+| Selección del filtro Tier | Umbral inferior | Umbral superior |
+|---|---|---|
+| Sin filtro de Tier | 70 | 80 |
+| Solo Tier I | 85 | 90 |
+| Solo Tier II | 80 | 85 |
+| Solo Tier III | 75 | 80 |
+| Solo Tier IV | 60 | 75 |
+| Solo Tier I y II | 81 | 86 |
+| Varios, incluye Tier I (cualquier otra combinación con Tier I) | 70 | 80 |
+| Varios, incluye Tier II (sin I) | 69 | 79 |
+| Varios, incluye Tier III (sin I ni II) | 66 | 77 |
+
+Con varios Tier se aplica la primera fila que se cumple, en ese orden: Tier I y II solos usan 81 y 86; cualquier otra combinación se clasifica por el Tier más crítico que incluye.
+Los umbrales activos se aplican a todos los semáforos del reporte y se muestran bajo los filtros.
 
 ## Indicadores por driver
 
@@ -41,7 +53,7 @@ Los dos indicadores de alerta son "No aplica" si no hay modelos en alerta.
 | Indicador | Valor | Puntuación |
 |---|---|---|
 | Modelos sin validación de primera vez | Modelos con `VALIDACION_COMPLETA` = "Sin validación" | 1 − valor / total |
-| Modelos que incumplen la validación periódica | Modelos con `VALIDACION_PERIODICA` = "Descoberturado" | 1 − valor / total |
+| Modelos sin validación periódica | Modelos con `VALIDACION_PERIODICA` = "Descoberturado" | 1 − valor / total |
 | Nota dinámica de validación (%) | Promedio de `NOTA_DINAMICA_VALIDACION` | El mismo promedio |
 
 ### Observaciones
@@ -49,7 +61,7 @@ Los dos indicadores de alerta son "No aplica" si no hay modelos en alerta.
 | Indicador | Valor | Puntuación |
 |---|---|---|
 | Observaciones vencidas de validación (críticas, relevantes y moderadas) | Suma de `OBS_CRIT_RELE_MODE_VENCIDAS_VI` | 1 − vencidas / `OBS_CRIT_RELE_MODE_PENDIENTES_VI` |
-| Observaciones vencidas del regulador y auditoría | Suma de `OBS_SBS_AI_VENCIDAS` | 1 − vencidas / `OBS_SBS_AI_PENDIENTES` |
+| Observaciones vencidas del regulador local (SBS) | Suma de `OBS_SBS_AI_VENCIDAS` | 1 − vencidas / `OBS_SBS_AI_PENDIENTES` |
 
 Son "No aplica" si no hay observaciones pendientes.
 
@@ -98,7 +110,7 @@ Las cifras corresponden a la base de desarrollo de agosto de 2026 (versión 1).
 | Score oficial | Portafolio: 71,6. Promedio de modelos: 82,2 | Definir cuál se reporta |
 | Faltas graves | 4 de 18 modelos sin seguimiento están en verde | Evaluar un tope de score |
 | "Sin información" | Se excluye igual que "No aplica" | Evaluar penalizarlo |
-| Umbrales | 70 y 80 | El reporte anterior usaba 69 y 79 |
+| Umbrales | 70 y 80 sin filtro de Tier; dinámicos según los Tier elegidos | El reporte anterior usaba 69 y 79 |
 | Peso de los drivers | Igual para todos, aunque Calidad cubre 43 modelos y Lineamientos 52 | Evaluar ponderar por cobertura |
 | Cobertura proyectada | Se interpreta `Proy_` como cobertura esperada | Confirmar su significado |
 | Nombres de plataforma | "SAS GUIDE" y "SAS Enterprise Guide" se muestran por separado | Definir si se agrupan |

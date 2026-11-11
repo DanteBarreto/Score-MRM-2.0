@@ -44,6 +44,7 @@ COLS_SBS = {
     "Número de ampliaciones": "ampliaciones", "Tipo": "tipo",
 }
 COLS_TTM = {
+    "NOMBRE_MODELO": "nombre", "TIER": "tier", "MITIGANTE": "mitigante",
     "FECH_ALERTA": "fecha_alerta", "DIAGNOSTICO": "diagnostico", "PLAN_ACCION": "plan", "TTM_GOBIERNO_MESES": "ttm_gobierno",
     "TTM_REAL_HOY": "ttm_real", "HOLGURA_EXCESO_TTM": "holgura", "SOLICITO_AMPLIACION": "ampliacion",
     "NUEVA_FECH_SUBSANACION": "nueva_fecha", "COMENTARIOS": "comentarios",
@@ -142,7 +143,8 @@ def leer_coberturas(filas, ids):
 
 
 def leer_ttm(filas, ids):
-    return [{"id_modelo": num_id(f["ID_MODELO"]), **{d: f[c] for c, d in COLS_TTM.items()}} for f in filas if num_id(f["ID_MODELO"]) in ids]
+    return [{"id_modelo": num_id(f["ID_MODELO"]), "codigo": f["ID_MODELO"], **{d: f[c] for c, d in COLS_TTM.items()}}
+            for f in filas if num_id(f["ID_MODELO"]) in ids]
 
 
 def leer_sbs(filas, ids):
@@ -201,9 +203,35 @@ def leer_inventario(filas, ids):
 
     crudos = {k: lista_ids(por_id[k]["ID_MODELO_INPUT"]) for k in ids if k in por_id}
     insumos = {k: [i for i in dict.fromkeys(v) if i != k and es_real(i)] for k, v in crudos.items()}
-    nombres = {i: {"n": por_id[i]["NOMBRE_MODELO"], "p": por_id[i]["PERIMETRO_MODELO"]} for v in insumos.values() for i in v}
+    nombres = {i: {"n": por_id[i]["NOMBRE_MODELO"], "p": por_id[i]["PERIMETRO_MODELO"], "c": por_id[i].get("CODIGO_MODELO")} for v in insumos.values() for i in v}
     modelos = [{"id_modelo": k, "tipo": por_id[k]["TIPO_MODELO"], "perimetro": por_id[k]["PERIMETRO_MODELO"], "insumos": v} for k, v in insumos.items()]
     return modelos, nombres, crudos, insumos
+
+
+def movimientos_inventario(filas, ids):
+    """Estado y fechas de uso en el inventario de los modelos que entraron o salieron del score en el último mes.
+    Las fechas de relleno (1900, 1970) se tratan como vacías."""
+    real = lambda v: v if v and v[:4] > "1990" else None
+    por_id = {num_id(f["ID_MODELO"]): f for f in filas}
+    return {k: {"estado": por_id[k].get("ESTADO_MODELO"), "inicio": real(por_id[k].get("FECHA_INICIO_USO")),
+                "retiro": real(por_id[k].get("FECHA_RETIRO_USO"))} for k in ids if k in por_id}
+
+
+def leer_contenido_gobierno(lector):
+    """Flujos, aprobaciones, definiciones y mapa normativo de la sección Gobierno (archivo YAML editable).
+    Vive en la carpeta de inputs porque resume la norma interna, que no se publica en el repositorio."""
+    nombre = lector.nombres.get("gobierno_contenido")
+    ruta = lector.carpeta / nombre if nombre else None
+    if not ruta or not ruta.exists():
+        motivo = f"no se encontró {nombre}" if nombre else "no está en config.yaml"
+        lector.hallazgos.append(calidad.Hallazgo("Contenido de Gobierno", calidad.AVISO, f"Archivo no cargado ({motivo}): Gobierno muestra solo la nota y la puntuación", 1))
+        return None
+    try:
+        contenido = yaml.safe_load(ruta.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as e:
+        sys.exit(f"{nombre} no es un YAML válido: {e}")
+    lector.leidos["gobierno_contenido"] = f"{nombre}: {len(contenido.get('flujos') or [])} flujos"
+    return contenido
 
 
 def main():
@@ -248,11 +276,14 @@ def main():
     gob = lector.leer("nota_gobierno")
     datos["gobierno"], datos["gob_de"] = leer_gobierno(gob, ultimo) if gob else (None, {})
     datos["gob_componentes"] = [t for _, t in COMPONENTES_GOBIERNO]
+    datos["gob_contenido"] = leer_contenido_gobierno(lector)
     cal = lector.leer("calidad_datos")
     datos["calidad"], cal_meta = leer_calidad(cal, ids) if cal else (None, None)
     datos["cal_criterios"] = [{"t": t, "peso": p} for _, t, p in CRITERIOS_CALIDAD]
     inv = lector.leer("inventario")
     datos["inventario"], datos["inv_nombres"], crudos, insumos = leer_inventario(inv, ids) if inv else (None, {}, {}, {})
+    previo = {f["ID_MODELO"] for f in filas if len(fechas) > 1 and f["FECHA"] == fechas[-2]}
+    datos["inv_mov"] = movimientos_inventario(inv, ids ^ previo) if inv and previo else {}
 
     control.update(
         observaciones=datos["observaciones"] if obs else None, obs_meta=datos["obs_meta"],

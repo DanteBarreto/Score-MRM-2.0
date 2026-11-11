@@ -156,12 +156,12 @@ class Generacion(unittest.TestCase):
         d = self.datos()
         insumos = {i["id_modelo"]: i["insumos"] for i in d["inventario"]}
         self.assertEqual(insumos, {1: [2, 50], 2: [], 3: []})
-        self.assertEqual(d["inv_nombres"]["50"], {"n": "Módulo", "p": "Módulo"})
+        self.assertEqual({k: d["inv_nombres"]["50"][k] for k in "np"}, {"n": "Módulo", "p": "Módulo"})
 
     def test_control_de_calidad(self):
         self.generar()
         texto = (self.tmp / "control_calidad.txt").read_text(encoding="utf-8")
-        self.assertIn("Modelos que se declaran como insumo de sí mismos", texto)
+        self.assertIn("Modelos que se declaran como modelo input de sí mismos", texto)
         self.assertIn("Observaciones sin modelo", texto)
 
     def test_archivo_de_detalle_opcional(self):
@@ -171,6 +171,13 @@ class Generacion(unittest.TestCase):
         self.assertIsNone(d["ttm"])
         self.assertIsNone(d["inventario"])
         self.assertIn("Archivo no cargado", (self.tmp / "control_calidad.txt").read_text(encoding="utf-8"))
+
+    def test_contenido_de_gobierno(self):
+        # Sin el YAML, Gobierno se queda con la nota y la puntuación
+        self.assertIsNone(self.datos()["gob_contenido"])
+        (self.inputs / "gob.yaml").write_text("flujos:\n  - id: baja\n    titulo: Baja del modelo\n    pasos: []\n", encoding="utf-8")
+        self.cfg["archivos"]["gobierno_contenido"] = "gob.yaml"
+        self.assertEqual(self.datos()["gob_contenido"]["flujos"][0]["titulo"], "Baja del modelo")
 
     def test_input_principal_faltante(self):
         self.cfg["archivos"]["input_principal"] = "no_existe.xlsx"

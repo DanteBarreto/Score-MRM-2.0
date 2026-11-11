@@ -122,8 +122,8 @@ USO_ESPECIFICO_1 | texto | sí | - | Uso específico principal
 USO_ESPECIFICO_2 | texto | sí | - | Uso específico secundario
 BANCA | texto | sí | - | Banca
 LINEA_PRODUCTO | texto | sí | - | Línea de producto
-ID_MODELO_INPUT | lista de id | sí | R | Modelos que este modelo usa como insumo, separados por punto y coma
-COD_NOMBRE_MODELO_INPUT | texto | sí | - | Código y nombre de los modelos insumo
+ID_MODELO_INPUT | lista de id | sí | R | Modelos input que usa este modelo, separados por punto y coma
+COD_NOMBRE_MODELO_INPUT | texto | sí | - | Código y nombre de los modelos input
 ID_VERSION_ANTERIOR | id modelo | sí | - | Versión anterior del modelo
 CODIGO_MODELO_VERSION_ANTERIOR | texto | sí | - | Código de la versión anterior
 NOMBRE_MODELO_VERSION_ANTERIOR | texto | sí | - | Nombre de la versión anterior

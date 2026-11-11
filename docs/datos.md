@@ -18,6 +18,7 @@ El proceso lee la primera hoja de cada Excel, con los títulos en la primera fil
 | Nota de Gobierno | No | Una fila por PO usuario y model developer | `PO_USUARIO` y `MODELO_DEVELOPER` | Gobierno |
 | Calidad de Datos | No | Una fila por modelo evaluado | `ID` | Implementación |
 | Tablón de coberturas | No | Una fila por modelo | `Modelo_ID` | Validación |
+| Gobierno de modelos.yaml | No | Texto editable, no es Excel | No aplica | Gobierno |
 
 Los nombres de los archivos se definen en `archivos` de `config.yaml`.
 
@@ -48,13 +49,30 @@ erDiagram
 | Archivo | Regla |
 |---|---|
 | Input principal | Es la base: calcula los indicadores, el score y los evolutivos |
-| Inventario | Solo aporta los modelos insumo (`ID_MODELO_INPUT`). El estado del modelo sale del input principal |
+| Inventario | Aporta los modelos input (`ID_MODELO_INPUT`), el código completo de cada modelo y las fechas de inicio y retiro para las altas y bajas. El estado del modelo sale del input principal |
 | TTM | Agrega fecha de alerta, plan de acción y tiempos de atención a los modelos en alerta |
 | Reporte de observaciones | Los días vencidos se calculan desde el compromiso vigente (`Fecha ampliada` si existe, si no `Fecha estimada`) |
 | Observaciones SBS & AI | Solo el estado "Pendiente" cuenta como pendiente. Las observaciones sin modelo se muestran como transversales. El correo no se incluye en el reporte |
 | Nota de Gobierno | Se asigna por PO usuario y model developer; si el PO tiene una sola fila, por PO. Las áreas se homologan en `config.yaml` |
 | Calidad de Datos | Cada criterio se muestra como porcentaje de su peso |
 | Tablón de coberturas | Las fechas de descobertura van como `d/mm/aaaa` |
+
+## Contenido de Gobierno
+
+`Gobierno de modelos.yaml` resume la norma interna y por eso vive en la carpeta de inputs y no en el repositorio. Se edita a mano y tiene estas secciones:
+
+| Sección | Qué contiene |
+|---|---|
+| `roles` | Áreas que participan en los flujos y su línea de defensa |
+| `flujos` | Procesos del gobierno de modelos, con sus pasos, responsables, entradas, salidas y aprobaciones |
+| `aprobaciones` | Instancia que aprueba cada asunto, para Tier I y para Tier II a IV |
+| `comites` | Comités, de mayor a menor instancia |
+| `ambitos` | Etapas del gobierno que aplican a cada perímetro |
+| `indicadores` | Qué mide y por qué importa cada indicador, por clave |
+| `mapa_normativo` | Normas y políticas de modelos, por grupo |
+| `flujo_informacion` | Fuentes del reporte (owner, recurrencia, fecha de corte, sistema e indicadores que alimentan) y proceso de actualización |
+
+Un texto `[Por confirmar]` se muestra resaltado en el reporte. Si el archivo falta, Gobierno muestra solo la nota de gobierno, la explicación de las puntuaciones y el flujo básico de archivos.
 
 ## Controles de calidad
 

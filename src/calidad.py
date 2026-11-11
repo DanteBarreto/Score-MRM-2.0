@@ -157,8 +157,8 @@ def controles_cruzados(d):
         return m["BBDD"] is not None
 
     for control, f, nivel in [
-        ('Modelos "Sin Seguimiento" con nota de completitud de seguimiento', lambda m: m["ESTADO_SEGUIMIENTO"] == "Sin Seguimiento" and profundidad(m), AVISO),
-        ('Modelos "Con Seguimiento" sin nota de completitud de seguimiento', lambda m: m["ESTADO_SEGUIMIENTO"] == "Con Seguimiento" and not profundidad(m), AVISO),
+        ('Modelos "Sin Seguimiento" con nota de profundidad del seguimiento', lambda m: m["ESTADO_SEGUIMIENTO"] == "Sin Seguimiento" and profundidad(m), AVISO),
+        ('Modelos "Con Seguimiento" sin nota de profundidad del seguimiento', lambda m: m["ESTADO_SEGUIMIENTO"] == "Con Seguimiento" and not profundidad(m), AVISO),
         ('Modelos "Sin Seguimiento" marcados "En alerta"', lambda m: m["ESTADO_SEGUIMIENTO"] == "Sin Seguimiento" and alerta(m), ALERTA),
         ("Modelos en alerta sin dato de mitigante", lambda m: alerta(m) and m["PRESENCIA_MITIGANTE"] is None, ALERTA),
         ("Modelos en alerta sin situación de TTM", lambda m: alerta(m) and m["EXCEDE_TTM"] is None, ALERTA),
@@ -184,11 +184,11 @@ def controles_cruzados(d):
         distinto = [k for k, m in ult.items() if k in I and I[k].get("ESTADO_MODELO") not in (None, m["ESTADO_MODELO"])]
         agrega(T, AVISO, "Estado distinto al del input principal (el reporte usa el del input)", len(distinto),
                [f"{k}: {I[k].get('ESTADO_MODELO')}" for k in distinto])
-        agrega(T, ALERTA, "Modelos que se declaran como insumo de sí mismos (se ignora)", sum(k in d["insumos_crudos"].get(k, []) for k in ult),
+        agrega(T, ALERTA, "Modelos que se declaran como modelo input de sí mismos (se ignora)", sum(k in d["insumos_crudos"].get(k, []) for k in ult),
                [k for k in ult if k in d["insumos_crudos"].get(k, [])])
         sin_inv = sorted({i for k in ult for i in d["insumos_crudos"].get(k, []) if i not in I})
-        agrega(T, ALERTA, "Modelos insumo que no existen en el inventario", len(sin_inv), sin_inv)
-        agrega(T, AVISO, 'Modelos del score sin insumo declarado (vacío o "No aplica")', sum(not d["insumos"].get(k) for k in ult if k in I))
+        agrega(T, ALERTA, "Modelos input que no existen en el inventario", len(sin_inv), sin_inv)
+        agrega(T, AVISO, 'Modelos del score sin modelo input declarado (vacío o "No aplica")', sum(not d["insumos"].get(k) for k in ult if k in I))
         agrega(T, AVISO, "Modelos del score sin descripción", sum(1 for k in ult if k in I and I[k].get("DESCRIPCION") in (None, "Pendiente")))
 
     # --- TTM

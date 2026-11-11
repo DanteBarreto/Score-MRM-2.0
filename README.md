@@ -6,11 +6,11 @@ Reporte HTML de indicadores de riesgo de modelo del COE Model Risk Management. T
 
 ## Inicio rápido
 
-Necesitas [Python 3.10 o superior](https://www.python.org/downloads/), [Visual Studio Code](https://code.visualstudio.com/) y los Excel de entrada en una carpeta de tu equipo: el input principal histórico y los siete archivos de detalle.
+Necesitas [Python 3.10 o superior](https://www.python.org/downloads/), [Visual Studio Code](https://code.visualstudio.com/) y los inputs en una carpeta de tu equipo: el input principal histórico, los siete archivos de detalle y `Gobierno de modelos.yaml`.
 
 1. Clona el repositorio y abre la carpeta en Visual Studio Code.
 2. Abre `Terminal > Run Task…` y ejecuta **1. Preparar entorno** (solo la primera vez). Esto crea tu archivo `config.yaml`.
-3. Abre `config.yaml` e indica en `carpeta_inputs` la carpeta de tus Excel. Si los nombres de tus archivos son otros, ajústalos en `archivos`.
+3. Abre `config.yaml` e indica en `carpeta_inputs` la carpeta de tus inputs. Si los nombres de tus archivos son otros, ajústalos en `archivos`.
 4. Presiona `Ctrl+Shift+B` para generar el reporte. Se abrirá en tu navegador y la revisión de calidad de datos quedará en `output/control_calidad.txt`.
 
 El reporte queda en `output/reporte_mrm.html`. Incluye los datos, así que compártelo solo con quien corresponda. Necesita internet al abrirse, porque carga los estilos desde un CDN.
@@ -27,16 +27,16 @@ La guía paso a paso, con la alternativa por terminal y la solución de errores 
 
 | Sección | Contenido |
 |---|---|
-| **Reporte** | Indicadores de cabecera, evolutivo del score y tablero con los 16 indicadores |
+| **Reporte** | Indicadores de cabecera, evolutivo del score y tablero con los 16 indicadores, con simulador de valores |
 | **Macro** | Mapas de calor por Model User y por Banca y Producto, e indicadores por modelo |
 | **Seguimiento** | Cobertura de seguimiento, alertas, tiempo de atención (TTM) y plan de acción |
 | **Validación** | Cobertura metodológica y de implementación, calificaciones y próximas descoberturas |
 | **Observaciones** | Observaciones de validación y de SBS y auditoría interna, con su detalle |
 | **Implementación** | Ambientes de despliegue y data, plataformas y calidad de datos |
-| **Inventario** | Modelos que cada modelo usa como insumo, por proceso |
-| **Gobierno** | Nota de gobierno por PO usuario, flujo de información y explicación de cada puntuación |
+| **Inventario** | Modelos input de cada modelo, mapa por proceso y altas y bajas del último mes |
+| **Gobierno** | Flujos del gobierno de modelos, aprobaciones, comités, aplicabilidad por perímetro, definición de indicadores, mapa normativo, flujo de información y nota de gobierno por PO usuario |
 
-Los bloques que vienen de archivos de detalle solo se muestran con el último mes seleccionado.
+Los bloques que vienen de archivos de detalle solo se muestran con el último mes seleccionado. Los filtros permiten selección múltiple, salvo Fecha, y los umbrales del semáforo dependen de los Tier elegidos.
 
 ## Cómo funciona
 
@@ -45,15 +45,17 @@ flowchart LR
     subgraph L[Carpeta local del usuario]
       A[Input principal histórico]
       B[Siete archivos de detalle]
+      G[Gobierno de modelos.yaml]
     end
     A --> D[generar_reporte.py]
     B --> D
+    G --> D
     T[Plantilla HTML] --> D
     D --> Q[output/control_calidad.txt]
     D --> R[output/reporte_mrm.html]
 ```
 
-Python lee los Excel, revisa su calidad, une la información por ID de modelo y la inserta en la plantilla. Los indicadores se calculan en el navegador, para que se actualicen con cada filtro.
+Python lee los inputs, revisa su calidad, une la información por ID de modelo y la inserta en la plantilla. Los indicadores se calculan en el navegador, para que se actualicen con cada filtro.
 
 ## Estructura del proyecto
 
@@ -79,7 +81,7 @@ Score-MRM-2.0/
 
 | Documento | Para qué sirve |
 |---|---|
-| [Guía de Visual Studio Code](docs/guia_vscode.md) | Instalar, correr el proceso y resolver errores |
+| [Guía de Visual Studio Code](docs/guia_vscode.md) | Instalar, ejecutar el proceso, revisar el reporte y resolver errores |
 | [Proceso](docs/proceso.md) | Qué hace cada etapa, de los Excel al reporte |
 | [Datos de entrada](docs/datos.md) | Archivos, relaciones y reglas de uso |
 | [Diccionario de datos](docs/referencia/Diccionario_de_datos.xlsx) | Campos de cada archivo con su tipo de dato |
@@ -90,7 +92,7 @@ Score-MRM-2.0/
 
 ## Estado
 
-Versión 2 del MVP. Los cambios están en [docs/cambios_v2.md](docs/cambios_v2.md) y las definiciones pendientes están en [docs/indicadores.md](docs/indicadores.md#puntos-por-definir).
+Versión 2 del MVP, cerrada. Los cambios están en [docs/cambios_v2.md](docs/cambios_v2.md) y las definiciones pendientes están en [docs/indicadores.md](docs/indicadores.md#puntos-por-definir).
 
 ## Tecnologías
 
