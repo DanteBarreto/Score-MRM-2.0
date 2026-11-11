@@ -39,7 +39,8 @@ def archivos_config():
 def faltantes(carpeta, detalle=False):
     """Excel de config.yaml que no están en la carpeta: el input principal o, con detalle, los demás."""
     return [nombre for clave, nombre in archivos_config().items()
-            if (clave != "input_principal") == detalle and not (Path(carpeta) / nombre).is_file()]
+            if (clave != "input_principal") == detalle and nombre.lower().endswith((".xlsx", ".xlsm", ".xls"))
+            and not (Path(carpeta) / nombre).is_file()]
 
 
 def pedir_carpeta():

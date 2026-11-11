@@ -17,8 +17,9 @@ Este manual explica qué archivos necesita el proceso y cómo instalarlo y ejecu
 - [Git](https://git-scm.com/downloads), para clonar el repositorio y recibir las actualizaciones.
 - Una carpeta de tu equipo con los inputs. El repositorio no los incluye. Los nombres, los campos y el tipo de dato de cada uno están en el [anexo de esta guía](#anexo-archivos-de-entrada):
   - el input principal histórico (obligatorio);
-  - los siete Excel de detalle: Inventario de modelos, TTM, Reporte de observaciones, Observaciones SBS & AI, Nota de Gobierno, Calidad de Datos y Tablón de coberturas;
-  - `Gobierno de modelos.yaml`, con el contenido de la sección Gobierno. Lo entrega el equipo de Control MRM.
+  - los siete Excel de detalle: Inventario de modelos, TTM, Reporte de observaciones, Observaciones SBS & AI, Nota de Gobierno, Calidad de Datos y Tablón de coberturas.
+
+  El contenido de la sección Gobierno viene incluido en el repositorio, en `contenido/gobierno_modelos.yaml`; no tienes que copiarlo.
 
 Para comprobar Python, abre una terminal y ejecuta:
 
@@ -72,7 +73,6 @@ archivos:
   nota_gobierno: Nota de Gobierno.xlsx
   calidad_datos: Calidad de Datos.xlsx
   coberturas: Tablón de coberturas.xlsx
-  gobierno_contenido: Gobierno de modelos.yaml
 ```
 
 Para copiar la ruta, abre la carpeta en el Explorador de archivos y haz clic en la barra de direcciones. Si tus archivos tienen otros nombres, cámbialos en `archivos`. Solo el input principal es obligatorio: si falta otro archivo, su bloque no se muestra.
@@ -173,8 +173,9 @@ En macOS o Linux, usa `python3` para crear el entorno y `.venv/bin/python` en lo
 | `Faltan columnas en …` | El Excel cambió de estructura | Compáralo con el [anexo de archivos de entrada](#anexo-archivos-de-entrada) |
 | `Modelos repetidos en una misma FECHA` | Un ID aparece dos veces en una fecha | Corrige el input principal |
 | `El proceso se detuvo por errores de calidad de datos` | Un archivo tiene un problema que impide un reporte confiable | Corrige lo indicado y revisa [calidad_datos.md](calidad_datos.md) |
-| Gobierno no muestra los flujos, las aprobaciones ni el mapa normativo | Falta `Gobierno de modelos.yaml` o la línea `gobierno_contenido` en `config.yaml` | Copia el YAML a tu carpeta de inputs y agrega la línea |
-| `Gobierno de modelos.yaml no es un YAML válido` | El archivo se editó y quedó mal formado | Revisa la línea indicada: sangría con espacios, y textos con comas o dos puntos entre comillas |
+| Gobierno no muestra los últimos cambios | El repositorio de tu equipo está desactualizado | Haz **Git: Pull**, vuelve a generar el reporte y recarga el navegador con `Ctrl+F5` |
+| `No se encontró contenido/gobierno_modelos.yaml` | Falta el archivo en tu copia del repositorio | Haz **Git: Pull** |
+| `gobierno_modelos.yaml no es un YAML válido` | El archivo se editó y quedó mal formado | Revisa la línea indicada: sangría con espacios, y textos con comas o dos puntos entre comillas |
 | No aparecen los bloques de TTM, SBS & AI, Calidad de Datos, Inventario o Nota de Gobierno | Tu `config.yaml` es de la versión 1 y no lista esos archivos | Copia las secciones `archivos` y `homologacion` de `config.ejemplo.yaml` |
 | Un bloque muestra "solo está disponible para…" | Elegiste un mes anterior al último | Selecciona el último mes en el filtro Fecha |
 | `PermissionError` al guardar | El Excel está abierto | Ciérralo y vuelve a ejecutar |
@@ -199,8 +200,8 @@ Todos van en la carpeta de `carpeta_inputs`. El proceso lee la **primera hoja** 
 | Nota de Gobierno | `Nota de Gobierno.xlsx` | `nota_gobierno` | No | PO usuario y model developer | `PO_USUARIO y MODELO_DEVELOPER` | No tiene | Gobierno |
 | Calidad de Datos | `Calidad de Datos.xlsx` | `calidad_datos` | No | modelo evaluado | `ID` | No tiene | Implementación |
 | Tablón de coberturas | `Tablón de coberturas.xlsx` | `coberturas` | No | modelo | `Modelo_ID` | `Fecha` | Validación |
-| Contenido de Gobierno | `Gobierno de modelos.yaml` | `gobierno_contenido` | No | Archivo de texto YAML, no Excel | No aplica | No tiene | Gobierno |
 
+- **Gobierno:** su contenido no es un input; viene en el repositorio, en `contenido/gobierno_modelos.yaml`.
 - **Obligatorio:** sin el input principal el proceso no corre. Si falta otro archivo, su bloque del reporte no se muestra.
 - **Último mes:** los archivos de detalle deben corresponder a la última fecha del input principal.
 - **Columnas requeridas:** si falta una, el proceso se detiene. Si falta una informativa o sobra una columna, solo se avisa.

@@ -91,8 +91,8 @@ def anexo():
         l.append(f"| {a.titulo} | `{nombres.get(a.clave, '-')}` | `{a.clave}` | {'Sí' if a.clave == 'input_principal' else 'No'} | "
                  f"{md(a.granularidad.removeprefix('Una fila por ').removeprefix('Una fila '))} | `{a.id_modelo or 'PO_USUARIO y MODELO_DEVELOPER'}` | "
                  f"{f'`{a.fecha}`' if a.fecha else 'No tiene'} | {a.seccion} |")
-    l.append(f"| Contenido de Gobierno | `{nombres.get('gobierno_contenido', 'Gobierno de modelos.yaml')}` | `gobierno_contenido` | No | Archivo de texto YAML, no Excel | No aplica | No tiene | Gobierno |")
-    l += ["", "- **Obligatorio:** sin el input principal el proceso no corre. Si falta otro archivo, su bloque del reporte no se muestra.",
+    l += ["", "- **Gobierno:** su contenido no es un input; viene en el repositorio, en `contenido/gobierno_modelos.yaml`.",
+          "- **Obligatorio:** sin el input principal el proceso no corre. Si falta otro archivo, su bloque del reporte no se muestra.",
           "- **Último mes:** los archivos de detalle deben corresponder a la última fecha del input principal.",
           "- **Columnas requeridas:** si falta una, el proceso se detiene. Si falta una informativa o sobra una columna, solo se avisa.", "",
           "### Tipos de dato", "", "| Tipo | Qué se espera | Ejemplo |", "|---|---|---|"]

@@ -173,11 +173,14 @@ class Generacion(unittest.TestCase):
         self.assertIn("Archivo no cargado", (self.tmp / "control_calidad.txt").read_text(encoding="utf-8"))
 
     def test_contenido_de_gobierno(self):
-        # Sin el YAML, Gobierno se queda con la nota y la puntuación
-        self.assertIsNone(self.datos()["gob_contenido"])
-        (self.inputs / "gob.yaml").write_text("flujos:\n  - id: baja\n    titulo: Baja del modelo\n    pasos: []\n", encoding="utf-8")
-        self.cfg["archivos"]["gobierno_contenido"] = "gob.yaml"
-        self.assertEqual(self.datos()["gob_contenido"]["flujos"][0]["titulo"], "Baja del modelo")
+        # Se lee del repositorio, sin depender de la carpeta de inputs ni de config.yaml
+        g = self.datos()["gob_contenido"]
+        self.assertEqual(len(g["flujos"]), 7)
+        self.assertEqual(len(g["flujo_informacion"]["fuentes"]), 8)
+        # Cada fuente del flujo de información alimenta indicadores que existen
+        claves = set(g["indicadores"])
+        for f in g["flujo_informacion"]["fuentes"]:
+            self.assertLessEqual(set(f["alimenta"]), claves, f["nombre"])
 
     def test_input_principal_faltante(self):
         self.cfg["archivos"]["input_principal"] = "no_existe.xlsx"

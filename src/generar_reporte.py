@@ -23,6 +23,7 @@ from esquema import ARCHIVOS, COMPONENTES_GOBIERNO, CRITERIOS_CALIDAD
 
 RAIZ = Path(__file__).resolve().parents[1]
 PLANTILLA = RAIZ / "templates" / "plantilla_reporte.html"
+GOBIERNO = RAIZ / "contenido" / "gobierno_modelos.yaml"
 MARCA = "/*__DATOS__*/null"
 SIN_INSUMO = ("no aplica", "pendiente")  # nombres del inventario que significan "sin modelo insumo"
 
@@ -217,20 +218,17 @@ def movimientos_inventario(filas, ids):
                 "retiro": real(por_id[k].get("FECHA_RETIRO_USO"))} for k in ids if k in por_id}
 
 
-def leer_contenido_gobierno(lector):
-    """Flujos, aprobaciones, definiciones y mapa normativo de la sección Gobierno (archivo YAML editable).
-    Vive en la carpeta de inputs porque resume la norma interna, que no se publica en el repositorio."""
-    nombre = lector.nombres.get("gobierno_contenido")
-    ruta = lector.carpeta / nombre if nombre else None
-    if not ruta or not ruta.exists():
-        motivo = f"no se encontró {nombre}" if nombre else "no está en config.yaml"
-        lector.hallazgos.append(calidad.Hallazgo("Contenido de Gobierno", calidad.AVISO, f"Archivo no cargado ({motivo}): Gobierno muestra solo la nota y la puntuación", 1))
-        return None
+def leer_contenido_gobierno(ruta=GOBIERNO):
+    """Flujos, aprobaciones, comités, definiciones, mapa normativo y flujo de información de la sección Gobierno.
+    Es un YAML del repositorio que se edita a mano."""
+    if not ruta.exists():
+        sys.exit(f"No se encontró {ruta.relative_to(RAIZ)}. Actualiza el repositorio con git pull.")
     try:
         contenido = yaml.safe_load(ruta.read_text(encoding="utf-8")) or {}
     except yaml.YAMLError as e:
-        sys.exit(f"{nombre} no es un YAML válido: {e}")
-    lector.leidos["gobierno_contenido"] = f"{nombre}: {len(contenido.get('flujos') or [])} flujos"
+        sys.exit(f"{ruta.name} no es un YAML válido: {e}")
+    if not isinstance(contenido, dict) or not contenido.get("flujos"):
+        sys.exit(f"{ruta.name} no tiene la sección flujos.")
     return contenido
 
 
@@ -276,7 +274,7 @@ def main():
     gob = lector.leer("nota_gobierno")
     datos["gobierno"], datos["gob_de"] = leer_gobierno(gob, ultimo) if gob else (None, {})
     datos["gob_componentes"] = [t for _, t in COMPONENTES_GOBIERNO]
-    datos["gob_contenido"] = leer_contenido_gobierno(lector)
+    datos["gob_contenido"] = leer_contenido_gobierno()
     cal = lector.leer("calidad_datos")
     datos["calidad"], cal_meta = leer_calidad(cal, ids) if cal else (None, None)
     datos["cal_criterios"] = [{"t": t, "peso": p} for _, t, p in CRITERIOS_CALIDAD]

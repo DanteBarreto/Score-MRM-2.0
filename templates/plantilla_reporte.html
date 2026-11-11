@@ -234,18 +234,8 @@ td.cell{font-weight:800;font-stretch:80%;font-size:.92rem;text-align:center;box-
 .obs-fila{cursor:pointer}
 .obs-det td{background:var(--drv-bg);white-space:normal}
 /* Flujo de inputs */
-.flujo{display:grid;grid-template-columns:minmax(0,1.5fr) auto minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1.5fr);gap:.75rem;align-items:stretch}
-.flujo-paso{display:flex;flex-direction:column;gap:.6rem}
-.flujo-num{font-size:.78rem;font-weight:700;color:var(--tinta-2)}
-.flujo-caja{border:1px solid var(--borde);border-radius:4px;padding:.7rem .8rem;background:#fff;font-size:.82rem;line-height:1.35}
-.flujo-caja b{display:block;margin-bottom:.15rem;font-size:.86rem}
-.flujo-caja.ancha{flex:1;display:flex;flex-direction:column;justify-content:center}
-.flujo-caja.input b::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--input);margin-right:7px}
 .flujo-flecha{display:flex;align-items:center;color:var(--tinta-2);font-size:1.4rem}
-.flujo-seccion{display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
-.flujo-origen{display:inline-flex;gap:4px;align-items:center;color:var(--tinta-2);font-size:.74rem}
-.flujo-origen i{width:9px;height:9px;border-radius:50%;background:var(--input)}
-@media (max-width:991px){.flujo{grid-template-columns:minmax(0,1fr)}.flujo-flecha{justify-content:center;transform:rotate(90deg)}}
+@media (max-width:991px){.flujo-flecha{justify-content:center;transform:rotate(90deg)}}
 /* Tiempo de atención: barra del TTM real con una marca en el TTM de gobierno */
 .ttm{display:grid;grid-template-columns:minmax(120px,36%) 1fr 6.5rem;gap:.6rem;align-items:center;font-size:.82rem;margin-bottom:.55rem}
 .ttm .et{line-height:1.35}
@@ -1640,35 +1630,10 @@ function notaGobierno(ms) {
   return bloque('col-12', 'Nota de gobierno por PO usuario', 'ti-scale', tabla,
     `La nota es el promedio de los componentes con dato · "-" indica que el componente no aplica${sin ? ` · ${sin} modelos seleccionados no tienen nota` : ''}`);
 }
-const INPUTS = [
-  { c: '#096AAD', t: 'Input principal histórico', d: 'Una fila por modelo y mes. Con él se calculan los indicadores, el score y los evolutivos.' },
-  { c: '#0E9384', t: 'Inventario de modelos', d: 'Modelos input que usa cada modelo y modelos que entran o salen del inventario.' },
-  { c: '#0F766E', t: 'TTM', d: 'Plan de acción y tiempo de atención de los modelos en alerta.' },
-  { c: '#6250d6', t: 'Tablón de coberturas', d: 'Cobertura metodológica y de implementación.' },
-  { c: '#e87ba4', t: 'Reporte de observaciones', d: 'Detalle de las observaciones de validación.' },
-  { c: '#B84A00', t: 'Observaciones SBS & AI', d: 'Detalle de las observaciones de SBS y auditoría interna.' },
-  { c: '#64748B', t: 'Calidad de Datos', d: 'Criterios del indicador de calidad de datos.' },
-  { c: '#e34948', t: 'Nota de Gobierno', d: 'Componentes de la nota, por PO usuario.' }
-];
-const SECCIONES = [['Reporte', [0]], ['Macro', [0]], ['Seguimiento', [0, 2]], ['Validación', [0, 3]], ['Observaciones', [0, 4, 5]], ['Implementación', [0, 6]], ['Inventario', [0, 1]], ['Gobierno', [7]]];
-function flujoInputs() {
-  const flecha = '<div class="flujo-flecha" aria-hidden="true"><i class="ti ti-arrow-right"></i></div>';
-  const paso = (n, t, cuerpo) => `<div class="flujo-paso"><div class="flujo-num">Paso ${n} · ${t}</div>${cuerpo}</div>`;
-  const inputs = INPUTS.map(i => `<div class="flujo-caja input" style="--input:${i.c}"><b>${i.t}</b>${i.d}</div>`).join('');
-  const origen = i => `<span class="flujo-origen" style="--input:${INPUTS[i].c}"><i></i>${INPUTS[i].t}</span>`;
-  const secciones = SECCIONES.map(([t, os]) => `<div class="flujo-caja flujo-seccion"><span class="fw-bold">${t}</span><span class="d-inline-flex gap-2 flex-wrap">${os.map(origen).join('')}</span></div>`).join('');
-  return `<div class="flujo">
-    ${paso(1, 'Información', inputs)}${flecha}
-    ${paso(2, 'Unión', '<div class="flujo-caja ancha"><b>Se validan y se unen por modelo</b>Se revisa la calidad de cada archivo y todos se relacionan con el ID del modelo. La Nota de Gobierno se une por PO usuario. Los archivos de detalle corresponden solo al último mes.</div>')}${flecha}
-    ${paso(3, 'Cálculo', '<div class="flujo-caja ancha"><b>Se calculan indicadores y score</b>Cada indicador recibe un puntaje de 0 a 100 según las reglas definidas en el archivo Indicadores, y con ellos se obtiene el score.</div>')}${flecha}
-    ${paso(4, 'Reporte', secciones)}
-  </div>
-  <div class="text-secondary small mt-3"><b>Actualización mensual:</b> se agregan las filas del nuevo mes al input principal, se reemplazan los siete archivos de detalle y se vuelve a generar el reporte. El detalle solo se muestra con el último mes seleccionado.</div>`;
-}
-/* Contenido de gobierno: viene de un YAML de la carpeta de inputs (resume la norma interna, no está en el repositorio) */
+/* Contenido de gobierno: viene de contenido/gobierno_modelos.yaml */
 const GC = DATOS.gob_contenido;
 let gfSel = null, gfPaso = 0, gfRol = null;
-const rolDe = id => ((GC && GC.roles) || []).find(r => r.id === id) || { nombre: id };
+const rolDe = id => (GC.roles || []).find(r => r.id === id) || { nombre: id };
 const LINEA_TXT = { 1: '1ª línea', 2: '2ª línea', 3: '3ª línea', 0: 'Instancia de aprobación' };
 const porConfirmar = t => esc(t).replace(/\[(Por confirmar|detalle por confirmar)\]/gi, m => `<span class="g-pc">${m.slice(1, -1)}</span>`);
 
@@ -1741,7 +1706,7 @@ function tablaAmbitos() {
 }
 // Definición de indicadores: qué mide, por qué importa, cómo se calcula y su semáforo actual
 function tablaDefIndicadores(ms) {
-  const D = (GC && GC.indicadores) || {}, R = ms.length ? medidas(ms) : null;
+  const D = GC.indicadores || {}, R = ms.length ? medidas(ms) : null;
   const semaforo = i => {
     const r = R && R.ind[i.key];
     const actual = r ? `<div class="d-flex align-items-center gap-2">${dot(r.p)}<b style="color:var(--${col(r.p)})">${r.p == null ? 'No aplica' : fmt0(r.p)}</b></div>` : '';
@@ -1834,17 +1799,14 @@ function conectarFlujoInfo(el) {
 }
 function vistaGobierno(ms) {
   const el = document.getElementById('v-gobierno');
-  const tablaSimple = `<div class="table-responsive"><table class="table table-vcenter card-table"><thead><tr><th>Driver</th><th>Indicador</th><th>¿Cómo se obtiene la puntuación?</th></tr></thead><tbody>
-    ${CFG.drivers.map(dr => dr.ind.map((i, j) => `<tr>${j === 0 ? `<td rowspan="${dr.ind.length}"><b>${dr.nombre}</b></td>` : ''}<td style="white-space:normal">${esc(i.nombre)}</td><td style="white-space:normal">${esc(i.lp)}</td></tr>`).join('')).join('')}
-    </tbody></table></div>`;
   el.innerHTML = `<div class="row row-cards">
-    ${GC && (GC.flujos || []).length ? bloque('col-12', 'Flujos del gobierno de modelos', 'ti-route-2', `<div class="card-body" id="gf">${flujosGobierno()}</div>`, 'Cada proceso del gobierno de modelos en pocos pasos') : ''}
-    ${GC && (GC.aprobaciones || []).length ? bloque('col-xl-8', '¿Quién aprueba qué?', 'ti-gavel', matrizAprobaciones(), 'Instancia que aprueba cada asunto según el Tier del modelo') : ''}
-    ${GC && (GC.comites || []).length ? bloque('col-xl-4', 'Jerarquía de comités', 'ti-hierarchy-3', cuerpo(jerarquiaComites()), 'Instancias que aprueban los asuntos de modelos') : ''}
-    ${GC && GC.ambitos ? bloque('col-12', 'Aplicabilidad del gobierno según el perímetro', 'ti-table-options', tablaAmbitos(), 'Qué etapas del gobierno aplican a cada tipo de entidad analítica') : ''}
-    ${bloque('col-12', 'Definición de indicadores', 'ti-list-details', GC ? tablaDefIndicadores(ms) : tablaSimple, GC ? `Cada indicador va de 0 a 100, donde 100 es el mejor resultado · el semáforo usa los umbrales activos (${esc(UMBRALES.regla)}) y la puntuación de los modelos filtrados` : 'Cada indicador va de 0 a 100, donde 100 es el mejor resultado')}
-    ${GC && (GC.mapa_normativo || []).length ? bloque('col-12', 'Mapa de normas y políticas de modelos', 'ti-books', cuerpo(mapaNormativo()), 'Documentos normativos vigentes, por grupo · haz clic en un grupo para ver sus documentos') : ''}
-    ${GC && GC.flujo_informacion ? bloque('col-12', 'Flujo de información del reporte', 'ti-route', `<div class="card-body" id="fi">${flujoInformacion()}</div>`, 'Quién entrega cada fuente, cada cuánto se actualiza y cómo llega al reporte') : bloque('col-12', 'Flujo de información del reporte', 'ti-route', cuerpo(flujoInputs()), 'De dónde sale la información y cómo llega a cada sección')}
+    ${(GC.flujos || []).length ? bloque('col-12', 'Flujos del gobierno de modelos', 'ti-route-2', `<div class="card-body" id="gf">${flujosGobierno()}</div>`, 'Cada proceso del gobierno de modelos en pocos pasos') : ''}
+    ${(GC.aprobaciones || []).length ? bloque('col-xl-8', '¿Quién aprueba qué?', 'ti-gavel', matrizAprobaciones(), 'Instancia que aprueba cada asunto según el Tier del modelo') : ''}
+    ${(GC.comites || []).length ? bloque('col-xl-4', 'Jerarquía de comités', 'ti-hierarchy-3', cuerpo(jerarquiaComites()), 'Instancias que aprueban los asuntos de modelos') : ''}
+    ${GC.ambitos ? bloque('col-12', 'Aplicabilidad del gobierno según el perímetro', 'ti-table-options', tablaAmbitos(), 'Qué etapas del gobierno aplican a cada tipo de entidad analítica') : ''}
+    ${bloque('col-12', 'Definición de indicadores', 'ti-list-details', tablaDefIndicadores(ms), `Cada indicador va de 0 a 100, donde 100 es el mejor resultado · el semáforo usa los umbrales activos (${esc(UMBRALES.regla)}) y la puntuación de los modelos filtrados`)}
+    ${(GC.mapa_normativo || []).length ? bloque('col-12', 'Mapa de normas y políticas de modelos', 'ti-books', cuerpo(mapaNormativo()), 'Documentos normativos vigentes, por grupo · haz clic en un grupo para ver sus documentos') : ''}
+    ${GC.flujo_informacion ? bloque('col-12', 'Flujo de información del reporte', 'ti-route', `<div class="card-body" id="fi">${flujoInformacion()}</div>`, 'Quién entrega cada fuente, cada cuánto se actualiza y cómo llega al reporte') : ''}
     ${notaGobierno(ms)}
   </div>`;
   conectarFlujos(el); conectarMapa(el); conectarFlujoInfo(el);
