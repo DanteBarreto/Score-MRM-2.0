@@ -123,6 +123,10 @@ class Generacion(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         html = (self.tmp / "reporte.html").read_text(encoding="utf-8")
         self.assertNotIn("/*__DATOS__*/null", html)
+        # Autocontenido: estilos, íconos, fuente y script van dentro del HTML, sin recursos externos
+        self.assertNotRegex(html, r'(href|src)="https?://')
+        self.assertNotIn("<!--__", html)
+        self.assertIn("data:font/woff2;base64,", html)
         return json.loads(re.search(r"const DATOS = (\{.*?\});\n", html, re.S).group(1))
 
     def test_historico_e_id_normalizado(self):

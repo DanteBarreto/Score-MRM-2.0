@@ -13,7 +13,7 @@ Necesitas [Python 3.10 o superior](https://www.python.org/downloads/), [Visual S
 3. Abre `config.yaml` e indica en `carpeta_inputs` la carpeta de tus inputs. Si los nombres de tus archivos son otros, ajústalos en `archivos`.
 4. Presiona `Ctrl+Shift+B` para generar el reporte. Se abrirá en tu navegador y la revisión de calidad de datos quedará en `output/control_calidad.txt`.
 
-El reporte queda en `output/reporte_mrm.html`. Incluye los datos, así que compártelo solo con quien corresponda. Necesita internet al abrirse, porque carga los estilos desde un CDN.
+El reporte queda en `output/reporte_mrm.html`. Incluye los datos, así que compártelo solo con quien corresponda. Es un solo archivo autocontenido: lleva dentro los estilos, los íconos y la fuente, así que se ve igual sin internet y al abrirlo desde el navegador, Outlook, Teams o SharePoint.
 
 También puedes hacerlo todo con un solo comando, que explica cada paso y te pide la carpeta de tus Excel:
 
@@ -54,7 +54,7 @@ flowchart LR
     D --> R[output/reporte_mrm.html]
 ```
 
-Python lee los inputs, revisa su calidad, une la información por ID de modelo y la inserta en la plantilla. Los indicadores se calculan en el navegador, para que se actualicen con cada filtro.
+Python lee los inputs, revisa su calidad, une la información por ID de modelo y la inserta en la plantilla, junto con los estilos, íconos y fuente de `templates/vendor`. Los indicadores se calculan en el navegador, para que se actualicen con cada filtro.
 
 ## Estructura del proyecto
 
@@ -70,6 +70,7 @@ Score-MRM-2.0/
 │   ├── calidad.py             Controles de calidad de datos
 │   └── generar_diccionario.py Crea el diccionario de datos y el anexo de la guía
 ├── templates/         Plantilla del reporte: diseño e indicadores
+│   └── vendor/        Estilos, íconos y fuente que se incrustan en el reporte
 ├── contenido/         Contenido de la sección Gobierno (gobierno_modelos.yaml)
 ├── tests/             Pruebas automáticas
 ├── .vscode/           Tareas y configuración de Visual Studio Code

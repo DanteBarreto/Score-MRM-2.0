@@ -100,7 +100,7 @@ Calidad de datos: 22 alertas y 37 avisos. Detalle en output\control_calidad.txt
 
 Si hay errores de calidad de datos, el proceso se detiene y los muestra. Qué significa cada control está en [calidad_datos.md](calidad_datos.md).
 
-El reporte necesita internet al abrirse, porque carga los estilos desde un CDN. El archivo HTML incluye todos los datos, así que compártelo solo con quien corresponda.
+El reporte es un solo archivo autocontenido: lleva dentro los estilos, los íconos y la fuente, así que no necesita internet y se puede compartir por correo, Teams o SharePoint. Incluye todos los datos, así que compártelo solo con quien corresponda.
 
 ## 6. Revisar el reporte
 
@@ -179,7 +179,8 @@ En macOS o Linux, usa `python3` para crear el entorno y `.venv/bin/python` en lo
 | No aparecen los bloques de TTM, SBS & AI, Calidad de Datos, Inventario o Nota de Gobierno | Tu `config.yaml` es de la versión 1 y no lista esos archivos | Copia las secciones `archivos` y `homologacion` de `config.ejemplo.yaml` |
 | Un bloque muestra "solo está disponible para…" | Elegiste un mes anterior al último | Selecciona el último mes en el filtro Fecha |
 | `PermissionError` al guardar | El Excel está abierto | Ciérralo y vuelve a ejecutar |
-| El reporte se ve sin estilos | No hay acceso al CDN | Revisa la conexión a internet o la red corporativa |
+| El reporte se ve sin estilos o deformado | Se generó con una versión anterior al 11/11/2026, que cargaba los estilos de internet | Haz **Git: Pull**, vuelve a generar el reporte y comparte el archivo nuevo |
+| Al abrirlo desde SharePoint se descarga o se ve el código | SharePoint no muestra páginas HTML en el navegador | Descárgalo y ábrelo con doble clic |
 
 <!-- ARCHIVOS:INICIO -->
 ## Anexo: archivos de entrada
