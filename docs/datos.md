@@ -2,85 +2,78 @@
 
 ## Carpeta local
 
-El repositorio no contiene inputs. Cada persona guarda los tres Excel en una carpeta de su equipo y la indica en `carpeta_inputs` de su `config.yaml`. Git ignora `config.yaml`, los Excel y el reporte generado.
+El repositorio no contiene inputs. Cada persona guarda los Excel en una carpeta de su equipo y la indica en `carpeta_inputs` de su `config.yaml`. Git ignora `config.yaml`, los Excel y el reporte generado.
 
 El proceso lee la primera hoja de cada Excel, con los títulos en la primera fila.
 
 ## Archivos
 
-| Archivo | Contenido | Identificador | Periodicidad |
-|---|---|---|---|
-| Input principal | Inventario y campos de cada indicador | `ID_MODELO` | Una fila por modelo y `FECHA` |
-| Reporte de observaciones | Detalle de observaciones pendientes | `ID_Model` | Solo última fecha |
-| Tablón de coberturas | Cobertura por frente de validación | `Modelo_ID` | Solo última fecha |
+| Archivo | Obligatorio | Granularidad | Llave del modelo | Sección |
+|---|---|---|---|---|
+| Input principal histórico | Sí | Una fila por modelo y fecha de corte | `ID_MODELO` | Todas |
+| Inventario de modelos | No | Una fila por modelo | `ID_MODELO` | Inventario |
+| TTM | No | Una fila por modelo en alerta | `ID_MODELO` | Seguimiento |
+| Reporte de observaciones | No | Una fila por observación de validación | `ID_Model` | Observaciones |
+| Observaciones SBS & AI | No | Una fila por observación de SBS o auditoría interna | `ID_MODELO` | Observaciones |
+| Nota de Gobierno | No | Una fila por PO usuario y model developer | `PO_USUARIO` y `MODELO_DEVELOPER` | Gobierno |
+| Calidad de Datos | No | Una fila por modelo evaluado | `ID` | Implementación |
+| Tablón de coberturas | No | Una fila por modelo | `Modelo_ID` | Validación |
+| Gobierno de modelos.yaml | No | Texto editable, no es Excel | No aplica | Gobierno |
 
 Los nombres de los archivos se definen en `archivos` de `config.yaml`.
 
-`docs/referencia/Indicadores.xlsx` documenta las medidas de Power BI (DAX) y no se lee en el proceso: las reglas están programadas en la plantilla. Si cambia una regla, hay que actualizar la plantilla y [Indicadores](indicadores.md).
+**Campos y tipos de dato:** están en el [anexo de la guía de Visual Studio Code](guia_vscode.md#anexo-archivos-de-entrada) y en el [diccionario de datos](referencia/Diccionario_de_datos.xlsx), con una hoja por archivo. Ambos se generan desde `src/esquema.py`, que es la definición que usa el proceso.
 
-## Input principal
+`docs/referencia/Indicadores.xlsx` documenta las medidas de Power BI (DAX) y no se lee en el proceso.
 
-| Grupo | Columnas |
+## Cómo se relacionan
+
+```mermaid
+erDiagram
+    INPUT_PRINCIPAL ||--o| INVENTARIO : "ID_MODELO"
+    INPUT_PRINCIPAL ||--o| TTM : "ID_MODELO"
+    INPUT_PRINCIPAL ||--o{ OBSERVACIONES : "ID_Model"
+    INPUT_PRINCIPAL }o--o{ OBS_SBS_AI : "ID_MODELO"
+    INPUT_PRINCIPAL }o--o| NOTA_GOBIERNO : "PO_USUARIO y MODEL_DEVELOPER"
+    INPUT_PRINCIPAL ||--o| CALIDAD_DATOS : "ID"
+    INPUT_PRINCIPAL ||--o| COBERTURAS : "Modelo_ID"
+    INVENTARIO }o--o{ INVENTARIO : "ID_MODELO_INPUT"
+```
+
+- **Llave:** el número del modelo. Se acepta `21122`, `MOD-BCP-21122` o `MOD-BCP-0000177`.
+- **Último mes:** los archivos de detalle solo se cruzan con los modelos del último mes del input principal.
+- **Varios modelos en una celda:** en Observaciones SBS & AI y en `ID_MODELO_INPUT` del inventario se separan en una fila por modelo.
+
+## Reglas de uso
+
+| Archivo | Regla |
 |---|---|
-| Identificación | `FECHA`, `ID_MODELO`, `NOMBRE_MODELO`, `TIER_MODELO`, `ESTADO_MODELO`, `TIPO_RIESGO` |
-| Clasificación | `PRODUCTO`, `SUB_PRODUCTO`, `BANCA`, `PROCESO` |
-| Responsables | `MODEL_DEVELOPER`, `RESPONSABLE_MONITORING`, `RESPONSABLE_DEVELOPER`, `PO_USUARIO`, `MODEL_USER` |
-| Seguimiento | `ESTADO_SEGUIMIENTO`, `ESTADO_ALERTA`, `EXCESO_MESES_TTM`, `EXCEDE_TTM`, `IMPACTO`, `PRESENCIA_MITIGANTE`, `DESCRIPCION_MITIGANTE` |
-| Completitud de seguimiento | `BBDD`, `GOB`, `PRECISION_DISCRIMINACION`, `GRANULARIDAD`, `UNIVARIADA` |
-| Validación | `VALIDACION_COMPLETA`, `VALIDACION_PERIODICA`, `NOTA_DINAMICA_VALIDACION` |
-| Observaciones | `OBS_CRIT_RELE_MODE_PENDIENTES_VI`, `OBS_CRIT_RELE_MODE_VENCIDAS_VI`, `OBS_SBS_AI_PENDIENTES`, `OBS_SBS_AI_VENCIDAS`, `OBS_AMB_TEC_PENDIENTES`, `OBS_AMB_TEC_VENCIDOS` |
-| Implementación | `PLATAFORMA_IMPLEMENTACION`, `AMBIENTE_DESPLIEGUE`, `RATIO_IMPLEMENTACION`, `PLATAFORMA_DATA`, `AMBIENTE_DATA`, `RATIO_DATA`, `NOTA_CALIDAD_DATOS` |
-| Gobierno y desarrollo | `NUM_INCIDENTES`, `NOTA_GOBIERNO`, `NOTA_10_LINEAMIENTOS` |
+| Input principal | Es la base: calcula los indicadores, el score y los evolutivos |
+| Inventario | Aporta los modelos input (`ID_MODELO_INPUT`), el código completo de cada modelo y las fechas de inicio y retiro para las altas y bajas. El estado del modelo sale del input principal |
+| TTM | Agrega fecha de alerta, plan de acción y tiempos de atención a los modelos en alerta |
+| Reporte de observaciones | Los días vencidos se calculan desde el compromiso vigente (`Fecha ampliada` si existe, si no `Fecha estimada`) |
+| Observaciones SBS & AI | Solo el estado "Pendiente" cuenta como pendiente. Las observaciones sin modelo se muestran como transversales. El correo no se incluye en el reporte |
+| Nota de Gobierno | Se asigna por PO usuario y model developer; si el PO tiene una sola fila, por PO. Las áreas se homologan en `config.yaml` |
+| Calidad de Datos | Cada criterio se muestra como porcentaje de su peso |
+| Tablón de coberturas | Las fechas de descobertura van como `d/mm/aaaa` |
 
-Las notas y ratios van de 0 a 1. La columna opcional `SIMULADO` marca con 1 las filas simuladas.
+## Contenido de Gobierno
 
-## Reporte de observaciones
+`Gobierno de modelos.yaml` resume la norma interna y por eso vive en la carpeta de inputs y no en el repositorio. Se edita a mano y tiene estas secciones:
 
-| Grupo | Columnas |
+| Sección | Qué contiene |
 |---|---|
-| Identificación | `ID_Obs`, `ID_Model`, `FECHA_PROCESO` |
-| Contenido | `Observación`, `Recomendación`, `Criticidad_observacion`, `Ambito_observacion`, `Tipo_revisión` |
-| Plazos | `Estado_Vencimiento`, `# Ampliaciones`, `Fecha estimada`, `Fecha ampliada` |
-| Responsables | `Nombre_proyecto`, `Area homologada`, `Manager_nombre`, `Validador_nombre`, `Propietario_nombre` |
+| `roles` | Áreas que participan en los flujos y su línea de defensa |
+| `flujos` | Procesos del gobierno de modelos, con sus pasos, responsables, entradas, salidas y aprobaciones |
+| `aprobaciones` | Instancia que aprueba cada asunto, para Tier I y para Tier II a IV |
+| `comites` | Comités, de mayor a menor instancia |
+| `ambitos` | Etapas del gobierno que aplican a cada perímetro |
+| `indicadores` | Qué mide y por qué importa cada indicador, por clave |
+| `mapa_normativo` | Normas y políticas de modelos, por grupo |
+| `flujo_informacion` | Fuentes del reporte (owner, recurrencia, fecha de corte, sistema e indicadores que alimentan) y proceso de actualización |
 
-Los días vencidos se calculan entre el compromiso vigente (`Fecha ampliada` si existe, si no `Fecha estimada`) y `FECHA_PROCESO`. No se usa `Diferencia_dias`, porque siempre parte de la fecha estimada original.
-
-## Tablón de coberturas
-
-| Grupo | Columnas |
-|---|---|
-| Identificación | `Modelo_ID`, `Fecha` |
-| Cobertura actual | `Cobertura_Metodologia`, `Cobertura_Implementación`, `Cobertura_Global` |
-| Cobertura proyectada | `Proy_Cobertura_Met`, `Proy_Cobertura_Imp`, `Proy_Cobertura_Global` |
-| Fechas | `Met_Fecha_fin`, `Imp_Fecha_fin`, `Fecha_descobertura_Met`, `Fecha_descobertura_Imp` |
-| Última validación | `Met_Tipo_revision`, `Imp_Tipo_revision`, `Met_Alcance`, `Imp_Alcance`, `Met_Manager`, `Imp_Manager`, `Met_Validador`, `Imp_Validador`, `Calificación_Metodología`, `Calificación_Implementación` |
-
-`Fecha_descobertura_Met` y `Fecha_descobertura_Imp` van en formato `dd/mm/aaaa`.
+Un texto `[Por confirmar]` se muestra resaltado en el reporte. Si el archivo falta, Gobierno muestra solo la nota de gobierno, la explicación de las puntuaciones y el flujo básico de archivos.
 
 ## Controles de calidad
 
-Al generar el reporte, la consola lista avisos que no detienen el proceso:
-
-- Modelos "Sin Seguimiento" con nota de completitud, o "Con Seguimiento" sin ella.
-- Modelos "Sin Seguimiento" marcados "En alerta".
-- Modelos en alerta sin dato de mitigante, o sin alerta con ese dato.
-- Mitigante "Si" con descripción "No aplica".
-- Ambiente informado con plataforma sin información.
-- `NOTA_CALIDAD_DATOS` igual a 0.
-- Más observaciones vencidas que pendientes.
-- Filas repetidas en observaciones.
-- Modelos sin registro en el tablón.
-- Observaciones y coberturas de modelos fuera del inventario.
-
-## Diferencias conocidas entre fuentes
-
-En la base de desarrollo de agosto de 2026 se encontró lo siguiente. Conviene revisarlo con los datos reales:
-
-| Dato | Input principal | Archivo de detalle |
-|---|---|---|
-| Críticas, relevantes y moderadas pendientes | 151 | 163 |
-| Críticas, relevantes y moderadas vencidas | 121 | 127 |
-| Observaciones de entorno tecnológico pendientes | 11 | 9 |
-| `VALIDACION_PERIODICA` frente a `Cobertura_Global` | 20 modelos con estado distinto | |
-
-El score y la cabecera usan el input principal.
+El proceso revisa los archivos en cada corrida y guarda el resultado en `output/control_calidad.txt`. Los controles, sus niveles y las mejoras propuestas están en [calidad_datos.md](calidad_datos.md).

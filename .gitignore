@@ -15,6 +15,10 @@ config.yaml
 *.xls
 *.csv
 !docs/referencia/Indicadores.xlsx
+!docs/referencia/Diccionario_de_datos.xlsx
 
 # Bloqueos temporales de Excel
 ~$*
+
+# Contenido de la sección Gobierno: resume la norma interna, vive en la carpeta de inputs
+Gobierno de modelos.yaml

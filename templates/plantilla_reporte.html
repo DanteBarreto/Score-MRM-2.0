@@ -7,125 +7,381 @@
 <!-- Plantilla base: Tabler 1.4 (MIT) sobre Bootstrap 5 · Íconos: Tabler Icons (MIT) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
 <style>
+/* ============ Mundo visual: pizarra de agencia bancaria ============
+   Azul marino institucional en la carcasa, cifras condensadas y tabulares,
+   naranja reservado para lo activo (sección, filtro y mes seleccionados). */
 :root{
-  /* Semáforo (alineado a la paleta de Tabler) + "No aplica" */
-  --g:#2fb344; --g-bg:#e6f6e9; --a:#e08900; --a-bg:#fff3dc; --r:#d63939; --r-bg:#fbe6e6; --n:#b5bcc6; --n-bg:#f1f3f6;
-  --track:#eef1f5; --drv-bg:#eef4fa;
+  --marino:#085A93; --marino-2:#0B6DB0; --marino-3:#096AAD; --linea-osc:rgba(255,255,255,.18); --txt-osc:#CFE3F3;
+  --naranja:#FF6600; --naranja-osc:#FF8F4D; --naranja-txt:#B04400;
+  --fondo:#EDF1F6; --borde:#D3DBE5; --borde-suave:#E4E9F0; --tinta:#14213A; --tinta-2:#4A5870; --sutil:#F5F7FA;
+  --tblr-primary:#0B5CA8; --tblr-primary-rgb:11,92,168; --tblr-primary-lt:#E5EEF8; --tblr-link-color:#0B5CA8; --tblr-link-color-rgb:11,92,168;
+  --tblr-body-color:#14213A; --tblr-secondary:#4A5870; --tblr-border-color:#D3DBE5; --tblr-border-radius:4px;
+  --tblr-font-sans-serif:"Archivo","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  /* Semáforo: texto (AA sobre blanco y sobre su fondo), fondo claro, tono para formas y barras, y tono sobre marino */
+  --g:#0D6B47; --g-bg:#DDF2E8; --g-dot:#17945F; --g-osc:#45D094;
+  --a:#8A4B00; --a-bg:#FCEFD6; --a-dot:#E08A00; --a-osc:#FFBF47;
+  --r:#A8141F; --r-bg:#FBE3E4; --r-dot:#D92332; --r-osc:#FF7A7A;
+  --n:#5B6676; --n-bg:#EDF0F4; --n-dot:#AEB7C3; --n-osc:#8FA3BD;
+  --track:#E9EEF4; --drv-bg:#F3F6FA;
 }
-body{background:#f6f8fb}
-/* Barra lateral */
-.marca{font-family:"Arial Black",Arial,Helvetica,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
-.navbar-vertical{background:linear-gradient(180deg,#096AAD 0%,#FF6600 100%)!important;border-right:0;color:#fff}
-.navbar-vertical .navbar-brand,.navbar-vertical .nav-link,.navbar-vertical .nav-link-icon,.navbar-vertical .navbar-toggler{color:#fff!important}
-.side-label{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#fff;font-weight:600;padding:.75rem .75rem .35rem;text-shadow:0 1px 2px rgba(0,0,0,.45)}
-.filtros{padding:0 .75rem 1rem}
-.filtros .form-label{font-size:.75rem;color:#fff;font-weight:600;margin:.5rem 0 .2rem;text-shadow:0 1px 2px rgba(0,0,0,.45)}
-.filtros .on{border-color:#fff;box-shadow:0 0 0 .15rem rgba(255,255,255,.55)}
-#fcount{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.45)}
-.navbar-vertical .nav-link:hover{background:rgba(255,255,255,.12);border-radius:6px}
-.navbar-vertical .nav-item.active .nav-link{background:rgba(255,255,255,.24);border-radius:6px;font-weight:600}
-.navbar-vertical .navbar-nav{padding:0 .5rem}
+body{background-color:var(--fondo);color:var(--tinta);font-family:var(--tblr-font-sans-serif);font-size:.875rem;letter-spacing:-.003em;-webkit-font-smoothing:antialiased}
+.cifra,.h1,.h2,td.cell,.tablero td.pts,.tablero td.val{font-variant-numeric:tabular-nums}
+.cifra{font-stretch:72%;font-weight:800;letter-spacing:-.01em;line-height:1}
+::selection{background:#CFE0EE;color:var(--tinta)}
+.form-control::placeholder{color:#6B7890}
+:focus-visible{outline:2px solid var(--tblr-primary);outline-offset:2px}
+.btn{border-radius:4px;font-weight:600}
+.btn-primary{--tblr-btn-bg:var(--marino);--tblr-btn-border-color:var(--marino);--tblr-btn-hover-bg:var(--marino-2);--tblr-btn-hover-border-color:var(--marino-2);--tblr-btn-active-bg:#061B33}
+.text-primary{color:var(--marino-3)!important}
 
-/* KPIs y tarjetas */
-.kpi .avatar{width:2.75rem;height:2.75rem;font-size:1.35rem}
-.kpi .h1{font-variant-numeric:tabular-nums}
-/* Gráficos */
+/* ---------- Barra lateral ---------- */
+.navbar-vertical{background:linear-gradient(180deg,#096AAD 0%,#FF6600 100%)!important;border-right:0;color:#fff}
+.navbar-vertical .navbar-brand{padding:1.1rem .75rem .9rem}
+.marca{font-stretch:75%;font-weight:900;text-transform:uppercase;font-size:1.6rem;letter-spacing:.01em;line-height:1;color:#fff}
+.marca span{color:var(--naranja-osc)}
+.navbar-vertical .nav-link,.navbar-vertical .nav-link-icon,.navbar-vertical .navbar-toggler{color:#fff!important}
+.side-label{font-size:.75rem;color:#fff;font-weight:700;padding:1rem .75rem .35rem;border-top:1px solid var(--linea-osc);margin-top:.5rem}
+.filtros{padding:0 .75rem 1rem}
+.filtros .form-label{font-size:.75rem;color:#fff;font-weight:600;margin:.55rem 0 .2rem}
+.navbar-vertical .form-select,.navbar-vertical .form-control{background-color:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2);color:#fff;border-radius:4px}
+.navbar-vertical .form-select option{color:var(--tinta);background:#fff}
+.navbar-vertical .form-control::placeholder{color:rgba(255,255,255,.85)}
+.navbar-vertical .input-icon-addon{color:#fff}
+.navbar-vertical .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}
+.navbar-vertical .btn:hover{background:rgba(255,255,255,.08)}
+.filtros .on{border-color:#fff!important;box-shadow:0 0 0 .15rem rgba(255,255,255,.55)}
+#nfil{background:#fff!important;color:var(--marino)!important}
+.msel{position:relative}
+.msel-btn{text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.msel-panel{color-scheme:light;position:absolute;z-index:1050;left:0;right:0;top:calc(100% + 4px);background:#fff;color:var(--tinta);border:1px solid var(--borde);border-radius:4px;box-shadow:0 8px 24px rgba(20,33,58,.22);max-height:260px;overflow:auto;padding:.3rem 0}
+.msel-acc{display:flex;justify-content:space-between;padding:.2rem .6rem .35rem;border-bottom:1px solid var(--borde);margin-bottom:.2rem}
+.msel-acc button{all:unset;cursor:pointer;font-size:.72rem;font-weight:700;color:var(--marino-3)}
+.msel-acc button:hover{text-decoration:underline}
+.msel-op{display:flex;align-items:flex-start;gap:.45rem;padding:.3rem .6rem;font-size:.8rem;cursor:pointer;line-height:1.25}
+.msel-op:hover{background:var(--fondo)}
+.msel-op input{margin-top:.12rem;accent-color:var(--marino-3);flex:none}
+#fcount{color:#fff;font-weight:600}
+.navbar-vertical .navbar-nav{padding:0 .5rem}
+.navbar-vertical .nav-link{border-radius:4px;font-weight:500;padding-top:.45rem;padding-bottom:.45rem}
+.navbar-vertical .nav-link:hover{background:rgba(255,255,255,.07)}
+.navbar-vertical .nav-link:focus-visible{outline:2px solid var(--naranja-osc);outline-offset:-2px}
+.navbar-vertical .nav-item.active .nav-link{background:rgba(255,255,255,.2);color:#fff!important;font-weight:700}
+.navbar-vertical .nav-item.active .nav-link-icon{color:var(--naranja-osc)!important}
+
+/* ---------- Cabecera ---------- */
+.page-header{margin-top:0;padding-top:1.5rem}
+.page-pretitle{text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:600;color:var(--tinta-2)}
+.page-title{font-size:1.75rem;font-weight:800;font-stretch:85%;letter-spacing:-.015em;line-height:1.1;color:var(--tinta)}
+
+/* ---------- Cuadros: placa blanca plana, esquina corta, filete marino arriba ---------- */
+.card{border:1px solid var(--borde);border-top:2px solid var(--marino);border-radius:4px;box-shadow:none}
+.card-header{background:#fff;border-bottom:1px solid var(--borde-suave);padding:.85rem 1.1rem;min-height:0}
+.card-title{font-size:1.02rem;font-weight:700;letter-spacing:-.008em;color:var(--tinta)}
+.card-title i{font-size:1.1rem}
+.card-header{flex-wrap:wrap;gap:.6rem 1rem}
+.card-header>.card-actions{margin:0 0 0 auto;padding:0;max-width:100%}
+.card-actions>.d-flex{justify-content:flex-end;align-items:center}
+.card-actions .form-select{max-width:100%;min-width:0}
+.card-footer{background:var(--sutil);border-top:1px solid var(--borde-suave)}
+.subheader{text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:600;color:var(--tinta-2)}
+.table thead th{background:var(--sutil);color:var(--tinta-2);font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--borde)}
+.table>tbody>tr:hover>*{background-color:#F2F6FB}
+.table td{border-color:var(--borde-suave)}
+.form-select,.form-control{border-radius:4px}
+
+/* ---------- Pizarra (firma del reporte) ---------- */
+.pizarra{background:var(--marino);color:#fff;border-radius:4px;margin-bottom:1rem;display:grid;grid-template-columns:minmax(230px,1.05fr) minmax(0,3fr)}
+.pz-global{padding:1.25rem 1.5rem 1.1rem}
+.pz-et{font-size:.8rem;color:var(--txt-osc);font-weight:600}
+.pz-num{font-size:5.75rem;display:flex;align-items:flex-end;gap:.6rem;margin:.35rem 0 .35rem}
+.pz-num small{font-size:.9rem;font-stretch:100%;font-weight:600;color:var(--txt-osc);margin-bottom:.7rem}
+.pz-var{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:#D4E0EE;flex-wrap:wrap}
+.sube{color:var(--g-osc);font-weight:700}.baja{color:var(--r-osc);font-weight:700}.igual{color:var(--txt-osc);font-weight:700}
+.pz-spark{display:block;margin-top:.9rem;width:100%;max-width:260px;height:44px;overflow:visible}
+.pz-drivers{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-left:1px solid var(--linea-osc)}
+.pz-drv{all:unset;box-sizing:border-box;padding:1.25rem 1rem 1.1rem;border-right:1px solid var(--linea-osc);display:flex;flex-direction:column;gap:.35rem;cursor:pointer;transition:background .15s}
+.pz-drv:last-child{border-right:0}
+.pz-drv:hover{background:rgba(255,255,255,.06)}
+.pz-drv:focus-visible{outline:2px solid var(--naranja-osc);outline-offset:-2px}
+.pz-drv[aria-disabled=true]{cursor:default}.pz-drv[aria-disabled=true]:hover{background:none}
+.pz-drv{min-width:0}
+.pz-drv .t{font-size:.8rem;color:#D4E0EE;font-weight:600;display:flex;align-items:flex-start;gap:6px;line-height:1.25;min-width:0;hyphens:auto}
+.pz-drv .t i{display:none}
+.pz-drv .n{font-size:2.6rem;display:flex;align-items:center;gap:.5rem;margin-top:auto}
+.pz-drv .d{font-size:.78rem}
+.pz-pie{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--linea-osc);background:rgba(0,0,0,.14)}
+.pz-pie>div{padding:.75rem 1.5rem;border-right:1px solid var(--linea-osc)}
+.pz-pie>div:last-child{border-right:0}
+.pz-pie b{display:block;font-size:1.65rem;color:#fff}
+.pz-pie span{font-size:.76rem;color:var(--txt-osc)}
+.pizarra .dot.verde{background:var(--g-osc)!important}.pizarra .dot.ambar{background:var(--a-osc)!important}
+.pizarra .dot.rojo{background:var(--r-osc)!important}.pizarra .dot.na{box-shadow:inset 0 0 0 2px var(--n-osc)}
+@media (max-width:1199px){.pizarra{grid-template-columns:1fr}.pz-drivers{border-left:0;border-top:1px solid var(--linea-osc);grid-template-columns:repeat(3,minmax(0,1fr))}.pz-drv:nth-child(3n){border-right:0}.pz-drv:nth-child(-n+3){border-bottom:1px solid var(--linea-osc)}}
+@media (max-width:640px){.pz-drivers,.pz-pie{grid-template-columns:repeat(2,minmax(0,1fr))}.pz-num{font-size:4.5rem}.pz-pie>div{padding:.7rem 1rem}}
+
+/* ---------- Tarjetas de conteo ---------- */
+.stat .avatar{width:2.5rem;height:2.5rem;font-size:1.25rem;border-radius:4px;background:var(--drv-bg)!important;color:var(--marino-3)!important}
+.stat .h2{font-stretch:72%;font-weight:800;letter-spacing:-.01em}
+.stat .h2{font-size:2rem;line-height:1}
+
+/* ---------- Gráficos ---------- */
 .lineas svg{display:block;width:100%;height:auto}
-.lineas text{font-family:inherit;fill:var(--tblr-secondary);font-size:12px}
-.lineas text.valor{fill:var(--tblr-body-color);font-size:14px;font-weight:700}
-.lineas text.sel{fill:var(--tblr-body-color);font-weight:700}
+.lineas text{font-family:inherit;fill:var(--tinta-2);font-size:12px;font-variant-numeric:tabular-nums}
+.lineas text.valor{fill:var(--tinta);font-size:15px;font-weight:800;font-stretch:80%}
+.lineas text.sel{fill:var(--naranja-txt);font-weight:800}
+.lineas .rejilla{stroke:var(--borde-suave);stroke-dasharray:2 4}
 .lineas .hit{fill:transparent;outline:none}
-.lineas .cruz{stroke:var(--tblr-secondary);stroke-width:1;opacity:0}
-.lineas .col:hover .cruz,.lineas .col:focus-within .cruz{opacity:.5}
-#tip{position:fixed;transform:translate(-50%,-100%);background:#fff;border:1px solid var(--tblr-border-color);border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:.4rem .6rem;font-size:.78rem;white-space:pre-line;pointer-events:none;z-index:2000}
-#tip::first-line{font-weight:700}
-.leg{display:flex;gap:12px;font-size:.75rem;color:var(--tblr-secondary);flex-wrap:wrap}
-.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
-.barras{display:flex;flex-direction:column;gap:.55rem}
-.barra{display:grid;grid-template-columns:minmax(90px,38%) 1fr 3.2rem;gap:.6rem;align-items:center;font-size:.82rem}
-.barra .et{line-height:1.15}
-.barra b{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
-.pista{display:flex;gap:2px;height:12px}
-.pista i{display:block;height:100%;min-width:3px}
-.pista i:last-child{border-radius:0 4px 4px 0}
+.lineas .hit:focus-visible{stroke:var(--tblr-primary);stroke-width:2}
+.lineas .cruz{stroke:var(--tinta-2);stroke-width:1;opacity:0}
+.lineas .col:hover .cruz,.lineas .col:focus-within .cruz{opacity:.45}
+#tip{position:fixed;transform:translate(-50%,-100%);background:var(--marino);color:#fff;border-radius:4px;box-shadow:0 6px 18px rgba(9,106,173,.25);padding:.45rem .65rem;font-size:.78rem;white-space:pre-line;pointer-events:none;z-index:2000;font-variant-numeric:tabular-nums}
+#tip::first-line{font-weight:800}
+.leg{display:flex;gap:14px;font-size:.76rem;color:var(--tinta-2);flex-wrap:wrap}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.barras{display:flex;flex-direction:column;gap:.6rem}
+.barra{display:grid;grid-template-columns:minmax(90px,38%) 1fr 3.2rem;gap:.7rem;align-items:center;font-size:.82rem}
+.barra .et{line-height:1.35}
+.barra b{font-variant-numeric:tabular-nums;font-weight:800;font-stretch:80%;font-size:.95rem;text-align:right}
+.pista{display:flex;gap:2px;height:10px}
+.pista i{display:block;height:100%;min-width:3px;border-radius:1px}
+.donas{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem 1.5rem}
+.dona{display:flex;flex-direction:column;align-items:center;gap:.35rem;min-width:0}
+.dona svg{width:150px;height:150px;display:block}
+.dona .arco{cursor:default;transition:opacity .15s}
+.dona svg:hover .arco{opacity:.55}.dona svg .arco:hover{opacity:1}
+.dona .c1{font-size:22px;font-weight:800;font-stretch:75%;fill:var(--tinta);font-variant-numeric:tabular-nums}
+.dona .c2{font-size:10px;fill:var(--tinta-2)}
+.dona .tit{font-size:.82rem;font-weight:700}
+.vbarras{display:flex;align-items:flex-end;gap:.5rem;height:210px;padding-top:1.4rem;border-bottom:1px solid var(--borde)}
+.vbarra{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.vbarra b{font-size:.85rem;font-weight:800;font-stretch:80%;font-variant-numeric:tabular-nums;margin-bottom:.2rem}
+.vbarra i{display:block;width:100%;max-width:46px;border-radius:2px 2px 0 0;min-height:2px}
+.vetiq{display:flex;gap:.5rem;margin-top:.4rem}
+.vetiq span{flex:1;min-width:0;font-size:.7rem;line-height:1.2;text-align:center;color:var(--tinta-2);overflow-wrap:anywhere}
 .grupo-fila{cursor:pointer}
 .grupo-fila button{all:unset;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px}
 .grupo-fila button:focus-visible{outline:2px solid var(--tblr-primary);outline-offset:2px}
-.heat tr.sub td:first-child{padding-left:2.1rem;color:var(--tblr-secondary)}
+.heat tr.sub td:first-child{padding-left:2.1rem;color:var(--tinta-2)}
 
-/* Semáforo */
-.sem{display:inline-flex;align-items:center;gap:6px;padding:.2rem .6rem;border-radius:999px;font-size:.72rem;font-weight:600;white-space:nowrap}
-.sem::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
-.verde{color:var(--g);background:var(--g-bg)}.ambar{color:var(--a);background:var(--a-bg)}.rojo{color:var(--r);background:var(--r-bg)}.na{color:#8a93a0;background:var(--n-bg)}
-.dot{display:inline-block;width:16px;height:16px;border-radius:50%;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+/* ---------- Semáforo: círculo en todos los tamaños ---------- */
+.sem{display:inline-flex;align-items:center;gap:6px;padding:.18rem .55rem;border-radius:3px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.sem::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sem-dot,currentColor)}
+.verde{color:var(--g);background:var(--g-bg)}.ambar{color:var(--a);background:var(--a-bg)}.rojo{color:var(--r);background:var(--r-bg)}.na{color:var(--n);background:var(--n-bg)}
+.sem.verde{--sem-dot:var(--g-dot)}.sem.ambar{--sem-dot:var(--a-dot)}.sem.rojo{--sem-dot:var(--r-dot)}.sem.na{--sem-dot:var(--n-dot)}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;flex:none}
+.dot.na{background:transparent!important;box-shadow:inset 0 0 0 2px var(--n-dot)}
 
-/* Tablero vertical de indicadores */
+/* ---------- Tablero vertical de indicadores ---------- */
 .tablero{margin:0}
-.tablero thead th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tblr-secondary);background:#fff;border-bottom:2px solid var(--tblr-border-color)}
 .tablero td{vertical-align:middle;padding-top:.6rem;padding-bottom:.6rem}
 .tablero td:not(.drv){padding-left:1rem!important}
-.tablero td.drv{padding-left:1.25rem!important}
-.tablero tr.grupo td{border-top:2px solid var(--tblr-border-color)}
-.tablero td.drv{background:var(--drv-bg);width:190px;border-right:1px solid var(--tblr-border-color)}
+.tablero td.drv{padding-left:1.1rem!important}
+.tablero tr.grupo td{border-top:1px solid var(--borde)}
+.tablero td.drv{background:var(--drv-bg);width:190px;border-right:1px solid var(--borde-suave)}
 .tablero td.drv .nombre{font-weight:700;display:flex;align-items:center;gap:6px}
-.tablero td.drv .nombre i{color:var(--tblr-primary)}
-.tablero td.val{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;width:90px}
+.tablero td.drv .nombre i{color:var(--marino-3)}
+.tablero td.val{text-align:center;font-weight:600;width:170px}
+.sim{display:inline-flex;align-items:center;border:1px solid var(--borde);border-radius:4px;background:#fff;overflow:hidden}
+.sim-b{all:unset;cursor:pointer;width:26px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--marino-3);font-size:1rem;transition:background .15s}
+.sim-b:hover{background:var(--tblr-primary-lt)}
+.sim-b:focus-visible{outline:2px solid var(--tblr-primary);outline-offset:-2px}
+.sim-campo{display:inline-flex;align-items:center;border-left:1px solid var(--borde);border-right:1px solid var(--borde);padding:0 .3rem}
+.sim-in{width:3.6rem;border:0;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;color:var(--tinta);background:transparent;padding:.25rem 0;-moz-appearance:textfield}
+.sim-in:focus{outline:none}
+.sim-campo:focus-within{box-shadow:inset 0 0 0 2px var(--tblr-primary)}
+.sim-in::-webkit-outer-spin-button,.sim-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.sim-campo .u{font-weight:600;color:var(--tinta-2);font-size:.85rem}
+.sim-antes{font-size:.72rem;font-weight:600;color:var(--naranja-txt);min-height:0;margin-top:.15rem}
+.sim-antes:empty{display:none}
+.tablero tr.sim-on td:not(.drv){background:#FFF4EC}
+.tablero tr.sim-on .sim{border-color:var(--naranja)}
+.sim-nota{font-size:.8rem;color:var(--tinta-2);background:var(--fondo);border-radius:4px;padding:.45rem .7rem}
+.sim-delta{font-size:.85rem;font-weight:700;white-space:nowrap}
+.sim-delta .sube{color:var(--g)}.sim-delta .baja{color:var(--r)}.sim-delta .igual{color:var(--tinta-2)}
+.card.simulando{border-top-color:var(--naranja)}
+.card.simulando #sim-etq{color:var(--naranja-txt)!important}
 .tablero td.luz{text-align:center;width:90px}
-.tablero td.pts{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;width:110px}
-.tablero tr.no-aplica td:not(.drv){color:#9aa3af}
+.ir-sem{all:unset;cursor:pointer;display:inline-flex;padding:6px;border-radius:50%;transition:background .15s}
+.ir-sem:hover{background:var(--tblr-primary-lt)}
+.ir-sem:focus-visible{outline:2px solid var(--tblr-primary);outline-offset:1px}
+.tablero td.pts{text-align:center;font-weight:800;font-stretch:80%;font-size:1.05rem;width:110px}
+.tablero tr.no-aplica td:not(.drv){color:var(--n)}
+.tablero tr.no-aplica td.pts{font-size:.8rem;font-weight:600;font-stretch:100%}
 .score-actual{display:flex;align-items:center;gap:12px}
-.score-actual .num{font-size:2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
-.leyenda-umbral{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--tblr-border-color);font-size:.85rem}
+.score-actual .num{font-size:2.2rem;font-weight:800;font-stretch:72%;line-height:1;font-variant-numeric:tabular-nums}
+.leyenda-umbral{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;padding:12px;border-top:1px solid var(--borde-suave);background:var(--sutil);font-size:.82rem}
 .leyenda-umbral div{display:flex;align-items:center;gap:8px}
 
-/* Tabla mapa de calor */
+/* ---------- Mapas de calor ---------- */
 .heat thead th{cursor:pointer;user-select:none;white-space:nowrap;vertical-align:middle}
 .heat td{white-space:nowrap}
-td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
+td.cell{font-weight:800;font-stretch:80%;font-size:.92rem;text-align:center;box-shadow:inset 2px 0 0 #fff}
 .macro-scroll{max-height:70vh;overflow:auto}
 .macro-scroll thead{position:sticky;top:0;z-index:3}
-.macro-scroll thead th{background:#fff}
-.macro-scroll thead tr.banda th{cursor:default;border-left:1px solid var(--tblr-border-color);color:var(--tblr-secondary)}
+.macro-scroll thead th{background:var(--sutil)}
+.macro-scroll thead tr.banda th{cursor:default;border-left:1px solid var(--borde);color:var(--tinta);text-transform:none;letter-spacing:0;font-size:.78rem}
 .macro-scroll .fija{position:sticky;left:0;background:#fff;z-index:1;white-space:normal;min-width:240px;max-width:280px}
-.macro-scroll thead .fija{z-index:4}
-.chip{display:inline-flex;gap:6px;align-items:center;background:var(--tblr-primary-lt);color:var(--tblr-primary);border-radius:999px;padding:.15rem .3rem .15rem .7rem;font-size:.78rem;margin:0 .35rem .35rem 0}
-.chip button{border:0;background:none;color:inherit;padding:0 .3rem;font-size:1rem;line-height:1}
+.macro-scroll thead .fija{z-index:4;background:var(--sutil)}
+.chip{display:inline-flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--borde);color:var(--tinta);border-radius:3px;padding:.15rem .3rem .15rem .6rem;font-size:.78rem;margin:0 .35rem .6rem 0}
+.chip b{color:var(--marino-3)}
+.chip button{border:0;background:none;color:var(--tinta-2);padding:0 .3rem;font-size:1rem;line-height:1}
 .view{display:none}.view.active{display:block}
-.empty{padding:40px;text-align:center;color:var(--tblr-secondary)}
+.empty{padding:40px;text-align:center;color:var(--tinta-2)}
 .clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .obs-fila{cursor:pointer}
 .obs-det td{background:var(--drv-bg);white-space:normal}
 /* Flujo de inputs */
 .flujo{display:grid;grid-template-columns:minmax(0,1.5fr) auto minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1.5fr);gap:.75rem;align-items:stretch}
 .flujo-paso{display:flex;flex-direction:column;gap:.6rem}
-.flujo-num{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--tblr-secondary)}
-.flujo-caja{border:1px solid var(--tblr-border-color);border-radius:8px;padding:.7rem .8rem;background:#fff;font-size:.82rem;line-height:1.35}
+.flujo-num{font-size:.78rem;font-weight:700;color:var(--tinta-2)}
+.flujo-caja{border:1px solid var(--borde);border-radius:4px;padding:.7rem .8rem;background:#fff;font-size:.82rem;line-height:1.35}
 .flujo-caja b{display:block;margin-bottom:.15rem;font-size:.86rem}
 .flujo-caja.ancha{flex:1;display:flex;flex-direction:column;justify-content:center}
-.flujo-caja.input{border-left:4px solid var(--input)}
-.flujo-flecha{display:flex;align-items:center;color:var(--tblr-secondary);font-size:1.4rem}
+.flujo-caja.input b::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--input);margin-right:7px}
+.flujo-flecha{display:flex;align-items:center;color:var(--tinta-2);font-size:1.4rem}
 .flujo-seccion{display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
-.flujo-origen{display:inline-flex;gap:4px;align-items:center;color:var(--tblr-secondary);font-size:.74rem}
+.flujo-origen{display:inline-flex;gap:4px;align-items:center;color:var(--tinta-2);font-size:.74rem}
 .flujo-origen i{width:9px;height:9px;border-radius:50%;background:var(--input)}
 @media (max-width:991px){.flujo{grid-template-columns:minmax(0,1fr)}.flujo-flecha{justify-content:center;transform:rotate(90deg)}}
+/* Tiempo de atención: barra del TTM real con una marca en el TTM de gobierno */
+.ttm{display:grid;grid-template-columns:minmax(120px,36%) 1fr 6.5rem;gap:.6rem;align-items:center;font-size:.82rem;margin-bottom:.55rem}
+.ttm .et{line-height:1.35}
+.ttm .pista{position:relative;display:block;height:12px;background:var(--track);border-radius:2px}
+.ttm .pista i{display:block;height:100%;border-radius:2px;min-width:3px}
+.ttm .pista u{position:absolute;top:-3px;bottom:-3px;width:3px;margin-left:-1px;background:var(--tinta);border-radius:1px}
+.ttm b{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap}
+/* Gobierno: flujos interactivos */
+.gf-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.gf-tab{all:unset;cursor:pointer;font-size:.8rem;font-weight:600;padding:.35rem .75rem;border:1px solid var(--borde);border-radius:999px;color:var(--tinta-2);background:#fff;transition:background .15s,color .15s}
+.gf-tab:hover{border-color:var(--marino-3);color:var(--marino-3)}
+.gf-tab.on{background:var(--marino-3);border-color:var(--marino-3);color:#fff}
+.gf-tab:focus-visible,.gf-rol:focus-visible,.gf-paso button:focus-visible{outline:2px solid var(--tblr-primary);outline-offset:2px}
+.gf-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem}
+.gf-cab h4{font-size:1.05rem;font-weight:800}
+.gf-para{font-size:.85rem;color:var(--tinta-2);max-width:72ch}
+.gf-pasos{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:.4rem;position:relative}
+.gf-paso{position:relative}
+.gf-paso:not(:last-child)::after{content:"";position:absolute;top:19px;left:calc(50% + 22px);right:calc(-50% + 18px);height:2px;background:var(--borde)}
+.gf-paso button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;width:100%;padding:0 .15rem .5rem;border-radius:6px;box-sizing:border-box}
+.gf-num{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:#fff;border:2px solid var(--marino-3);color:var(--marino-3);position:relative;z-index:1;transition:background .15s,color .15s}
+.gf-paso.dec .gf-num{border-radius:8px;transform:rotate(45deg);width:32px;height:32px;margin:3px;border-color:var(--naranja);color:var(--naranja-txt)}
+.gf-paso.dec .gf-num i{transform:rotate(-45deg)}
+.gf-t{font-size:.78rem;font-weight:700;line-height:1.2;color:var(--tinta)}
+.gf-q{font-size:.68rem;color:var(--tinta-2);line-height:1.2}
+.gf-paso button:hover .gf-num{background:var(--tblr-primary-lt)}
+.gf-paso.on .gf-num{background:var(--marino-3);color:#fff}
+.gf-paso.dec.on .gf-num{background:var(--naranja);color:#fff}
+.gf-paso.on button{background:var(--drv-bg)}
+.gf-paso.apaga{opacity:.35}
+.gf-paso.apaga.on{opacity:.75}
+.gf-roles{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;margin:.75rem 0}
+.gf-rol{all:unset;cursor:pointer;font-size:.72rem;font-weight:600;padding:.15rem .55rem;border-radius:4px;background:var(--drv-bg);color:var(--tinta-2);border:1px solid var(--borde-suave)}
+.gf-rol:hover{border-color:var(--marino-3)}
+.gf-rol.on{background:var(--marino-3);color:#fff;border-color:var(--marino-3)}
+.gf-det{border:1px solid var(--borde);border-left:4px solid var(--marino-3);border-radius:4px;padding:.85rem 1rem;background:#fff}
+.gf-det.dec{border-left-color:var(--naranja)}
+.gf-det-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.6rem}
+.gf-det-cab h4{font-size:1rem;font-weight:800;margin:.1rem 0 0}
+.gf-det-n{font-size:.72rem;font-weight:700;color:var(--tinta-2)}
+.gf-datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem 1.25rem;font-size:.85rem}
+.gf-dato .subheader{margin-bottom:.15rem}
+.fi-filtros{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;margin-bottom:.75rem}
+.fi-fuentes{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:.5rem}
+.fi-f{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--borde);border-left:4px solid var(--c);border-radius:4px;padding:.6rem .75rem;background:#fff;display:flex;flex-direction:column;gap:.3rem;transition:opacity .15s,box-shadow .15s}
+.fi-f:hover{border-color:var(--marino-3);border-left-color:var(--c)}
+.fi-f.on{box-shadow:0 0 0 2px var(--marino-3)}
+.fi-f.apaga{opacity:.35}
+.fi-f:focus-visible{outline:2px solid var(--tblr-primary);outline-offset:2px}
+.fi-f b{font-size:.86rem;line-height:1.2}
+.fi-own{font-size:.74rem;color:var(--tinta-2);line-height:1.25}
+.fi-tags{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:auto}
+.fi-tag{font-size:.68rem;font-weight:700;border-radius:4px;padding:.02rem .4rem;background:var(--drv-bg);color:var(--tinta-2);white-space:nowrap}
+.fi-tag.r-mensual{background:#E0F2FE;color:#075985}
+.fi-tag.r-quincenal{background:#EDE9FE;color:#5B21B6}
+.fi-tag.r-trimestral{background:#FFF1E6;color:var(--naranja-txt)}
+.fi-ind{display:inline-block;font-size:.76rem;background:var(--drv-bg);border-radius:4px;padding:.1rem .45rem;margin:0 .25rem .3rem 0}
+.fi-ind small{color:var(--tinta-2);font-weight:600}
+.fi-sub{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--marino);margin:1.4rem 0 .7rem}
+.fi-sub:first-child{margin-top:0}
+.gf-paso .fi-tag{margin-top:.1rem}
+.g-pc{display:inline-block;font-size:.72rem;font-weight:700;color:var(--naranja-txt);background:#FFF1E6;border-radius:4px;padding:0 .35rem}
+.g-cr{color:var(--marino)}
+.g-comites{display:flex;flex-direction:column;align-items:stretch}
+.g-comite{border:1px solid var(--borde);border-left:4px solid var(--marino);border-radius:4px;padding:.65rem .8rem;background:#fff}
+.g-comite.n1{border-left-color:var(--marino-3)}
+.g-comite.n2{border-left-color:#2E8BD8}
+.g-flecha{text-align:center;color:var(--tinta-2);line-height:1.6}
+.g-sesion{font-size:.7rem;background:var(--drv-bg);border-radius:4px;padding:.05rem .4rem;color:var(--tinta-2)}
+.g-si{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;font-size:.75rem;margin-right:.4rem;vertical-align:-3px}
+.g-si.si{background:var(--g-bg);color:var(--g)}
+.g-si.no{background:var(--n-bg);color:var(--tinta-2)}
+.leg .g-si{width:16px;height:16px;margin-right:5px}
+.leg .g-si i{width:auto;height:auto;margin:0;border-radius:0;vertical-align:0}
+.g-ambitos{table-layout:fixed;min-width:640px}.g-ind{table-layout:fixed;min-width:860px}.g-ambitos thead th{white-space:normal!important;vertical-align:bottom}.g-ambitos th:first-child{width:20%}
+.g-ind td{white-space:normal;vertical-align:top;font-size:.85rem}
+.g-ind tr.g-drv td{background:var(--drv-bg);font-weight:800;color:var(--marino);font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}
+.mn-g{border:1px solid var(--borde);border-radius:4px;margin-bottom:.5rem;background:#fff}
+.mn-g summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:.5rem;padding:.6rem .8rem}
+.mn-g summary::-webkit-details-marker{display:none}
+.mn-g summary:hover{background:var(--sutil)}
+.mn-g summary:focus-visible{outline:2px solid var(--tblr-primary);outline-offset:-2px}
+.mn-ch{transition:transform .15s;color:var(--marino-3)}
+.mn-g[open] .mn-ch{transform:rotate(90deg)}
+.mn-n{font-size:.72rem;font-weight:700;background:var(--marino-3);color:#fff;border-radius:999px;padding:0 .5rem}
+.mn-g table{border-top:1px solid var(--borde-suave)}
+.mn-cod{font-variant-numeric:tabular-nums;font-weight:700;color:var(--marino);width:110px}
+.mn-serie{font-size:.7rem;font-weight:600;color:var(--c);border:1px solid currentColor;border-radius:4px;padding:.05rem .4rem;white-space:nowrap}
+@media (max-width:991px){.gf-pasos{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:1rem}.gf-paso::after{display:none}}
+/* Altas y bajas del inventario */
+.mov-resumen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.mov-cifra .h1{font-stretch:72%;font-weight:800}
+.movs{display:flex;align-items:stretch;height:200px;padding-top:1.2rem}
+.mov{flex:1;display:flex;flex-direction:column;min-width:0}
+.mov-barras{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:2px;border-bottom:1px solid var(--borde)}
+.mov-barras i{position:relative;display:block;width:42%;max-width:18px;min-height:1px;border-radius:2px 2px 0 0}
+.mov-barras b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:.68rem;font-weight:700;color:var(--tinta-2);font-style:normal;line-height:1.4}
+.mov>span{font-size:.68rem;color:var(--tinta-2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.3rem}
+.mov.actual>span{color:var(--tinta);font-weight:700}
+/* Mapa de modelos input */
+.chip-m{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--borde);border-radius:3px;padding:.1rem .5rem;font-size:.76rem;margin:.15rem .3rem .15rem 0;background:#fff;max-width:340px}
+.chip-m i{width:9px;height:9px;border-radius:50%;flex:none}
+.chip-m span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.insumos td{white-space:normal;vertical-align:middle}
+.insumos tr.proceso td{background:var(--drv-bg);font-weight:700;border-top:1px solid var(--borde)}
+.insumos tr.sin td:not(.cell){background:#F5F7FA;color:var(--tinta-2)}
+.insumos tr.sin td b{color:var(--tinta-2)}
+.sin-input{display:inline-flex;align-items:center;gap:.3rem;font-size:.75rem;font-weight:600;color:var(--tinta-2);border:1px dashed #A9B4C2;border-radius:4px;padding:.12rem .45rem;background:#fff}
+.sin-input.fuera-inv{color:var(--naranja-txt);border-color:var(--naranja-osc)}
+.leg .sin-input i{width:auto;height:auto;margin:0;border-radius:0;vertical-align:0}
+.mapa-insumos{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:.75rem;align-items:center}
+.mapa-col{display:flex;flex-direction:column;gap:.5rem}
+.mapa-col>.subheader{margin-bottom:.1rem}
+.nodo{border:1px solid var(--borde);border-radius:4px;padding:.45rem .65rem;font-size:.8rem;line-height:1.35;background:#fff}
+.nodo.centro{background:var(--marino);border-color:var(--marino);color:#fff;font-size:.88rem}
+.nodo.centro small{color:var(--txt-osc)}
+.nodo b::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:6px}
+.nodo small{display:block;color:var(--tinta-2);font-size:.8rem}
+.titulo-bloque{font-size:1.15rem;font-weight:800;font-stretch:88%;margin:1.9rem 0 .75rem;letter-spacing:-.01em}
+@media (max-width:991px){.mapa-insumos{grid-template-columns:minmax(0,1fr)}}
 /* Detalle de alertas */
 .alertas-tabla td{vertical-align:middle}
 .alertas-tabla .desc{white-space:normal;min-width:280px;max-width:420px}
-.stat .h2{font-variant-numeric:tabular-nums}
 @media (max-width:640px){.tablero td.drv{width:auto}.tablero td.val,.tablero td.luz,.tablero td.pts{width:auto}}
-@media print{.navbar-vertical,.page-header .btn-list,.toolbar,#chips{display:none!important}.page-wrapper{margin-left:0!important}.view{display:block!important;page-break-after:always}}
+@media print{.navbar-vertical,.page-header .btn-list,.toolbar,#chips{display:none!important}.page-wrapper{margin-left:0!important}.view{display:block!important;page-break-after:always}.pizarra{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
 <div class="page">
 
   <!-- Barra lateral -->
-  <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="light">
+  <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Mostrar menú"><span class="navbar-toggler-icon"></span></button>
       <div class="navbar-brand d-flex align-items-center gap-2">
-        <span class="marca">Score MRM</span>
+        <span class="marca">Score <span>MRM</span></span>
       </div>
       <div class="collapse navbar-collapse" id="sidebar-menu">
         <div class="w-100">
@@ -137,6 +393,7 @@ td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
             <li class="nav-item"><a class="nav-link" href="#" data-v="validacion"><span class="nav-link-icon"><i class="ti ti-shield-check"></i></span><span class="nav-link-title">Validación</span></a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-v="obs"><span class="nav-link-icon"><i class="ti ti-clipboard-text"></i></span><span class="nav-link-title">Observaciones</span></a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-v="implementacion"><span class="nav-link-icon"><i class="ti ti-server-2"></i></span><span class="nav-link-title">Implementación</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-v="inventario"><span class="nav-link-icon"><i class="ti ti-affiliate"></i></span><span class="nav-link-title">Inventario</span></a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-v="gobierno"><span class="nav-link-icon"><i class="ti ti-sitemap"></i></span><span class="nav-link-title">Gobierno</span></a></li>
           </ul>
           <div class="side-label d-flex align-items-center gap-2">Filtros <span class="badge bg-primary text-white" id="nfil" hidden></span></div>
@@ -154,13 +411,12 @@ td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
         <div class="row g-2 align-items-center">
           <div class="col">
             <div class="page-pretitle">COE Model Risk Management</div>
-            <h2 class="page-title">Reporte de indicadores de modelos</h2>
+            <h1 class="page-title">Reporte de indicadores de modelos</h1>
             <div class="text-secondary small mt-1">Control de Riesgo de Modelo</div>
           </div>
           <div class="col-auto ms-auto">
             <div class="btn-list">
               <button class="btn btn-outline-secondary" id="exportar"><i class="ti ti-file-export me-1"></i>Exportar CSV</button>
-              <button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer me-1"></i>Imprimir / PDF</button>
             </div>
           </div>
         </div>
@@ -176,6 +432,7 @@ td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
         <div class="view" id="v-validacion"></div>
         <div class="view" id="v-obs"></div>
         <div class="view" id="v-implementacion"></div>
+        <div class="view" id="v-inventario"></div>
         <div class="view" id="v-gobierno"></div>
       </div>
     </div>
@@ -193,15 +450,35 @@ td.cell{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
 const DATOS = /*__DATOS__*/null;
 
 /* ===================== UTILIDADES DE CÁLCULO ===================== */
-const UMBRALES = { rojo: 70, verde: 80 };
+// Umbrales del semáforo: rojo < rojo, ámbar entre rojo y verde, verde > verde.
+// Dependen de los Tier elegidos en el filtro; sin filtro de Tier se usan los generales.
+const UMBRAL_BASE = { rojo: 70, verde: 80 };
+const UMBRAL_TIER = { I: { rojo: 85, verde: 90 }, II: { rojo: 80, verde: 85 }, III: { rojo: 75, verde: 80 }, IV: { rojo: 60, verde: 75 } };
+// Varios Tier: se aplica la primera regla que se cumple, en este orden.
+// "exacto": la selección es justo esos Tier; si no, basta con que la selección incluya el Tier.
+// Así, con Tier I y II se usa 81-86, y cualquier otra combinación con Tier I (por ejemplo, los cuatro) usa 70-80.
+const UMBRAL_MIX = [
+  { incluye: ['I', 'II'], exacto: true, rojo: 81, verde: 86 },
+  { incluye: ['I'], rojo: 70, verde: 80 },
+  { incluye: ['II'], rojo: 69, verde: 79 },
+  { incluye: ['III'], rojo: 66, verde: 77 }
+];
+const tierRomano = t => { const v = String(t ?? '').replace(/tier/i, '').trim().toUpperCase(); return { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' }[v] || v; };
+function umbralesTier(sel) {
+  const ts = [...new Set((sel || []).map(tierRomano))];
+  if (!ts.length) return { ...UMBRAL_BASE, regla: 'Umbrales generales' };
+  if (ts.length === 1) return UMBRAL_TIER[ts[0]] ? { ...UMBRAL_TIER[ts[0]], regla: `Tier ${ts[0]}` } : { ...UMBRAL_BASE, regla: 'Umbrales generales' };
+  const r = UMBRAL_MIX.find(x => x.incluye.every(t => ts.includes(t)) && (!x.exacto || ts.length === x.incluye.length));
+  return r ? { rojo: r.rojo, verde: r.verde, regla: r.exacto ? `Tier ${r.incluye.join(' y ')}` : `Varios Tier · incluye Tier ${r.incluye[0]}` } : { ...UMBRAL_BASE, regla: 'Umbrales generales' };
+}
+let UMBRALES = umbralesTier([]);
 const clamp = v => Math.max(0, Math.min(100, v));
 const sem = s => (s == null ? 'na' : s < UMBRALES.rojo ? 'rojo' : s > UMBRALES.verde ? 'verde' : 'ambar');
 const SEM_TXT = { verde: 'Verde', ambar: 'Ámbar', rojo: 'Rojo', na: 'No aplica' };
 const COLOR = { verde: 'g', ambar: 'a', rojo: 'r', na: 'n' };
 const fmt = v => (v == null ? '–' : (Math.round(v * 10) / 10).toLocaleString('es-PE', { maximumFractionDigits: 1 }));
 const fmt0 = v => (v == null ? '–' : Math.round(v).toLocaleString('es-PE'));
-const esSimulada = f => DATOS.fechas_simuladas.includes(f);
-const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
 const mesTxt = f => `${MESES[+f.slice(5, 7) - 1]}-${f.slice(2, 4)}`;
 const avg = a => a.reduce((x, y) => x + y, 0) / (a.length || 1);
 const avgN = a => { const v = a.filter(x => x != null); return v.length ? avg(v) : null; };
@@ -216,17 +493,20 @@ const NA = { v: null, p: null };                                 // valor "-" y 
 // Cada medida recibe un conjunto de modelos y devuelve { v: valor, p: puntuación }.
 // Se evalúa igual sobre el portafolio filtrado o sobre un solo modelo.
 const notaProm = k => ms => { const a = prom(ms, k); return a == null ? NA : { v: a * 100, p: a * 100 }; };
+// "Saludable" y "Aceptable" son modelos evaluados sin alerta, igual que "Sin alerta"
+const SIN_ALERTA = ['Sin alerta', 'Saludable', 'Aceptable'];
 const medAlerta = ms => {
-  if (!cuenta(ms, es('ESTADO_ALERTA', 'En alerta', 'Sin alerta'))) return NA;
+  if (!cuenta(ms, es('ESTADO_ALERTA', 'En alerta', ...SIN_ALERTA))) return NA;
   const v = cuenta(ms, es('ESTADO_ALERTA', 'En alerta'));
-  return { v, p: ratio(v, ms.length) };
+  return { v, p: ratio(v, ms.length), d: ms.length };
 };
 const medAmbiente = (amb, rat) => ms => {
-  if (!cuenta(ms, es(amb, 'PRODUCTIVO', 'NO PRODUCTIVO', 'MIXTO'))) return NA;
+  const n = cuenta(ms, es(amb, 'PRODUCTIVO', 'NO PRODUCTIVO', 'MIXTO'));
+  if (!n) return NA;
   const r = prom(ms, rat);
-  return { v: cuenta(ms, es(amb, 'NO PRODUCTIVO', 'MIXTO')), p: r == null ? null : r * 100 };
+  return { v: cuenta(ms, es(amb, 'NO PRODUCTIVO', 'MIXTO')), p: r == null ? null : r * 100, d: n };
 };
-const medObs = (venc, pend) => ms => ({ v: sum(ms, venc), p: ratio(sum(ms, venc), sum(ms, pend)) });
+const medObs = (venc, pend) => ms => ({ v: sum(ms, venc), p: ratio(sum(ms, venc), sum(ms, pend)), d: sum(ms, pend) });
 
 // lp: cómo se puntúa el indicador, explicado para el usuario en la sección Gobierno
 const CFG = {
@@ -237,7 +517,7 @@ const CFG = {
         med: ms => {
           if (!cuenta(ms, es('ESTADO_SEGUIMIENTO', 'Con Seguimiento', 'Sin Seguimiento'))) return NA;
           const v = cuenta(ms, es('ESTADO_SEGUIMIENTO', 'Sin Seguimiento'));
-          return { v, p: ratio(v, ms.length) };
+          return { v, p: ratio(v, ms.length), d: ms.length };
         } },
       { key: 'alerta_salud', nombre: '# Modelos con alerta de salud', tipo: 'conteo',
         lp: 'Porcentaje de modelos que no están en alerta.', med: medAlerta },
@@ -247,7 +527,7 @@ const CFG = {
           const a = medAlerta(ms);
           if (a.p == null || a.v === 0 || !cuenta(ms, es('EXCEDE_TTM', 'Excede TTM', 'No excede'))) return NA;
           const v = cuenta(ms, es('EXCEDE_TTM', 'Excede TTM'));
-          return { v, p: ratio(v, a.v) };
+          return { v, p: ratio(v, a.v), d: a.v };
         } },
       { key: 'alerta_sin_mitigantes', nombre: '# Modelos con alerta de salud sin mitigante temporal', tipo: 'conteo',
         lp: 'De los modelos en alerta, porcentaje que no figura sin mitigante temporal. No aplica si no hay modelos en alerta.',
@@ -255,24 +535,24 @@ const CFG = {
           const a = medAlerta(ms);
           if (a.p == null || a.v === 0) return NA;
           const v = cuenta(ms, m => m.ESTADO_ALERTA === 'En alerta' && m.PRESENCIA_MITIGANTE === 'No');
-          return { v, p: ratio(v, a.v) };
+          return { v, p: ratio(v, a.v), d: a.v };
         } },
-      { key: 'profundidad_seguimiento', nombre: 'Nivel de profundidad de seguimiento (%)', tipo: 'nota',
+      { key: 'profundidad_seguimiento', nombre: 'Nivel de profundidad del seguimiento (%)', tipo: 'nota',
         lp: 'Promedio de las notas de base de datos, gobierno, precisión y discriminación, granularidad y análisis univariado.', med: notaProm('_PROFUNDIDAD') } ] },
     { key: 'validacion', nombre: 'Validación', icono: 'ti-checks', peso: 1, ind: [
       { key: 'sin_val_inicial', nombre: '# Modelos sin validación de primera vez', tipo: 'conteo',
         lp: 'Porcentaje de modelos que tienen validación de primera vez.',
-        med: ms => { const v = cuenta(ms, es('VALIDACION_COMPLETA', 'Sin validación')); return { v, p: ratio(v, ms.length) }; } },
-      { key: 'incumple_val_periodica', nombre: '# Modelos que incumplen la validación periódica', tipo: 'conteo',
+        med: ms => { const v = cuenta(ms, es('VALIDACION_COMPLETA', 'Sin validación')); return { v, p: ratio(v, ms.length), d: ms.length }; } },
+      { key: 'incumple_val_periodica', nombre: '# Modelos sin validación periódica', tipo: 'conteo',
         lp: 'Porcentaje de modelos con la validación periódica vigente.',
-        med: ms => { const v = cuenta(ms, es('VALIDACION_PERIODICA', 'Descoberturado')); return { v, p: ratio(v, ms.length) }; } },
+        med: ms => { const v = cuenta(ms, es('VALIDACION_PERIODICA', 'Descoberturado')); return { v, p: ratio(v, ms.length), d: ms.length }; } },
       { key: 'nota_dinamica_validacion', nombre: 'Nota dinámica de validación (%)', tipo: 'nota',
         lp: 'Promedio de la nota dinámica de validación.', med: notaProm('NOTA_DINAMICA_VALIDACION') } ] },
     { key: 'observaciones', nombre: 'Observaciones', icono: 'ti-clipboard-list', peso: 1, ind: [
       { key: 'obs_venc_validacion', nombre: '# Observaciones vencidas de validación (críticas, relevantes y moderadas)', tipo: 'conteo',
         lp: 'De las observaciones pendientes críticas, relevantes y moderadas, porcentaje que aún no está vencido. No aplica si no hay pendientes.',
         med: medObs('OBS_CRIT_RELE_MODE_VENCIDAS_VI', 'OBS_CRIT_RELE_MODE_PENDIENTES_VI') },
-      { key: 'obs_venc_reg_aud', nombre: '# Observaciones vencidas del regulador local, auditoría externa y auditoría interna', tipo: 'conteo',
+      { key: 'obs_venc_reg_aud', nombre: '# Observaciones vencidas del regulador local (SBS)', tipo: 'conteo',
         lp: 'De las observaciones pendientes del regulador y auditoría, porcentaje que aún no está vencido. No aplica si no hay pendientes.',
         med: medObs('OBS_SBS_AI_VENCIDAS', 'OBS_SBS_AI_PENDIENTES') } ] },
     { key: 'implementacion', nombre: 'Implementación', icono: 'ti-server-2', peso: 1, ind: [
@@ -285,7 +565,7 @@ const CFG = {
     { key: 'gobierno', nombre: 'Gobierno', icono: 'ti-scale', peso: 1, ind: [
       { key: 'incidencias_inventario', nombre: '# Incidentes en el inventario de modelos', tipo: 'conteo',
         lp: 'Compara los incidentes con el total de modelos: sin incidentes puntúa 100 y baja a medida que aumentan.',
-        med: ms => { const v = sum(ms, 'NUM_INCIDENTES'); return { v, p: ratio(v, ms.length) }; } },
+        med: ms => { const v = sum(ms, 'NUM_INCIDENTES'); return { v, p: ratio(v, ms.length), d: ms.length }; } },
       { key: 'nota_documentacion', nombre: 'Nota de documentación (desarrollo, validación, estándares, políticas, waivers y uso de la calculadora de valorización) (%)', tipo: 'nota',
         lp: 'Promedio de la nota de documentación.', med: notaProm('NOTA_GOBIERNO') } ] },
     { key: 'desarrollo', nombre: 'Desarrollo', icono: 'ti-code', peso: 1, ind: [
@@ -319,8 +599,8 @@ const META_COLS = ['FECHA', 'ID_MODELO', 'NOMBRE_MODELO', ...DIMS.map(d => d.k)]
 // Encabezados abreviados para la tabla de indicadores de Macro
 const CORTOS = {
   sin_seguimiento: 'Seguimiento', alerta_salud: 'Estado de alerta', alerta_excede_tiempo: 'Exceso meses TTM', alerta_sin_mitigantes: 'Mitigante',
-  profundidad_seguimiento: 'Completitud de seguimiento', sin_val_inicial: 'Val. inicial', incumple_val_periodica: 'Val. periódica',
-  nota_dinamica_validacion: 'Nota dinámica', obs_venc_validacion: 'Crit/Relev/Mod venc. de val.', obs_venc_reg_aud: 'SBS y Auditoría Interna',
+  profundidad_seguimiento: 'Profundidad del seguimiento', sin_val_inicial: 'Val. inicial', incumple_val_periodica: 'Val. periódica',
+  nota_dinamica_validacion: 'Nota dinámica', obs_venc_validacion: 'Crit/Relev/Mod venc. de val.', obs_venc_reg_aud: 'Regulador local (SBS)',
   impl_np_despliegue: 'Despliegue', impl_np_data: 'Data', nota_calidad_datos: 'Calidad datos',
   incidencias_inventario: 'Incidentes', nota_documentacion: 'Documentación', nota_lineamientos_desarrollo: 'Cumpl. 10 lineamientos'
 };
@@ -344,40 +624,83 @@ function preparar(filas) {
 }
 const fmtVal = (i, r) => (r.v == null ? '–' : fmt0(r.v) + (i.tipo === 'nota' ? '%' : ''));
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// Código original del modelo (MOD-BCP-21122): del input principal o, para modelos input fuera del score, del inventario
+const CODIGOS = Object.fromEntries(DATOS.modelos.map(m => [String(m.ID_MODELO), m.CODIGO_MODELO]));
+const cod = id => (id == null ? id : CODIGOS[id] || (DATOS.inv_nombres[id] || {}).c || id);
+const campo = (r, c) => (/^id_modelo$/i.test(c) ? cod(r[c]) : r[c]);
 const uniq = k => [...new Set(MODELOS.map(m => m[k]).filter(v => v !== '' && v != null))].sort((a, b) => String(a).localeCompare(String(b), 'es'));
 
 /* ===================== COMPONENTES ===================== */
 const col = s => COLOR[sem(s)];
 const pill = s => `<span class="sem ${sem(s)}">${SEM_TXT[sem(s)]}</span>`;
-const dot = s => `<span class="dot" style="background:var(--${col(s)})" title="${SEM_TXT[sem(s)]}"></span>`;
-const cellStyle = s => `background:var(--${col(s)}-bg);color:${s == null ? '#8a93a0' : `var(--${col(s)})`}`;
+// Color de marca de un estado (puntos, barras, líneas). El texto usa var(--g) etc., más oscuro.
+const tono = s => `var(--${col(s)}-dot)`;
+const dot = s => `<span class="dot ${sem(s)}" style="background:${tono(s)}" role="img" aria-label="Semáforo: ${SEM_TXT[sem(s)]}" title="${SEM_TXT[sem(s)]}"></span>`;
+const cellStyle = s => `background:var(--${col(s)}-bg);color:var(--${col(s)})`;
 const leyendaUmbral = () => `<div class="leyenda-umbral">
   <div>${dot(0)}<b style="color:var(--r)">Rojo</b><span class="text-secondary">&lt; ${UMBRALES.rojo}</span></div>
   <div>${dot(75)}<b style="color:var(--a)">Ámbar</b><span class="text-secondary">${UMBRALES.rojo} – ${UMBRALES.verde}</span></div>
   <div>${dot(100)}<b style="color:var(--g)">Verde</b><span class="text-secondary">&gt; ${UMBRALES.verde}</span></div>
-  <div>${dot(null)}<b class="text-secondary">No aplica</b></div></div>`;
+  <div>${dot(null)}<b class="text-secondary">No aplica</b></div>
+  <div class="text-secondary small ms-auto"><i class="ti ti-adjustments me-1"></i>${esc(UMBRALES.regla)}</div></div>`;
+
+/* Simulación del tablero: el usuario cambia el VALOR de un indicador y se recalculan puntuación, semáforo y score.
+   Solo cambia lo que se ve en el tablero; los datos y el resto del reporte no se tocan.
+   - Notas (%): la puntuación es el mismo valor.
+   - Conteos: cada unidad vale 100 / d puntos, donde d es la base del indicador (modelos evaluados, modelos en alerta
+     u observaciones pendientes). Para los ratios puros equivale a recalcular 1 - valor / base; en implementación,
+     cada modelo que pasa a productivo suma lo que suma un modelo 100% productivo.
+   Cada indicador se simula por separado: bajar los modelos en alerta no cambia la base de los indicadores que dependen de ella. */
+let SIM = {}, SIM_BASE = null;
+const simulable = (i, r) => r.v != null && r.p != null && (i.tipo === 'nota' || r.d > 0);
+const simMax = (i, r) => (i.tipo === 'nota' ? 100 : Math.max(r.d, r.v));
+const simPaso = i => (i.tipo === 'nota' ? 1 : 1);
+const redondeoVal = (i, v) => (i.tipo === 'nota' ? Math.round(v * 10) / 10 : Math.round(v));
+function puntajeSim(i, r) {
+  if (!(i.key in SIM)) return r.p;
+  const v = SIM[i.key];
+  return i.tipo === 'nota' ? clamp(v) : clamp(r.p + 100 * (r.v - v) / r.d);
+}
+function scoreSim(R) {
+  const drv = {};
+  CFG.drivers.forEach(d => { drv[d.key] = avgN(d.ind.map(i => puntajeSim(i, R.ind[i.key]))); });
+  const ds = CFG.drivers.filter(d => drv[d.key] != null), peso = ds.reduce((a, d) => a + d.peso, 0);
+  return peso ? ds.reduce((a, d) => a + d.peso * drv[d.key], 0) / peso : null;
+}
+const celdaValor = (i, r) => {
+  if (!simulable(i, r)) return fmtVal(i, r);
+  const v = redondeoVal(i, r.v), u = i.tipo === 'nota' ? '<span class="u">%</span>' : '';
+  return `<div class="sim"><button type="button" class="sim-b" data-paso="-1" aria-label="Bajar valor">−</button>
+    <span class="sim-campo"><input type="number" class="sim-in" value="${v}" min="0" max="${simMax(i, r)}" step="${simPaso(i)}" inputmode="decimal" aria-label="Valor simulado de ${esc(i.nombre)}">${u}</span>
+    <button type="button" class="sim-b" data-paso="1" aria-label="Subir valor">+</button></div><div class="sim-antes"></div>`;
+};
 
 // Tablero vertical: driver | indicador | valor | semáforo | puntuación
-// ms es el portafolio filtrado; con el filtro Modelo, un solo modelo.
+// ms es el portafolio filtrado.
 function tablero(ms, titulo, subtitulo) {
   const R = medidas(ms), g = R.global;
+  SIM_BASE = R;
   const filas = CFG.drivers.map(dr => {
     return dr.ind.map((i, j) => {
       const r = R.ind[i.key], s = r.p;
       const drv = j === 0 ? `<td class="drv" rowspan="${dr.ind.length}"><div class="nombre"><i class="ti ${dr.icono}"></i>${dr.nombre}</div></td>` : '';
-      return `<tr class="${j === 0 ? 'grupo' : ''} ${s == null ? 'no-aplica' : ''}">${drv}
+      const vista = VISTA_DRV[dr.key];
+      const luz = vista ? `<button type="button" class="ir-sem" data-ir="${vista}" data-tip="${esc(`${dr.nombre}: ${SEM_TXT[sem(s)]}\nClic para abrir la sección`)}" aria-label="Abrir la sección ${esc(dr.nombre)} · semáforo ${SEM_TXT[sem(s)]}">${dot(s)}</button>` : dot(s);
+      return `<tr class="${j === 0 ? 'grupo' : ''} ${s == null ? 'no-aplica' : ''}" data-k="${i.key}">${drv}
         <td>${esc(i.nombre)}</td>
-        <td class="val">${fmtVal(i, r)}</td>
-        <td class="luz">${dot(s)}</td>
-        <td class="pts" style="color:${s == null ? '#9aa3af' : `var(--${col(s)})`}">${s == null ? 'No aplica' : fmt0(s)}</td></tr>`;
+        <td class="val">${celdaValor(i, r)}</td>
+        <td class="luz">${luz}</td>
+        <td class="pts" style="color:var(--${col(s)})">${s == null ? 'No aplica' : fmt0(s)}</td></tr>`;
     }).join('');
   }).join('');
   return `<div class="card">
     <div class="card-header flex-wrap gap-3">
       <div><h3 class="card-title d-flex align-items-center gap-2"><i class="ti ti-list-details text-primary"></i>${titulo}</h3>
         <div class="text-secondary small mt-1">${subtitulo}</div></div>
-      <div class="card-actions score-actual"><span class="text-secondary fw-semibold">Score actual</span>
-        <span class="num" style="color:var(--${col(g)})">${fmt(g)}</span>${pill(g)}</div>
+      <div class="card-actions score-actual"><button type="button" id="sim-reset" class="btn btn-sm btn-outline-secondary" disabled><i class="ti ti-restore me-1"></i>Valores iniciales</button>
+        <span class="text-secondary fw-semibold" id="sim-etq">Score actual</span>
+        <span class="num" id="sim-score" style="color:var(--${col(g)})">${fmt(g)}</span><span id="sim-pill">${pill(g)}</span><span id="sim-delta" class="sim-delta"></span></div>
+      <div class="sim-nota w-100"><i class="ti ti-adjustments-horizontal me-1"></i>Simula el score: sube o baja el <b>valor</b> de cualquier indicador con − / + o escribiendo el número. La puntuación, el semáforo y el score se recalculan al momento. Es solo una simulación: no cambia los datos ni el resto del reporte.</div>
     </div>
     <div class="table-responsive"><table class="table card-table tablero">
       <thead><tr><th>Driver</th><th>Indicador</th><th class="text-center">Valor</th><th class="text-center">Semáforo</th><th class="text-center">Puntuación</th></tr></thead>
@@ -393,69 +716,122 @@ const abiertos = new Set(), abiertosB = new Set();   // Filas desplegadas en los
 let ordenG = { k: 'global', asc: true }, ordenB = { k: 'global', asc: true }, ordenM = { k: 'global', asc: true };
 let FIL = {};
 const ULTIMA = DATOS.fechas[DATOS.fechas.length - 1];
-function resetFil() { FIL = { fecha: ULTIMA, q: '', modelo: '' }; DIMS.forEach(d => FIL[d.k] = ''); cambiarFecha(); }
+function resetFil() { FIL = { fecha: ULTIMA, q: '' }; DIMS.forEach(d => FIL[d.k] = []); cambiarFecha(); }
 // La fecha elige la foto del inventario; el resto de filtros se aplica sobre esa foto
 function cambiarFecha() {
   MODELOS = TODOS.filter(m => m.FECHA === FIL.fecha);
-  if (!MODELOS.some(m => m.ID_MODELO === FIL.modelo)) FIL.modelo = '';
 }
-const nombreModelo = id => (MODELOS.find(m => m.ID_MODELO === id) || {}).NOMBRE_MODELO || '';
 
 function construirFiltros() {
   const el = document.getElementById('filtros');
   el.innerHTML = `<label class="form-label" for="f-fecha">Fecha</label><select id="f-fecha" class="form-select form-select-sm" data-f="fecha">${[...DATOS.fechas].reverse().map(f => `<option value="${f}" ${FIL.fecha === f ? 'selected' : ''}>${mesTxt(f)}</option>`).join('')}</select>
     <label class="form-label" for="fq">Buscar</label>
     <div class="input-icon"><span class="input-icon-addon"><i class="ti ti-search"></i></span><input id="fq" type="search" class="form-control form-control-sm" data-f="q" placeholder="Modelo o ID…" value="${esc(FIL.q)}"></div>
-    <label class="form-label" for="f-modelo">Modelo</label><select id="f-modelo" class="form-select form-select-sm" data-f="modelo"><option value="">Todos</option>${[...MODELOS].sort((a, b) => a.ID_MODELO - b.ID_MODELO).map(m => `<option value="${esc(m.ID_MODELO)}" ${FIL.modelo === m.ID_MODELO ? 'selected' : ''}>${esc(m.ID_MODELO)} · ${esc(m.NOMBRE_MODELO)}</option>`).join('')}</select>
-    ${DIMS.map(d => `<label class="form-label" for="f-${d.k}">${d.t}</label><select id="f-${d.k}" class="form-select form-select-sm" data-f="${d.k}"><option value="">Todos</option>${uniq(d.k).map(v => `<option ${FIL[d.k] === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>`).join('')}
+    ${DIMS.map(d => multiSel(d)).join('')}
     <button id="limpiar" class="btn btn-sm w-100 mt-3"><i class="ti ti-eraser me-1"></i>Limpiar filtros</button>`;
-  el.querySelectorAll('[data-f]').forEach(c => c.addEventListener('input', () => {
+  el.querySelectorAll('select[data-f], input[data-f]').forEach(c => c.addEventListener('input', () => {
     FIL[c.dataset.f] = c.value;
     if (c.dataset.f === 'fecha') { cambiarFecha(); construirFiltros(); }
     aplicar();
   }));
+  el.querySelectorAll('.msel').forEach(conectarMultiSel);
   el.querySelector('#limpiar').onclick = () => { resetFil(); construirFiltros(); aplicar(); };
   marcarFiltros();
 }
+// Filtro de selección múltiple: botón con el resumen y una lista de casillas. Sin casillas marcadas = Todos.
+const resumenSel = (vs, k) => (!vs.length ? 'Todos' : vs.length === 1 ? (k === 'TIER_MODELO' ? `Tier ${vs[0]}` : vs[0]) : `${vs.length} seleccionados`);
+const multiSel = d => `<div class="form-label" id="l-${d.k}">${d.t}</div><div class="msel" data-f="${d.k}">
+  <button type="button" class="form-select form-select-sm msel-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="l-${d.k}">${esc(resumenSel(FIL[d.k], d.k))}</button>
+  <div class="msel-panel" hidden><div class="msel-acc"><button type="button" data-acc="todos">Marcar todos</button><button type="button" data-acc="ninguno">Limpiar</button></div>
+    ${uniq(d.k).map(v => `<label class="msel-op"><input type="checkbox" value="${esc(v)}" ${FIL[d.k].includes(String(v)) ? 'checked' : ''}><span>${esc(d.k === 'TIER_MODELO' ? `Tier ${v}` : v)}</span></label>`).join('')}</div></div>`;
+function conectarMultiSel(box) {
+  const k = box.dataset.f, btn = box.querySelector('.msel-btn'), panel = box.querySelector('.msel-panel');
+  const abrir = on => { panel.hidden = !on; btn.setAttribute('aria-expanded', on); };
+  const leer = () => { FIL[k] = [...panel.querySelectorAll('input:checked')].map(c => c.value); btn.textContent = resumenSel(FIL[k], k); aplicar(); };
+  btn.onclick = e => { e.stopPropagation(); const on = panel.hidden; document.querySelectorAll('.msel-panel').forEach(p => { p.hidden = true; }); abrir(on); };
+  panel.onclick = e => e.stopPropagation();
+  panel.querySelectorAll('input').forEach(c => c.onchange = leer);
+  panel.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => { panel.querySelectorAll('input').forEach(c => { c.checked = b.dataset.acc === 'todos'; }); leer(); });
+  box.onkeydown = e => { if (e.key === 'Escape') { abrir(false); btn.focus(); } };
+}
+document.addEventListener('click', () => document.querySelectorAll('.msel-panel').forEach(p => { p.hidden = true; p.previousElementSibling.setAttribute('aria-expanded', false); }));
+const activo = (k, v) => (Array.isArray(v) ? v.length > 0 : !!v && !(k === 'fecha' && v === ULTIMA));
 function marcarFiltros() {
   document.querySelectorAll('#filtros select').forEach(s => s.classList.toggle('on', !!s.value && s.value !== ULTIMA));
-  const activos = Object.entries(FIL).filter(([k, v]) => v && !(k === 'fecha' && v === ULTIMA));
+  document.querySelectorAll('#filtros .msel').forEach(m => m.querySelector('.msel-btn').classList.toggle('on', FIL[m.dataset.f].length > 0));
+  const activos = Object.entries(FIL).filter(([k, v]) => activo(k, v));
   const b = document.getElementById('nfil'); b.hidden = !activos.length; b.textContent = activos.length;
-  const nombre = k => k === 'q' ? 'Búsqueda' : k === 'modelo' ? 'Modelo' : k === 'fecha' ? 'Fecha' : DIMS.find(d => d.k === k).t;
-  const valor = (k, v) => k === 'modelo' ? `${v} · ${nombreModelo(v)}` : k === 'fecha' ? mesTxt(v) : v;
-  document.getElementById('chips').innerHTML = activos.map(([k, v]) => `<span class="chip">${nombre(k)}: <b>${esc(valor(k, v))}</b><button data-k="${k}" aria-label="Quitar filtro">×</button></span>`).join('');
+  const nombre = k => k === 'q' ? 'Búsqueda' : k === 'fecha' ? 'Fecha' : DIMS.find(d => d.k === k).t;
+  const valor = (k, v) => k === 'fecha' ? mesTxt(v) : Array.isArray(v) ? (k === 'TIER_MODELO' ? v.map(t => `Tier ${t}`) : v).join(', ') : v;
+  document.getElementById('chips').innerHTML = activos.map(([k, v]) => `<span class="chip">${nombre(k)}: <b>${esc(valor(k, v))}</b><button data-k="${k}" aria-label="Quitar filtro ${esc(nombre(k))}">×</button></span>`).join('');
   document.querySelectorAll('#chips button').forEach(b => b.onclick = () => {
-    FIL[b.dataset.k] = b.dataset.k === 'fecha' ? ULTIMA : '';
+    FIL[b.dataset.k] = b.dataset.k === 'fecha' ? ULTIMA : Array.isArray(FIL[b.dataset.k]) ? [] : '';
     cambiarFecha(); construirFiltros(); aplicar();
   });
 }
 const pasaFiltros = m => {
   const q = FIL.q.toLowerCase();
-  return (!q || [m.ID_MODELO, m.NOMBRE_MODELO].join(' ').toLowerCase().includes(q)) &&
-    (!FIL.modelo || m.ID_MODELO === FIL.modelo) &&
-    DIMS.every(d => !FIL[d.k] || m[d.k] === FIL[d.k]);
+  return (!q || [m.ID_MODELO, m.CODIGO_MODELO, m.NOMBRE_MODELO].join(' ').toLowerCase().includes(q)) &&
+    DIMS.every(d => !FIL[d.k].length || FIL[d.k].includes(String(m[d.k])));
 };
 const filtrados = () => MODELOS.filter(pasaFiltros);
 function aplicar() {
+  SIM = {};
+  UMBRALES = umbralesTier(FIL.TIER_MODELO);
   marcarFiltros();
   const ms = filtrados();
   document.getElementById('fcount').textContent = `Mostrando ${ms.length} de ${MODELOS.length} modelos`;
-  vistaResumen(ms); vistaMacro(ms); vistaSeguimiento(ms); vistaValidacion(ms); vistaObs(ms); vistaImplementacion(ms);
+  vistaResumen(ms); vistaMacro(ms); vistaSeguimiento(ms); vistaValidacion(ms); vistaObs(ms); vistaImplementacion(ms); vistaInventario(ms); vistaGobierno(ms);
 }
 const vacio = '<div class="card"><div class="card-body empty">Ningún modelo cumple los filtros seleccionados.</div></div>';
 
 /* ===================== CABECERA ===================== */
-function kpis(ms) {
+// Pizarra: score del mes en cifras grandes, cada driver con su variación y los conteos clave
+const VISTA_DRV = { seguimiento: 'seguimiento', validacion: 'validacion', observaciones: 'obs', implementacion: 'implementacion', gobierno: 'gobierno' };
+const variacion = (a, b) => {
+  if (a == null || b == null) return '<span class="igual">sin comparación</span>';
+  const d = a - b, c = Math.abs(d) < 0.05 ? 'igual' : d > 0 ? 'sube' : 'baja';
+  return `<span class="${c}">${c === 'igual' ? '=' : d > 0 ? '▲' : '▼'} ${fmt(Math.abs(d))}</span>`;
+};
+function sparkline(pts) {
+  if (pts.length < 2) return '';
+  const W = 260, H = 44, vs = pts.map(p => p.s), lo = Math.min(...vs) - 2, hi = Math.max(...vs) + 2;
+  const x = i => 4 + i * (W - 8) / (pts.length - 1), y = v => H - 4 - (v - lo) / (hi - lo || 1) * (H - 8);
+  const sel = pts.findIndex(p => p.f === FIL.fecha);
+  return `<svg class="pz-spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolución del score: ${pts.map(p => `${mesTxt(p.f)} ${fmt(p.s)}`).join(', ')}">
+    <polyline points="${pts.map((p, i) => `${x(i)},${y(p.s)}`).join(' ')}" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-linejoin="round"/>
+    ${pts.map((p, i) => `<circle cx="${x(i)}" cy="${y(p.s)}" r="${i === sel ? 4.5 : 2.5}" fill="${i === sel ? 'var(--naranja)' : '#fff'}"/>`).join('')}</svg>`;
+}
+function pizarra(ms) {
+  const iF = DATOS.fechas.indexOf(FIL.fecha), fAnt = DATOS.fechas[iF - 1];
+  const R = medidas(ms);
+  const msAnt = fAnt ? TODOS.filter(m => m.FECHA === fAnt && pasaFiltros(m)) : [];
+  const A = msAnt.length ? medidas(msAnt) : null;
   const [val, sbs, tec] = OBS_GRUPOS.map(g => ({ p: sum(ms, g.p), v: sum(ms, g.v), mods: cuenta(ms, m => +m[g.p] > 0) }));
-  const box = (ic, color, t, v, s) => `<div class="col-sm-6 col-xl-3"><div class="card card-sm kpi"><div class="card-body"><div class="row align-items-center">
-    <div class="col-auto"><span class="avatar bg-${color}-lt"><i class="ti ${ic}"></i></span></div>
-    <div class="col"><div class="subheader">${t}</div><div class="h1 mb-0">${v.toLocaleString('es-PE')}</div><div class="text-secondary small">${s}</div></div>
-    </div></div></div></div>`;
-  return '<div class="row row-deck row-cards mb-3">' +
-    box('ti-stack-2', 'blue', '# Modelos', ms.length, `de ${MODELOS.length} en inventario`) +
-    box('ti-list-check', 'indigo', '# Observaciones pendientes', val.p + sbs.p + tec.p, `${val.p} de validación · vencidas: ${val.v + sbs.v + tec.v}`) +
-    box('ti-device-desktop-cog', 'cyan', '# Obs. entorno tecnológico pendientes', tec.p, `Vencidas: ${tec.v} · ${tec.mods} modelos`) +
-    box('ti-building-bank', 'azure', '# Obs. SBS y auditoría pendientes', sbs.p, `Vencidas: ${sbs.v} · ${sbs.mods} modelos`) + '</div>';
+  const g = ms.length ? R.global : null, ga = A ? A.global : null;
+  const drivers = CFG.drivers.map(d => {
+    const v = ms.length ? R.drv[d.key] : null, va = A ? A.drv[d.key] : null, vista = VISTA_DRV[d.key];
+    const tip = `${d.nombre}\nScore: ${v == null ? 'No aplica' : fmt(v)}${va != null ? `\n${mesTxt(fAnt)}: ${fmt(va)}` : ''}${vista ? '\nClic para abrir la sección' : ''}`;
+    return `<button type="button" class="pz-drv" ${vista ? `data-ir="${vista}"` : 'aria-disabled="true"'} data-tip="${esc(tip)}" aria-label="${esc(tip.replace(/\n/g, ' · '))}">
+      <span class="t"><i class="ti ${d.icono}"></i>${d.nombre}</span>
+      <span class="n cifra">${v == null ? '–' : fmt0(v)}${dot(v)}</span>
+      <span class="d">${variacion(v, va)}</span></button>`;
+  }).join('');
+  const pie = (t, v, sub) => `<div><span>${t}</span><b class="cifra">${v.toLocaleString('es-PE')}</b><span>${sub}</span></div>`;
+  return `<section class="pizarra" aria-label="Pizarra del score">
+    <div class="pz-global">
+      <div class="pz-et">Score MRM · ${mesTxt(FIL.fecha)}</div>
+      <div class="pz-num cifra">${fmt(g)}${dot(g)}</div>
+      <div class="pz-var">${variacion(g, ga)}<span>pts vs ${fAnt ? mesTxt(fAnt) : 'mes anterior'}</span>${pill(g)}</div>
+      ${sparkline(serieEvolutivo())}
+    </div>
+    <div class="pz-drivers">${drivers}</div>
+    <div class="pz-pie">
+      ${pie('Modelos', ms.length, `de ${MODELOS.length} en inventario`)}
+      ${pie('Observaciones pendientes', val.p + sbs.p + tec.p, `${val.p} de validación · vencidas: ${val.v + sbs.v + tec.v}`)}
+      ${pie('Obs. entorno tecnológico', tec.p, `Vencidas: ${tec.v} · ${tec.mods} modelos`)}
+      ${pie('Obs. SBS y auditoría', sbs.p, `Vencidas: ${sbs.v} · ${sbs.mods} modelos`)}
+    </div></section>`;
 }
 
 /* ===================== VISTAS ===================== */
@@ -463,18 +839,20 @@ function kpis(ms) {
 function serieEvolutivo() {
   return DATOS.fechas.map(f => {
     const ms = TODOS.filter(m => m.FECHA === f && pasaFiltros(m));
-    return { f, n: ms.length, s: ms.length ? medidas(ms).global : null, sim: esSimulada(f) };
+    return { f, n: ms.length, s: ms.length ? medidas(ms).global : null };
   }).filter(p => p.s != null);
 }
 // Gráfico de líneas por fecha. series: [{ nombre, color, vals }]; op: { ymax, bandas, marcasY, valores, finales, tip }
 function lineas(fechas, series, op) {
   const W = 900, H = 200, M = { t: 24, r: op.finales ? 170 : 30, b: 28, l: 34 };
-  const y = v => M.t + (op.ymax - v) / op.ymax * (H - M.t - M.b);
+  const ymin = op.ymin || 0;
+  const y = v => M.t + (op.ymax - v) / (op.ymax - ymin) * (H - M.t - M.b);
   const x = i => (fechas.length < 2 ? (M.l + W - M.r) / 2 : M.l + 50 + i * (W - M.l - M.r - 100) / (fechas.length - 1));
-  const banda = ([de, a, c]) => `<rect x="${M.l}" y="${y(a)}" width="${W - M.l - M.r}" height="${y(de) - y(a)}" fill="var(--${c}-bg)"/>`;
-  const marcaY = v => `${op.bandas ? '' : `<line x1="${M.l}" x2="${W - M.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--tblr-border-color)"/>`}<text x="${M.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
-  const tramos = s => s.vals.slice(1).map((v, i) => `<line x1="${x(i)}" y1="${y(s.vals[i])}" x2="${x(i + 1)}" y2="${y(v)}" stroke="${s.color}" stroke-width="2" ${esSimulada(fechas[i]) || esSimulada(fechas[i + 1]) ? 'stroke-dasharray="6 5"' : ''}/>`).join('');
-  const puntos = s => s.vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="${esSimulada(fechas[i]) ? '#fff' : s.color}" stroke="${esSimulada(fechas[i]) ? s.color : '#fff'}" stroke-width="2"/>
+  const banda = ([de, a, c]) => (a <= ymin ? '' : `<rect x="${M.l}" y="${y(a)}" width="${W - M.l - M.r}" height="${y(Math.max(de, ymin)) - y(a)}" fill="var(--${c}-bg)" fill-opacity=".6"/>`);
+  const marcaY = v => `<line class="rejilla" x1="${M.l}" x2="${W - M.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${M.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  const tramos = s => s.vals.slice(1).map((v, i) => `<line x1="${x(i)}" y1="${y(s.vals[i])}" x2="${x(i + 1)}" y2="${y(v)}" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round"/>`).join('');
+  const area = s => `<path d="M${x(0)},${y(ymin)} ${s.vals.map((v, i) => `L${x(i)},${y(v)}`).join(' ')} L${x(s.vals.length - 1)},${y(ymin)}Z" fill="${s.color}" fill-opacity=".08"/>`;
+  const puntos = s => s.vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="${fechas[i] === FIL.fecha ? 6 : 4}" fill="${s.color}" stroke="${fechas[i] === FIL.fecha ? 'var(--naranja)' : '#fff'}" stroke-width="${fechas[i] === FIL.fecha ? 3 : 2}"/>
     ${op.valores ? `<text class="valor" x="${x(i)}" y="${y(v) - 12}" text-anchor="middle">${fmt(v)}</text>` : ''}`).join('');
   // Etiquetas al final de cada línea, separadas para que no se pisen
   let previo = -99;
@@ -486,29 +864,78 @@ function lineas(fechas, series, op) {
   const columnas = fechas.map((f, i) => `<text class="${f === FIL.fecha ? 'sel' : ''}" x="${x(i)}" y="${H - 8}" text-anchor="middle">${mesTxt(f)}</text>
     <g class="col"><line class="cruz" x1="${x(i)}" x2="${x(i)}" y1="${M.t}" y2="${H - M.b}"/><rect class="hit" x="${x(i) - ancho / 2}" y="${M.t}" width="${ancho}" height="${H - M.t - M.b}" tabindex="0" data-tip="${esc(op.tip(i))}" aria-label="${esc(op.tip(i))}"/></g>`).join('');
   return `<div class="lineas"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(op.titulo)}">
-    ${(op.bandas || []).map(banda).join('')}${op.marcasY.map(marcaY).join('')}${series.map(tramos).join('')}${series.map(puntos).join('')}${finales}${columnas}</svg></div>`;
+    ${(op.bandas || []).map(banda).join('')}${[...new Set([ymin, ...op.marcasY.filter(v => v >= ymin)])].map(marcaY).join('')}${op.area ? series.map(area).join('') : ''}${series.map(tramos).join('')}${series.map(puntos).join('')}${finales}${columnas}</svg></div>`;
 }
 function evolutivo() {
   const pts = serieEvolutivo(), fechas = pts.map(p => p.f);
   const ult = pts[pts.length - 1], ant = pts[pts.length - 2];
   const delta = ant ? ult.s - ant.s : null;
   const extra = delta == null ? '' : `<span class="text-secondary small">${delta >= 0 ? '▲' : '▼'} ${fmt(Math.abs(delta))} pts vs ${mesTxt(ant.f)}</span>`;
-  const nota = pts.some(p => p.sim) ? ' · línea punteada y punto hueco: dato simulado' : '';
   const tip = i => {
     const p = pts[i], a = pts[i - 1];
     return `${mesTxt(p.f)}\nScore: ${fmt(p.s)} · ${SEM_TXT[sem(p.s)]}\n${p.n} modelos${a ? `\nVariación: ${p.s >= a.s ? '+' : '−'}${fmt(Math.abs(p.s - a.s))} pts` : ''}`;
   };
-  const grafico = lineas(fechas, [{ nombre: 'Score', color: 'var(--tblr-primary)', vals: pts.map(p => p.s) }], {
-    ymax: 100, valores: true, marcasY: [0, UMBRALES.rojo, UMBRALES.verde, 100], titulo: 'Evolutivo del score por fecha', tip,
+  const grafico = lineas(fechas, [{ nombre: 'Score', color: 'var(--marino-3)', vals: pts.map(p => p.s) }], {
+    ymax: 100, valores: true, area: true, marcasY: [0, UMBRALES.rojo, UMBRALES.verde, 100], titulo: 'Evolutivo del score por fecha', tip,
+    ymin: Math.min(50, Math.floor((Math.min(...pts.map(p => p.s)) - 5) / 10) * 10),
     bandas: [[0, UMBRALES.rojo, 'r'], [UMBRALES.rojo, UMBRALES.verde, 'a'], [UMBRALES.verde, 100, 'g']]
   });
   return `<div class="card mb-3"><div class="card-header"><div><h3 class="card-title d-flex align-items-center gap-2"><i class="ti ti-chart-line text-primary"></i>Evolutivo del score</h3>
-      <div class="text-secondary small mt-1">Score por fecha con los filtros aplicados${nota}</div></div><div class="card-actions">${extra}</div></div>
+      <div class="text-secondary small mt-1">Score por fecha con los filtros aplicados</div></div><div class="card-actions">${extra}</div></div>
     <div class="card-body py-2">${grafico}</div></div>`;
+}
+function actualizarSimulacion(el) {
+  const R = SIM_BASE;
+  if (!R) return;
+  el.querySelectorAll('.tablero tr[data-k]').forEach(tr => {
+    const i = IND.find(x => x.key === tr.dataset.k), r = R.ind[i.key];
+    if (!simulable(i, r)) return;
+    const s = puntajeSim(i, r), on = i.key in SIM;
+    tr.classList.toggle('sim-on', on);
+    tr.querySelector('.sim-antes').textContent = on ? `Inicial: ${fmtVal(i, r)}` : '';
+    const pts = tr.querySelector('td.pts');
+    pts.textContent = s == null ? 'No aplica' : fmt0(s); pts.style.color = `var(--${col(s)})`;
+    const d = tr.querySelector('td.luz .dot'); if (d) d.outerHTML = dot(s);
+    const b = tr.querySelector('td.luz .ir-sem'); if (b) b.dataset.tip = b.dataset.tip.replace(/: [^\n]*/, `: ${SEM_TXT[sem(s)]}`);
+  });
+  const hay = Object.keys(SIM).length, g = hay ? scoreSim(R) : R.global;
+  el.querySelector('#sim-etq').textContent = hay ? 'Score simulado' : 'Score actual';
+  const n = el.querySelector('#sim-score'); n.textContent = fmt(g); n.style.color = `var(--${col(g)})`;
+  el.querySelector('#sim-pill').innerHTML = pill(g);
+  el.querySelector('#sim-delta').innerHTML = hay ? `${variacion(g, R.global)} <span class="text-secondary">vs ${fmt(R.global)}</span>` : '';
+  el.querySelector('#sim-reset').disabled = !hay;
+  el.querySelector('.tablero').closest('.card').classList.toggle('simulando', !!hay);
+}
+function conectarSimulador(el) {
+  const fijar = (tr, v, normalizar) => {
+    const i = IND.find(x => x.key === tr.dataset.k), r = SIM_BASE.ind[i.key], inp = tr.querySelector('.sim-in');
+    if (v === '' || isNaN(v)) { if (normalizar) { delete SIM[i.key]; inp.value = redondeoVal(i, r.v); } actualizarSimulacion(el); return; }
+    v = redondeoVal(i, Math.max(0, Math.min(simMax(i, r), +v)));
+    if (normalizar || +inp.value !== v) inp.value = v;
+    if (v === redondeoVal(i, r.v)) delete SIM[i.key]; else SIM[i.key] = v;
+    actualizarSimulacion(el);
+  };
+  el.querySelectorAll('.tablero tr[data-k] .sim').forEach(box => {
+    const tr = box.closest('tr'), inp = box.querySelector('.sim-in');
+    box.querySelectorAll('.sim-b').forEach(b => b.onclick = () => fijar(tr, +inp.value + +b.dataset.paso * +inp.step, true));
+    inp.oninput = () => fijar(tr, inp.value, false);
+    inp.onchange = () => fijar(tr, inp.value, true);
+  });
+  el.querySelector('#sim-reset').onclick = () => {
+    SIM = {};
+    el.querySelectorAll('.tablero tr[data-k]').forEach(tr => {
+      const i = IND.find(x => x.key === tr.dataset.k), r = SIM_BASE.ind[i.key], inp = tr.querySelector('.sim-in');
+      if (inp) inp.value = redondeoVal(i, r.v);
+    });
+    actualizarSimulacion(el);
+  };
+  actualizarSimulacion(el);
 }
 function vistaResumen(ms) {
   const el = document.getElementById('v-resumen');
-  el.innerHTML = kpis(ms) + evolutivo() + (ms.length ? tablero(ms, 'Tablero de indicadores MRM', `Portafolio · ${ms.length} modelos · medidas recalculadas sobre los modelos filtrados`) : vacio);
+  el.innerHTML = pizarra(ms) + evolutivo() + (ms.length ? tablero(ms, 'Tablero de indicadores MRM', `Portafolio · ${ms.length} modelos · medidas recalculadas sobre los modelos filtrados`) : vacio);
+  el.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => { irA(b.dataset.ir); window.scrollTo(0, 0); });
+  if (ms.length) conectarSimulador(el);
 }
 
 const flecha = (o, k) => (o.k === k ? (o.asc ? ' ▲' : ' ▼') : '');
@@ -526,7 +953,7 @@ function mapaCalor(ms, t) {
   const resumen = de => { const R = medidas(de); return { n: de.length, drv: R.drv, global: R.global }; };
   const grupos = [...new Set(ms.map(m => m[op.campo]))].map(u => ({ u, ...resumen(ms.filter(m => m[op.campo] === u)) }));
   const val = (g, k) => (k in g.drv ? g.drv[k] : g[k]);
-  const th = (k, txt, cls = 'text-center') => `<th class="${cls}" data-t="${t}" data-k="${k}">${txt}${flecha(op.orden, k)}</th>`;
+  const th = (k, txt, cls = 'text-center') => `<th class="${cls}" data-t="${t}" data-k="${k}" tabindex="0" aria-sort="${op.orden.k === k ? (op.orden.asc ? 'ascending' : 'descending') : 'none'}">${txt}${flecha(op.orden, k)}</th>`;
   const celdas = g => `<td class="text-center">${g.n}</td>
     ${CFG.drivers.map(d => `<td class="cell" style="${cellStyle(g.drv[d.key])}">${g.drv[d.key] == null ? '-' : fmt(g.drv[d.key])}</td>`).join('')}
     <td class="cell" style="${cellStyle(g.global)}">${fmt(g.global)}</td>`;
@@ -546,8 +973,8 @@ const bandaDrivers = () => CFG.drivers.map(d => `<th class="text-center" colspan
 function tablaIndicadores(ms) {
   const dato = (m, k) => (modoInd === 'valor' ? m.vi[k] : m.pi[k]);
   const val = (m, k) => (k === 'global' ? m.global : k === 'alerta_excede_tiempo' ? m.EXCESO_MESES_TTM ?? -999 : k in CATEGORIA ? m[CATEGORIA[k]] ?? '' : k in m.pi ? dato(m, k) : k === 'ID_MODELO' ? +m[k] : m[k]);
-  const th = (k, t, titulo, cls = 'text-center') => `<th class="${cls}" data-t="m" data-k="${k}" title="${esc(titulo || t)}" style="white-space:normal">${esc(t)}${flecha(ordenM, k)}</th>`;
-  const fuente = s => `color:${s == null ? '#8a93a0' : `var(--${col(s)})`}`;
+  const th = (k, t, titulo, cls = 'text-center') => `<th class="${cls}" data-t="m" data-k="${k}" title="${esc(titulo || t)}" tabindex="0" aria-sort="${ordenM.k === k ? (ordenM.asc ? 'ascending' : 'descending') : 'none'}" style="white-space:normal">${esc(t)}${flecha(ordenM, k)}</th>`;
+  const fuente = s => `color:var(--${col(s)})`;
   const celda = (m, i) => {
     const p = m.pi[i.key], cat = CATEGORIA[i.key];
     if (cat) return `<td class="cell" style="${fuente(p)}"${p == null ? '' : ` title="Puntuación ${fmt0(p)}"`}>${esc(typeof m[cat] === 'number' ? fmt(m[cat]) : m[cat] ?? '-')}</td>`;
@@ -557,7 +984,7 @@ function tablaIndicadores(ms) {
   return `<div class="macro-scroll"><table class="table table-vcenter table-hover table-sm card-table heat"><thead>
     <tr class="banda"><th class="fija" colspan="1"></th><th></th>${bandaDrivers()}<th></th></tr>
     <tr>${th('ID_MODELO', 'Modelo', '', 'fija')}${th('TIER_MODELO', 'Tier')}${IND.map(i => th(i.key, CORTOS[i.key], i.nombre)).join('')}${th('global', 'Score')}</tr></thead><tbody>
-    ${ordenar(ms, ordenM, val).map(m => `<tr><td class="fija"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td>
+    ${ordenar(ms, ordenM, val).map(m => `<tr><td class="fija"><b>${esc(m.CODIGO_MODELO || m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td>
       ${IND.map(i => celda(m, i)).join('')}<td class="cell" style="${fuente(m.global)}">${fmt(m.global)}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
@@ -583,14 +1010,15 @@ function vistaMacro(ms) {
 }
 
 /* ===================== SEGUIMIENTO ===================== */
-const SEG_SERIES = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100'];
+// Series de conteos: sin los colores del semáforo, para que el verde nunca signifique algo malo
+const SEG_SERIES = ['#13406F', '#2E8BD8', '#0E9384', '#8B5CF6'];
 const SEG_DIMS = [{ k: 'MODEL_USER', t: 'Model User' }, { k: 'TIER_MODELO', t: 'Tier' }, { k: 'BANCA', t: 'Banca' }, { k: 'RESPONSABLE_MONITORING', t: 'Responsable monitoring' }];
-const SEG_TTM = [{ n: 'Excede TTM', c: 'var(--r)' }, { n: 'No excede', c: 'var(--g)' }, { n: 'No tiene TTM', c: 'var(--n)' }];
+const SEG_TTM = [{ n: 'Excede TTM', c: 'var(--r-dot)' }, { n: 'No excede', c: 'var(--g-dot)' }, { n: 'No tiene TTM', c: 'var(--n-dot)' }];
 const enAlerta = es('ESTADO_ALERTA', 'En alerta');
 const sinMitigante = m => m.ESTADO_ALERTA === 'En alerta' && m.PRESENCIA_MITIGANTE === 'No';
 const excede = es('EXCEDE_TTM', 'Excede TTM');
 const mitigante = m => m.PRESENCIA_MITIGANTE || 'Sin dato';
-const fmtImpacto = s => (/^Monto: /.test(s || '') ? `Monto: ${Math.round(+s.slice(7)).toLocaleString('es-PE')}` : s);
+const fmtImpacto = s => (typeof s === 'number' ? Math.round(s).toLocaleString('es-PE') : s);
 const prioridad = m => (excede(m) && sinMitigante(m) ? 0 : excede(m) ? 1 : sinMitigante(m) ? 2 : 3);
 const ordenAlertas = (a, b) => prioridad(a) - prioridad(b) || (b.EXCESO_MESES_TTM ?? -99) - (a.EXCESO_MESES_TTM ?? -99);
 const pctTxt = (n, d) => (d ? `${fmt0(100 * n / d)}%` : '–');
@@ -601,7 +1029,10 @@ const cuerpo = h => `<div class="card-body">${h}</div>`;
 const selector = (id, etiqueta, ops, actual) => `<select id="${id}" class="form-select form-select-sm toolbar" style="width:auto" aria-label="${etiqueta}">${ops.map(([v, t]) => `<option value="${esc(v)}" ${v === actual ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
 const fechaCorta = f => (f ? `${f.slice(8, 10)}/${f.slice(5, 7)}/${f.slice(0, 4)}` : '–');
 const dias = (de, a) => Math.round((new Date(a) - new Date(de)) / 864e5);
-// Tablón de coberturas y Reporte de observaciones solo corresponden a la última fecha del input
+// Los archivos de detalle solo corresponden a la última fecha del input principal
+const esUltima = () => FIL.fecha === ULTIMA;
+const notaDetalle = que => `<div class="col-12"><div class="card"><div class="card-body text-secondary"><i class="ti ti-calendar-off me-1"></i>${que} solo está disponible para ${mesTxt(ULTIMA)}. Selecciona esa fecha en el filtro.</div></div></div>`;
+const porModelo = (filas, k = 'id_modelo') => (filas ? Object.fromEntries(filas.map(f => [String(f[k]), f])) : null);
 const soloUltimaFecha = el => { el.innerHTML = `<div class="card"><div class="card-body empty">Esta sección solo tiene información de ${mesTxt(ULTIMA)}. Selecciona esa fecha en el filtro.</div></div>`; };
 const verMas = (id, total, lim) => (total > lim ? `<div class="card-footer text-center"><button id="${id}" class="btn btn-sm">Ver más (${lim} de ${total})</button></div>` : '');
 
@@ -620,7 +1051,7 @@ function evolutivoConteos(defs, titulo) {
   return lineas(fechas, series, { ymax, finales: true, marcasY: [0, Math.round(ymax / 2), ymax], titulo, tip })
     + `<div class="mt-2">${leyendaColores(series.map(s => ({ n: s.nombre, c: s.color })))}</div>`;
 }
-const notaFechas = () => (DATOS.fechas_simuladas.length ? 'Modelos por fecha · línea punteada y punto hueco: dato simulado' : 'Modelos por fecha');
+const notaFechas = () => 'Modelos por fecha';
 const evolutivoAlertas = () => evolutivoConteos([['En alerta', enAlerta], ['Sin seguimiento', es('ESTADO_SEGUIMIENTO', 'Sin Seguimiento')], ['Exceden TTM', excede], ['Sin mitigante', sinMitigante]], 'Evolutivo de modelos en alerta y sin seguimiento');
 function bloqueSeguimiento(ms, alertas) {
   const est = [['Con Seguimiento', 'var(--g)'], ['Sin Seguimiento', 'var(--r)'], ['Sin información', 'var(--n)'], ['No aplica', 'var(--n)']];
@@ -633,20 +1064,54 @@ function alertasPor(alertas, dim) {
   filas.sort((a, b) => total(b) - total(a));
   return apiladas(filas, Math.max(...filas.map(total))) + `<div class="mt-3">${leyendaColores(SEG_TTM)}</div>`;
 }
-function tablaAlertas(lista) {
+/* Detalle del archivo TTM: una fila por modelo en alerta, solo del último mes */
+const TTM = porModelo(DATOS.ttm);
+function graficoTTM(alertas) {
+  const filas = alertas.filter(m => TTM[m.ID_MODELO]).map(m => ({ m, t: TTM[m.ID_MODELO] })).sort((a, b) => (b.t.holgura ?? -99) - (a.t.holgura ?? -99));
+  if (!filas.length) return '<div class="empty">Los modelos en alerta seleccionados no están en el archivo TTM.</div>';
+  const max = Math.max(1, ...filas.flatMap(f => [f.t.ttm_real || 0, f.t.ttm_gobierno || 0]));
+  const color = m => (SEG_TTM.find(s => s.n === m.EXCEDE_TTM) || SEG_TTM[2]).c;
+  return filas.map(({ m, t }) => `<div class="ttm" data-tip="${esc(`${t.codigo || m.ID_MODELO} · Tier ${t.tier || m.TIER_MODELO}\n${m.NOMBRE_MODELO}\nAlerta desde: ${fechaCorta(t.fecha_alerta)}\nTTM real: ${fmt(t.ttm_real)} meses\nTTM de gobierno: ${t.ttm_gobierno == null ? 'no tiene' : fmt(t.ttm_gobierno) + ' meses'}\n${m.EXCEDE_TTM || 'Sin dato'}${t.plan ? `\nPlan: ${t.plan}` : ''}`)}">
+      <span class="et"><b>${esc(t.codigo || m.CODIGO_MODELO || m.ID_MODELO)}</b> · Tier ${esc(t.tier || m.TIER_MODELO)}<div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></span>
+      <span class="pista"><i style="width:${(t.ttm_real || 0) / max * 100}%;background:${color(m)}"></i>${t.ttm_gobierno == null ? '' : `<u style="left:${t.ttm_gobierno / max * 100}%"></u>`}</span>
+      <b>${fmt(t.ttm_real)} / ${t.ttm_gobierno == null ? '–' : fmt(t.ttm_gobierno)}</b></div>`).join('')
+    + `<div class="leg mt-3">${SEG_TTM.map(s => `<span><i style="background:${s.c}"></i>${s.n}</span>`).join('')}<span><i style="background:var(--tblr-body-color);width:3px"></i>TTM de gobierno</span><span>Cifras: TTM real / TTM de gobierno, en meses</span></div>`;
+}
+function tablaAlertas(lista, det) {
   if (!lista.length) return '<div class="empty">No hay alertas para los criterios seleccionados.</div>';
   const cls = { 'Excede TTM': 'bg-red-lt', 'No excede': 'bg-green-lt', 'No tiene TTM': 'bg-secondary-lt' };
-  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Resp. monitoring</th><th>TTM</th><th class="text-center">Exceso (meses)</th><th>Impacto</th><th>Mitigante</th><th>Descripción del mitigante</th></tr></thead><tbody>
-    ${lista.map(m => `<tr><td style="min-width:260px"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td>
-      <td class="text-center">${esc(m.TIER_MODELO)}</td><td>${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.RESPONSABLE_MONITORING)}</td>
+  const t = m => (det && TTM[m.ID_MODELO]) || {};
+  const th = det ? '<th>Alerta desde</th><th>Plan de acción</th><th class="text-center">TTM gobierno</th><th class="text-center">TTM real</th>' : '';
+  const td = m => (det ? `<td class="text-nowrap">${fechaCorta(t(m).fecha_alerta)}</td><td>${esc(t(m).plan || '–')}</td><td class="text-center">${fmt(t(m).ttm_gobierno)}</td><td class="text-center">${fmt(t(m).ttm_real)}</td>` : '');
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Resp. monitoring</th>${th}<th>TTM</th><th class="text-center">Exceso (meses)</th><th>Impacto</th><th>Mitigante</th><th>Descripción del mitigante</th>${det ? '<th>Pidió ampliación</th><th>Comentarios</th>' : ''}</tr></thead><tbody>
+    ${lista.map(m => `<tr><td style="min-width:260px"><b>${esc(cod(m.ID_MODELO))}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td>
+      <td class="text-center">${esc(m.TIER_MODELO)}</td><td>${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.RESPONSABLE_MONITORING)}</td>${td(m)}
       <td><span class="badge ${cls[m.EXCEDE_TTM] || 'bg-secondary-lt'}">${esc(m.EXCEDE_TTM || 'Sin dato')}</span></td><td class="text-center">${fmt(m.EXCESO_MESES_TTM)}</td>
-      <td class="text-nowrap">${esc(fmtImpacto(m.IMPACTO) || '–')}</td><td>${esc(mitigante(m))}</td><td class="desc">${esc(m.DESCRIPCION_MITIGANTE || '–')}</td></tr>`).join('')}
+      <td class="text-nowrap">${esc(fmtImpacto(m.IMPACTO) || '–')}</td><td>${esc(mitigante(m))}</td><td class="desc">${esc(m.DESCRIPCION_MITIGANTE || '–')}</td>
+      ${det ? `<td class="text-center">${esc(t(m).ampliacion || '–')}${t(m).nueva_fecha ? `<div class="small text-secondary">${fechaCorta(t(m).nueva_fecha)}</div>` : ''}</td><td class="desc">${esc(t(m).comentarios || '–')}</td>` : ''}</tr>`).join('')}
     </tbody></table></div>`;
+}
+// Columnas del archivo TTM, en su mismo orden
+const TTM_COLS = [['codigo', 'ID_MODELO'], ['nombre', 'NOMBRE_MODELO'], ['tier', 'TIER'], ['fecha_alerta', 'FECH_ALERTA', 'f'], ['diagnostico', 'DIAGNOSTICO'], ['plan', 'PLAN_ACCION'], ['mitigante', 'MITIGANTE'],
+  ['ttm_gobierno', 'TTM_GOBIERNO_MESES', 'n'], ['ttm_real', 'TTM_REAL_HOY', 'n'], ['holgura', 'HOLGURA_EXCESO_TTM', 'n'], ['ampliacion', 'SOLICITO_AMPLIACION'], ['nueva_fecha', 'NUEVA_FECH_SUBSANACION', 'f'], ['comentarios', 'COMENTARIOS']];
+const filasTTM = lista => lista.filter(m => TTM[m.ID_MODELO]).map(m => TTM[m.ID_MODELO]);
+function tablaTTM(lista) {
+  const fs = filasTTM(lista);
+  if (!fs.length) return '<div class="empty">Los modelos en alerta seleccionados no están en el archivo TTM.</div>';
+  const celda = (t, [k, , tipo]) => {
+    const v = t[k];
+    if (tipo === 'f') return `<td class="text-nowrap">${fechaCorta(v)}</td>`;
+    if (tipo === 'n') return `<td class="text-center"${k === 'holgura' && v > 0 ? ' style="color:var(--r);font-weight:700"' : ''}>${fmt(v)}</td>`;
+    if (k === 'codigo') return `<td class="text-nowrap fw-bold">${esc(v)}</td>`;
+    return `<td class="${['nombre', 'diagnostico', 'plan', 'mitigante', 'comentarios'].includes(k) ? 'desc' : 'text-nowrap'}">${esc(v ?? '–')}</td>`;
+  };
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr>${TTM_COLS.map(([, n, tipo]) => `<th class="${tipo === 'n' ? 'text-center' : ''}">${n}</th>`).join('')}</tr></thead><tbody>
+    ${fs.map(t => `<tr>${TTM_COLS.map(c => celda(t, c)).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 function tablaSinSeguimiento(lista) {
   if (!lista.length) return '<div class="empty">Todos los modelos evaluables tienen seguimiento.</div>';
   return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Resp. monitoring</th><th>Alerta</th></tr></thead><tbody>
-    ${lista.map(m => `<tr><td style="white-space:normal"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td>
+    ${lista.map(m => `<tr><td style="white-space:normal"><b>${esc(cod(m.ID_MODELO))}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td>
       <td class="text-center">${esc(m.TIER_MODELO)}</td><td>${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.RESPONSABLE_MONITORING)}</td><td class="text-nowrap">${esc(m.ESTADO_ALERTA)}</td></tr>`).join('')}
     </tbody></table></div>`;
 }
@@ -663,6 +1128,9 @@ function vistaSeguimiento(ms) {
     <button id="seg-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
   const lista = alertas.filter({ todas: () => true, excede, sinmit: sinMitigante, prio: m => prioridad(m) === 0 }[segFiltro]).sort(ordenAlertas);
   const sinAlertas = '<div class="empty">No hay modelos en alerta.</div>';
+  const det = esUltima() && !!TTM;
+  const atencion = det ? bloque('col-12', 'Tiempo de atención por modelo', 'ti-hourglass', cuerpo(alertas.length ? graficoTTM(alertas) : sinAlertas), 'TTM real frente al TTM de gobierno · ordenado de mayor a menor exceso')
+    : TTM ? notaDetalle('El tiempo de atención por modelo (archivo TTM)') : '';
   el.innerHTML = `<div class="row row-cards mb-3">
     ${tile('Score Seguimiento', sd == null ? '–' : fmt(sd), pill(sd), 'ti-gauge', 'blue')}
     ${tile('Cobertura', pctTxt(conSeg, conSeg + sinSeg.length), `${conSeg} de ${conSeg + sinSeg.length} evaluables`, 'ti-eye-check', 'green')}
@@ -673,16 +1141,20 @@ function vistaSeguimiento(ms) {
   <div class="row row-cards">
     ${bloque('col-12', 'Evolutivo de alertas y seguimiento', 'ti-chart-line', cuerpo(evolutivoAlertas()), notaFechas())}
     ${bloque('col-lg-4', 'Estado de seguimiento', 'ti-activity', cuerpo(bloqueSeguimiento(ms)), `${ms.length} modelos`)}
-    ${bloque('col-lg-8', 'Alertas por producto', 'ti-package', cuerpo(alertas.length ? alertasPor(alertas, 'PRODUCTO') : sinAlertas), 'Modelos en alerta según situación del TTM')}
-    ${bloque('col-12', 'Alertas por dimensión', 'ti-chart-bar', cuerpo(alertas.length ? alertasPor(alertas, segDim) : sinAlertas), 'Modelos en alerta según situación del TTM', selDim)}
-    ${bloque('col-12', 'Detalle de alertas', 'ti-list-details', tablaAlertas(lista), `${lista.length} modelos · ordenado por prioridad y exceso`, selFil)}
+    ${bloque('col-lg-4', 'Alertas por producto', 'ti-package', cuerpo(alertas.length ? alertasPor(alertas, 'PRODUCTO') : sinAlertas), 'Modelos en alerta según situación del TTM')}
+    ${bloque('col-lg-4', 'Alertas por dimensión', 'ti-chart-bar', cuerpo(alertas.length ? alertasPor(alertas, segDim) : sinAlertas), 'Modelos en alerta según situación del TTM', selDim)}
+    ${atencion}
+    ${det ? bloque('col-12', 'Detalle de alertas', 'ti-list-details', tablaTTM(lista), `${filasTTM(lista).length} modelos · archivo TTM · ordenado por prioridad y exceso`, selFil)
+      : bloque('col-12', 'Detalle de alertas', 'ti-list-details', tablaAlertas(lista, false), `${lista.length} modelos · ordenado por prioridad y exceso`, selFil)}
     ${bloque('col-12', 'Modelos sin seguimiento', 'ti-eye-off', tablaSinSeguimiento(sinSeg), `${sinSeg.length} modelos`)}
   </div>`;
   el.querySelector('#seg-dim').onchange = e => { segDim = e.target.value; vistaSeguimiento(filtrados()); };
   el.querySelector('#seg-fil').onchange = e => { segFiltro = e.target.value; vistaSeguimiento(filtrados()); };
   el.querySelector('#seg-csv').onclick = () => {
+    if (det) { descargar('mrm_alertas_ttm.csv', [TTM_COLS.map(c => c[1]).join(';'), ...filasTTM(lista).map(t => TTM_COLS.map(([k]) => csvVal(t[k])).join(';'))].join('\n')); return; }
     const cols = ['ID_MODELO', 'NOMBRE_MODELO', 'TIER_MODELO', 'MODEL_USER', 'RESPONSABLE_MONITORING', 'EXCEDE_TTM', 'EXCESO_MESES_TTM', 'IMPACTO', 'PRESENCIA_MITIGANTE', 'DESCRIPCION_MITIGANTE'];
-    descargar('mrm_alertas.csv', [cols.join(';'), ...lista.map(m => cols.map(c => csvVal(m[c])).join(';'))].join('\n'));
+    const extra = det ? ['fecha_alerta', 'plan', 'ttm_gobierno', 'ttm_real', 'ampliacion', 'nueva_fecha', 'comentarios'] : [];
+    descargar('mrm_alertas.csv', [[...cols, ...extra].join(';'), ...lista.map(m => [...cols.map(c => campo(m, c)), ...extra.map(c => (TTM[m.ID_MODELO] || {})[c])].map(csvVal).join(';'))].join('\n'));
   };
 }
 
@@ -690,13 +1162,12 @@ function vistaSeguimiento(ms) {
 const COB = Object.fromEntries(DATOS.coberturas.map(c => [String(c.Modelo_ID), c]));
 const COB_DIMS = [{ k: 'TIER_MODELO', t: 'Tier' }, { k: 'MODEL_USER', t: 'Model User' }, { k: 'BANCA', t: 'Banca' }, { k: 'PRODUCTO', t: 'Producto' }, { k: 'MODEL_DEVELOPER', t: 'Model developer' }];
 const COB_FILTROS = [['desc', 'Descoberturados'], ['prox', 'Descoberturan en 90 días'], ['met', 'Sin cobertura metodológica'], ['imp', 'Sin cobertura de implementación'], ['todos', 'Todos']];
-const CALIF = [['Satisfactorio', 'var(--g)'], ['Aceptable', '#9bd8a6'], ['Regular', 'var(--a)'], ['Deficiente', 'var(--r)']];
-const FRENTES = ['#2a78d6', '#eb6834'];
+const CALIF = [['Satisfactorio', 'var(--g-dot)'], ['Aceptable', '#9BD8A6'], ['Regular', 'var(--a-dot)'], ['Deficiente', 'var(--r-dot)']];
+const FRENTES = ['#13406F', '#2E8BD8'];
 let valDim = 'TIER_MODELO', valFiltro = 'desc', valLim = 50;
 const cubreMet = c => c.Cobertura_Metodologia === 'Coberturado';
 const cubreImp = c => c.Cobertura_Implementación === 'Coberturado';
 const cubreGlobal = c => c.Cobertura_Global === 'Coberturado';
-const proyGlobal = c => c.Proy_Cobertura_Global === 'Coberturado';
 // Días hasta que el modelo pierde cobertura en el primer frente que hoy sigue cubierto
 const proximaDesc = c => [cubreMet(c) && c.Fecha_descobertura_Met, cubreImp(c) && c.Fecha_descobertura_Imp].filter(Boolean).sort()[0] || null;
 const descEn90 = c => { const f = proximaDesc(c), d = f ? dias(DATOS.cob_meta.corte, f) : null; return d != null && d >= 0 && d <= 90; };
@@ -709,21 +1180,28 @@ function cobPorDim(fs) {
   return `<div class="table-responsive"><table class="table table-vcenter table-sm card-table"><thead><tr><th>${COB_DIMS.find(d => d.k === valDim).t}</th><th class="text-center"># Modelos</th><th class="text-center">Metodológica</th><th class="text-center">Implementación</th><th class="text-center">Global</th></tr></thead><tbody>
     ${vals.map(v => fila(v, fs.filter(f => f.m[valDim] === v))).join('')}${fila('Total', fs, 'fw-bold')}</tbody></table></div>`;
 }
-function calendarioDesc(fs) {
-  const [a, mes0] = DATOS.cob_meta.corte.split('-').map(Number);
-  const meses = Array.from({ length: 12 }, (_, i) => { const n = mes0 - 1 + i; return `${a + Math.floor(n / 12)}-${String(n % 12 + 1).padStart(2, '0')}`; });
-  const de = (k, ok, ym) => cuenta(fs, c => ok(c) && (c[k] || '').startsWith(ym) && c[k] >= DATOS.cob_meta.corte);
-  const filas = meses.map(ym => ({ t: mesTxt(ym + '-01'), segs: [{ n: 'Metodológica', c: FRENTES[0], v: de('Fecha_descobertura_Met', cubreMet, ym) }, { n: 'Implementación', c: FRENTES[1], v: de('Fecha_descobertura_Imp', cubreImp, ym) }] }));
-  const max = Math.max(1, ...filas.map(f => f.segs[0].v + f.segs[1].v));
-  return apiladas(filas, max) + `<div class="mt-3">${leyendaColores([{ n: 'Metodológica', c: FRENTES[0] }, { n: 'Implementación', c: FRENTES[1] }])}</div>`;
+// Gráfico circular (dona). segs: [{ n, c, v }]
+function dona(segs, titulo, centro = 'modelos') {
+  const tot = segs.reduce((a, x) => a + x.v, 0), R = 46, C = 2 * Math.PI * R;
+  let acc = 0;
+  const arcos = segs.filter(x => x.v).map(x => {
+    const len = x.v / tot * C, a = `<circle class="arco" r="${R}" cx="60" cy="60" fill="none" stroke="${x.c}" stroke-width="20" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-acc}" transform="rotate(-90 60 60)" data-tip="${esc(`${titulo ? titulo + ' · ' : ''}${x.n}\n${x.v} ${centro} · ${pctTxt(x.v, tot)}`)}"/>`;
+    acc += len; return a;
+  }).join('');
+  return `<div class="dona">${titulo ? `<span class="tit">${esc(titulo)}</span>` : ''}<svg viewBox="0 0 120 120" role="img" aria-label="${esc(`${titulo || ''} ${segs.map(x => `${x.n}: ${x.v}`).join(', ')}`)}">
+    <circle r="${R}" cx="60" cy="60" fill="none" stroke="var(--track)" stroke-width="20"/>${arcos}
+    <text class="c1" x="60" y="62" text-anchor="middle">${tot.toLocaleString('es-PE')}</text><text class="c2" x="60" y="76" text-anchor="middle">${centro}</text></svg></div>`;
 }
+// Barras verticales. items: [{ t, v, c }]
+const vbarras = (items, max, unidad = 'modelos') => `<div class="vbarras">${items.map(i => `<div class="vbarra" data-tip="${esc(i.tip || `${i.t}\n${i.v} ${unidad}`)}"><b>${i.v}</b><i style="height:${max ? i.v / max * 100 : 0}%;background:${i.c}"></i></div>`).join('')}</div>
+  <div class="vetiq">${items.map(i => `<span>${esc(i.t)}</span>`).join('')}</div>`;
 function tablaCobertura(lista) {
   if (!lista.length) return '<div class="empty">No hay modelos para los criterios seleccionados.</div>';
-  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Val. periódica</th><th class="text-center">Met.</th><th class="text-center">Imp.</th><th class="text-center">Global</th><th>Fech. Fin proy val. Met.</th><th>Fech. Fin proy val. Imp.</th><th>Calif. Met.</th><th>Calif. Imp.</th><th class="text-center">Nota</th><th>Manager Met.</th></tr></thead><tbody>
-    ${lista.slice(0, valLim).map(c => `<tr><td style="min-width:260px"><b>${esc(c.m.ID_MODELO)}</b><div class="text-secondary small">${esc(c.m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(c.m.TIER_MODELO)}</td><td class="text-nowrap">${esc(c.m.VALIDACION_PERIODICA)}</td>
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Val. periódica</th><th class="text-center">Met.</th><th class="text-center">Imp.</th><th class="text-center">Global</th><th>Fech. Fin proy val. Met.</th><th>Fech. Fin proy val. Imp.</th><th>Calif. Met.</th><th>Calif. Imp.</th><th>Manager Met.</th><th>Manager Imp.</th></tr></thead><tbody>
+    ${lista.slice(0, valLim).map(c => `<tr><td style="min-width:260px"><b>${esc(cod(c.m.ID_MODELO))}</b><div class="text-secondary small">${esc(c.m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(c.m.TIER_MODELO)}</td><td class="text-nowrap">${esc(c.m.VALIDACION_PERIODICA)}</td>
       <td class="text-center">${badgeCob(cubreMet(c))}</td><td class="text-center">${badgeCob(cubreImp(c))}</td><td class="text-center">${badgeCob(cubreGlobal(c))}</td>
       <td class="text-nowrap">${fechaCorta(c.Met_Fecha_fin)}</td><td class="text-nowrap">${fechaCorta(c.Imp_Fecha_fin)}</td>
-      <td>${esc(c.Calificación_Metodología || '–')}</td><td>${esc(c.Calificación_Implementación || '–')}</td><td class="text-center">${fmt0(c.m.NOTA_DINAMICA_VALIDACION * 100)}%</td><td class="text-nowrap">${esc(c.Met_Manager || '–')}</td></tr>`).join('')}
+      <td>${esc(c.Calificación_Metodología || '–')}</td><td>${esc(c.Calificación_Implementación || '–')}</td><td class="text-nowrap">${esc(c.Met_Manager || '–')}</td><td class="text-nowrap">${esc(c.Imp_Manager || '–')}</td></tr>`).join('')}
     </tbody></table></div>${verMas('val-mas', lista.length, valLim)}`;
 }
 function vistaValidacion(ms) {
@@ -736,16 +1214,14 @@ function vistaValidacion(ms) {
   const fs = ms.flatMap(m => (COB[m.ID_MODELO] ? [{ ...COB[m.ID_MODELO], m }] : []));
   const N = fs.length;
   if (!N) { el.innerHTML = evo + '<div class="card"><div class="card-body empty">Los modelos seleccionados no están en el tablón de coberturas.</div></div>'; return; }
-  const glob = cuenta(fs, cubreGlobal), met = cuenta(fs, cubreMet), imp = cuenta(fs, cubreImp), proy = cuenta(fs, proyGlobal);
+  const glob = cuenta(fs, cubreGlobal), met = cuenta(fs, cubreMet), imp = cuenta(fs, cubreImp);
   const prox = fs.filter(descEn90), nota = prom(ms, 'NOTA_DINAMICA_VALIDACION');
   const completa = cuenta(ms, es('VALIDACION_COMPLETA', 'Con validación'));
-  const actProy = barras([['Metodológica', met], ['Metodológica proyectada', cuenta(fs, c => c.Proy_Cobertura_Met === 'Coberturado')], ['Implementación', imp], ['Implementación proyectada', cuenta(fs, c => c.Proy_Cobertura_Imp === 'Coberturado')], ['Global', glob], ['Global proyectada', proy]]
-    .map(([t, n]) => ({ t, v: 100 * n / N, txt: pctTxt(n, N), c: `var(--${col(100 * n / N)})`, tip: `${t}\n${n} de ${N} modelos` })), 100);
-  const calif = apiladas([['Metodológica', 'Calificación_Metodología'], ['Implementación', 'Calificación_Implementación']].map(([t, k]) => ({ t, segs: CALIF.map(([n, c]) => ({ n, c, v: cuenta(fs, f => f[k] === n) })) })), N)
+  const califSegs = k => CALIF.map(([n, c]) => ({ n, c, v: cuenta(fs, f => f[k] === n) }));
+  const calif = `<div class="donas">${dona(califSegs('Calificación_Metodología'), 'Metodológica')}${dona(califSegs('Calificación_Implementación'), 'Implementación')}</div>`
     + `<div class="mt-3">${leyendaColores(CALIF.map(([n, c]) => ({ n, c })))}</div>`;
-  const notas = barras([[1, '100%'], [.75, '75%'], [.5, '50%'], [.25, '25%']].map(([v, t]) => ({ t, v: cuenta(ms, m => m.NOTA_DINAMICA_VALIDACION === v), c: `var(--${col(v * 100)})` })), ms.length);
   const alcances = Object.entries(fs.reduce((a, c) => { const k = c.Met_Alcance || 'Sin dato'; a[k] = (a[k] || 0) + 1; return a; }, {})).sort((a, b) => b[1] - a[1]);
-  const alcance = barras(alcances.map(([t, v]) => ({ t, v, c: FRENTES[0] })), N);
+  const alcance = vbarras(alcances.map(([t, v]) => ({ t, v, c: t === 'Sin dato' ? 'var(--n-dot)' : FRENTES[0] })), alcances.length ? Math.max(...alcances.map(a => a[1])) : 0);
   const lista = fs.filter({ desc: c => !cubreGlobal(c), prox: descEn90, met: c => !cubreMet(c), imp: c => !cubreImp(c), todos: () => true }[valFiltro])
     .sort((a, b) => String(a.m.TIER_MODELO).localeCompare(String(b.m.TIER_MODELO)) || String(a.Met_Fecha_fin).localeCompare(String(b.Met_Fecha_fin)));
   const selFil = `<div class="d-flex flex-wrap gap-2">${selector('val-fil', 'Filtrar modelos', COB_FILTROS, valFiltro)}<button id="val-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
@@ -756,12 +1232,9 @@ function vistaValidacion(ms) {
     ${tile('Descoberturan en 90 días', prox.length, 'modelos hoy cubiertos', 'ti-calendar-exclamation', 'orange')}
     ${tile('Nota dinámica', `${fmt0(nota * 100)}%`, `${completa} de ${ms.length} con validación completa`, 'ti-star', 'green')}
   </div>${evo}<div class="row row-cards">
-    ${bloque('col-lg-8', 'Cobertura por dimensión', 'ti-table', cobPorDim(fs), 'Porcentaje de modelos cubiertos · color según umbrales del score', selector('val-dim', 'Agrupar por', COB_DIMS.map(d => [d.k, d.t]), valDim))}
-    ${bloque('col-lg-4', 'Cobertura actual y proyectada', 'ti-trending-up', cuerpo(actProy), 'Porcentaje de modelos')}
-    ${bloque('col-lg-3', 'Próximas descoberturas', 'ti-calendar-time', cuerpo(calendarioDesc(fs)), 'Modelos por mes y frente, próximos 12 meses')}
-    ${bloque('col-lg-3', 'Calificación por frente', 'ti-award', cuerpo(calif), 'Última validación')}
-    ${bloque('col-lg-3', 'Nota dinámica', 'ti-star', cuerpo(notas), 'NOTA_DINAMICA_VALIDACION')}
-    ${bloque('col-lg-3', 'Alcance metodológico', 'ti-list-search', cuerpo(alcance), 'Última validación')}
+    ${bloque('col-12', 'Cobertura por dimensión', 'ti-table', cobPorDim(fs), 'Porcentaje de modelos cubiertos · color según umbrales del score', selector('val-dim', 'Agrupar por', COB_DIMS.map(d => [d.k, d.t]), valDim))}
+    ${bloque('col-lg-5', 'Calificación por frente', 'ti-award', cuerpo(calif), 'Última validación')}
+    ${bloque('col-lg-7', 'Alcance metodológico', 'ti-list-search', cuerpo(alcance), 'Modelos por alcance de la última validación')}
     ${bloque('col-12', 'Detalle de cobertura por modelo', 'ti-list-details', tablaCobertura(lista), `${lista.length} modelos · ordenado por Tier y fecha fin del proyecto metodológico`, selFil)}
   </div>`;
   el.querySelector('#val-dim').onchange = e => { valDim = e.target.value; vistaValidacion(filtrados()); };
@@ -770,7 +1243,7 @@ function vistaValidacion(ms) {
   el.querySelector('#val-csv').onclick = () => {
     const cols = ['Cobertura_Metodologia', 'Cobertura_Implementación', 'Cobertura_Global', 'Proy_Cobertura_Met', 'Proy_Cobertura_Imp', 'Proy_Cobertura_Global', 'Met_Fecha_fin', 'Imp_Fecha_fin', 'Fecha_descobertura_Met', 'Fecha_descobertura_Imp', 'Calificación_Metodología', 'Calificación_Implementación', 'Met_Alcance', 'Imp_Alcance', 'Met_Manager', 'Imp_Manager'];
     const base = ['ID_MODELO', 'NOMBRE_MODELO', 'TIER_MODELO', 'VALIDACION_COMPLETA', 'VALIDACION_PERIODICA', 'NOTA_DINAMICA_VALIDACION'];
-    descargar('mrm_coberturas.csv', [[...base, ...cols].join(';'), ...lista.map(c => [...base.map(k => c.m[k]), ...cols.map(k => c[k])].map(csvVal).join(';'))].join('\n'));
+    descargar('mrm_coberturas.csv', [[...base, ...cols].join(';'), ...lista.map(c => [...base.map(k => campo(c.m, k)), ...cols.map(k => c[k])].map(csvVal).join(';'))].join('\n'));
   };
 }
 
@@ -778,7 +1251,7 @@ function vistaValidacion(ms) {
 const OBS = DATOS.observaciones.map(o => ({ ...o, id_modelo: String(o.id_modelo), compromiso: o.fecha_ampliada || o.fecha_estimada }));
 const OBS_CRIT = ['Crítico', 'Relevante', 'Moderado', 'Bajo', 'Potencial', 'Nulo'];
 const CRIT_CLS = { 'Crítico': 'bg-red-lt', 'Relevante': 'bg-orange-lt', 'Moderado': 'bg-yellow-lt', 'Bajo': 'bg-blue-lt', 'Potencial': 'bg-secondary-lt', 'Nulo': 'bg-secondary-lt' };
-const OBS_PLAZO = [{ n: 'Vencidas', c: 'var(--r)' }, { n: 'Vencen en 30 días o menos', c: 'var(--a)' }, { n: 'Vencen en más de 30 días', c: 'var(--g)' }];
+const OBS_PLAZO = [{ n: 'Vencidas', c: 'var(--r-dot)' }, { n: 'Vencen en 30 días o menos', c: 'var(--a-dot)' }, { n: 'Vencen en más de 30 días', c: 'var(--g-dot)' }];
 const OBS_DIMS = [{ k: 'MODEL_USER', t: 'Model User' }, { k: 'TIER_MODELO', t: 'Tier' }, { k: 'manager', t: 'Manager de validación' }, { k: 'tipo_revision', t: 'Tipo de revisión' }, { k: 'area', t: 'Área' }];
 let obsDim = 'MODEL_USER', obsFil = { plazo: '', criticidad: '', ambito: '' }, obsLim = 50;
 const obsVencida = o => o.vencimiento === 'Vencido';
@@ -796,71 +1269,124 @@ const obsApiladas = (os, clave, orden) => {
 };
 function antiguedadObs(venc) {
   const t = (a, b) => cuenta(venc, o => diasVencida(o) > a && diasVencida(o) <= b);
-  return barras([['Hasta 90 días', t(-1, 90)], ['91 a 180 días', t(90, 180)], ['181 a 365 días', t(180, 365)], ['1 a 2 años', t(365, 730)], ['Más de 2 años', t(730, Infinity)]]
-    .map(([e, v]) => ({ t: e, v, c: 'var(--r)', tip: `${e}\n${v} observaciones · ${pctTxt(v, venc.length)}` })), venc.length);
-}
-function topModelosObs(venc, mapa) {
-  const por = {}; venc.forEach(o => { por[o.id_modelo] = (por[o.id_modelo] || 0) + 1; });
-  const top = Object.entries(por).sort((a, b) => b[1] - a[1]).slice(0, 10);
-  return barras(top.map(([id, v]) => ({ t: mapa[id].NOMBRE_MODELO, v, c: 'var(--r)', tip: `${id} · ${mapa[id].NOMBRE_MODELO}\n${v} vencidas` })), top.length ? top[0][1] : 0);
+  const items = [['Hasta 90 días', t(-1, 90)], ['91 a 180 días', t(90, 180)], ['181 a 365 días', t(180, 365)], ['1 a 2 años', t(365, 730)], ['Más de 2 años', t(730, Infinity)]]
+    .map(([e, v]) => ({ t: e, v, c: 'var(--r-dot)', tip: `${e}\n${v} observaciones · ${pctTxt(v, venc.length)}` }));
+  return vbarras(items, Math.max(0, ...items.map(i => i.v)), 'observaciones');
 }
 function tablaObs(os, mapa) {
   if (!os.length) return '<div class="empty">No hay observaciones para los criterios seleccionados.</div>';
   const plazo = o => (obsVencida(o) ? `<span style="color:var(--r);font-weight:600">${fmt0(diasVencida(o))} días</span>` : `<span class="text-secondary">${esc(o.vencimiento)}</span>`);
   return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>ID obs.</th><th>Modelo</th><th>Criticidad</th><th>Ámbito</th><th>Tipo de revisión</th><th>Observación</th><th>Compromiso</th><th>Vencimiento</th><th class="text-center">Ampliaciones</th><th>Validador</th><th>Propietario</th></tr></thead><tbody>
-    ${os.slice(0, obsLim).map(o => `<tr class="obs-fila" tabindex="0" title="Clic para ver el detalle"><td class="fw-bold">${esc(o.id)}</td><td style="min-width:220px;white-space:normal"><b>${esc(o.id_modelo)}</b><div class="text-secondary small">${esc(mapa[o.id_modelo].NOMBRE_MODELO)}</div></td>
+    ${os.slice(0, obsLim).map(o => `<tr class="obs-fila" tabindex="0" title="Clic para ver el detalle"><td class="fw-bold">${esc(o.id)}</td><td style="min-width:220px;white-space:normal"><b>${esc(cod(o.id_modelo))}</b><div class="text-secondary small">${esc(mapa[o.id_modelo].NOMBRE_MODELO)}</div></td>
       <td><span class="badge ${CRIT_CLS[o.criticidad]}">${esc(o.criticidad)}</span></td><td class="text-nowrap">${esc(o.ambito)}</td><td class="text-nowrap">${esc(o.tipo_revision)}</td>
       <td class="desc"><div class="clamp">${esc(o.observacion)}</div></td><td class="text-nowrap">${fechaCorta(o.compromiso)}</td><td class="text-nowrap">${plazo(o)}</td><td class="text-center">${o.ampliaciones}</td><td class="text-nowrap">${esc(o.validador)}</td><td class="text-nowrap">${esc(o.propietario)}</td></tr>
       <tr class="obs-det" hidden><td colspan="11"><b>Observación:</b> ${esc(o.observacion)}<br><b>Recomendación:</b> ${esc(o.recomendacion)}<br><span class="text-secondary small">Proyecto: ${esc(o.proyecto)} · Manager: ${esc(o.manager)} · Área: ${esc(o.area)} · Fecha estimada: ${fechaCorta(o.fecha_estimada)}${o.fecha_ampliada ? ` · Fecha ampliada: ${fechaCorta(o.fecha_ampliada)}` : ''}</span></td></tr>`).join('')}
     </tbody></table></div>${verMas('obs-mas', os.length, obsLim)}`;
+}
+/* Observaciones de SBS y auditoría interna: una fila por observación y modelo, solo del último mes */
+const SBS = DATOS.sbs ? DATOS.sbs.map(o => ({ ...o, id_modelo: o.id_modelo == null ? null : String(o.id_modelo) })) : null;
+const SBS_ESTADOS = [{ n: 'Pendiente', c: 'var(--r-dot)' }, { n: 'En Proceso', c: 'var(--a-dot)' }, { n: 'Implementada Por Verificar', c: '#64748B' }];
+const SBS_RIESGOS = ['de Atención Prioritaria', 'de Atención', 'Alto', 'Relevante', 'Moderado', 'Bajo'];
+const SBS_CLS = { 'Pendiente': 'bg-orange-lt', 'En Proceso': 'bg-blue-lt', 'Implementada Por Verificar': 'bg-green-lt' };
+let sbsFil = { tipo: '', estado: '' }, sbsLim = 50;
+// Solo el estado "Pendiente" cuenta como pendiente; vence si su fecha es anterior al corte del input principal
+const sbsPendiente = o => o.estado === 'Pendiente';
+const sbsVencida = o => sbsPendiente(o) && o.vencimiento < DATOS.corte;
+const sbsSegs = os => SBS_ESTADOS.map(e => ({ ...e, v: cuenta(os, o => o.estado === e.n) }));
+function sbsApiladas(os, clave, orden) {
+  const filas = orden.map(t => ({ t, segs: sbsSegs(os.filter(o => clave(o) === t)) })).filter(totalSegs);
+  return filas.length ? apiladas(filas, Math.max(...filas.map(totalSegs))) + `<div class="mt-3">${leyendaColores(SBS_ESTADOS)}</div>` : '<div class="empty">Sin observaciones.</div>';
+}
+function tablaSBS(os, mapa, lim, idMas) {
+  if (!os.length) return '<div class="empty">No hay observaciones para los criterios seleccionados.</div>';
+  const modelo = o => (o.id_modelo ? `<b>${esc(cod(o.id_modelo))}</b><div class="text-secondary small">${esc(mapa[o.id_modelo].NOMBRE_MODELO)}</div>` : esc(o.alcance));
+  const plazo = o => (sbsVencida(o) ? `<span style="color:var(--r);font-weight:600">${fechaCorta(o.vencimiento)} · vencida</span>` : fechaCorta(o.vencimiento));
+  return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>ID obs.</th><th>Origen</th><th>${os[0].id_modelo ? 'Modelo' : 'Alcance'}</th><th>Riesgo</th><th>Estado</th><th>Título</th><th>Vencimiento</th><th class="text-center">Ampliaciones</th><th>Propietario</th><th>Unidad responsable</th></tr></thead><tbody>
+    ${os.slice(0, lim).map(o => `<tr class="obs-fila" tabindex="0" title="Clic para ver el detalle"><td class="fw-bold">${esc(o.id)}</td><td class="text-nowrap">${esc(o.tipo)}</td><td style="min-width:200px;white-space:normal">${modelo(o)}</td>
+      <td class="text-nowrap">${esc(o.riesgo)}</td><td><span class="badge ${SBS_CLS[o.estado] || 'bg-secondary-lt'}">${esc(o.estado)}</span></td><td class="desc"><div class="clamp">${esc(o.titulo)}</div></td>
+      <td class="text-nowrap">${plazo(o)}</td><td class="text-center">${o.ampliaciones}</td><td class="text-nowrap">${esc(o.propietario)}</td><td style="white-space:normal;min-width:180px">${esc(o.unidad)}</td></tr>
+      <tr class="obs-det" hidden><td colspan="10"><b>Observación:</b> ${esc(o.observacion)}<br><b>Recomendación:</b> ${esc(o.recomendacion)}<br><span class="text-secondary small">Proyecto: ${esc(o.codigo)} · ${esc(o.proyecto)} · Emisión: ${fechaCorta(o.emision)}</span></td></tr>`).join('')}
+    </tbody></table></div>${verMas(idMas, os.length, lim)}`;
+}
+function bloqueSBS(mapa) {
+  if (!SBS) return '';
+  const base = SBS.filter(o => o.id_modelo && mapa[o.id_modelo]), trans = SBS.filter(o => !o.id_modelo);
+  const pend = base.filter(sbsPendiente), venc = base.filter(sbsVencida);
+  const os = base.filter(o => (!sbsFil.tipo || o.tipo === sbsFil.tipo) && (!sbsFil.estado || o.estado === sbsFil.estado))
+    .sort((a, b) => sbsVencida(b) - sbsVencida(a) || SBS_ESTADOS.findIndex(e => e.n === a.estado) - SBS_ESTADOS.findIndex(e => e.n === b.estado) || a.vencimiento.localeCompare(b.vencimiento));
+  const filtros = `<div class="d-flex flex-wrap gap-2">
+    ${selector('s-tipo', 'Origen', [['', 'SBS y auditoría interna'], ...[...new Set(SBS.map(o => o.tipo))].sort().map(t => [t, t])], sbsFil.tipo)}
+    ${selector('s-estado', 'Estado', [['', 'Todos los estados'], ...SBS_ESTADOS.map(e => [e.n, e.n])], sbsFil.estado)}
+    <button id="s-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+  return `<h3 class="titulo-bloque">Observaciones de SBS y auditoría interna</h3>
+  <div class="row row-cards mb-3">
+    ${tile('Pendientes', pend.length, `en ${new Set(pend.map(o => o.id_modelo)).size} modelos`, 'ti-folder-open', 'orange')}
+    ${tile('Vencidas', venc.length, 'pendientes con plazo vencido', 'ti-alert-triangle', 'red')}
+    ${tile('En proceso', cuenta(base, o => o.estado === 'En Proceso'), 'no cuentan como pendientes', 'ti-progress', 'blue')}
+    ${tile('Implementadas por verificar', cuenta(base, o => o.estado === 'Implementada Por Verificar'), 'no cuentan como pendientes', 'ti-circle-check', 'green')}
+  </div><div class="row row-cards">
+    ${bloque('col-lg-5', 'Por origen', 'ti-building-bank', cuerpo(sbsApiladas(base, o => o.tipo, [...new Set(SBS.map(o => o.tipo))].sort())), 'Observaciones por estado')}
+    ${bloque('col-lg-7', 'Por nivel de riesgo', 'ti-flame', cuerpo(sbsApiladas(base, o => o.riesgo, [...SBS_RIESGOS, ...new Set(base.map(o => o.riesgo).filter(r => !SBS_RIESGOS.includes(r)))])), 'SBS y auditoría interna usan escalas distintas')}
+    ${bloque('col-12', 'Detalle de observaciones de SBS y auditoría interna', 'ti-clipboard-text', tablaSBS(os, mapa, sbsLim, 'sbs-mas'), `${os.length} observaciones · una fila por observación y modelo · clic en una fila para ver el detalle`, filtros)}
+    ${trans.length ? bloque('col-12', 'Observaciones transversales', 'ti-arrows-split', tablaSBS(trans, mapa, 999, 'sbs-t'), `${trans.length} observaciones que no pertenecen a un modelo · no cambian con los filtros`) : ''}
+  </div>`;
 }
 function vistaObs(ms) {
   const el = document.getElementById('v-obs');
   if (!ms.length) { el.innerHTML = vacio; return; }
   // El evolutivo sale del input, así que se muestra en todas las fechas
   const evo = `<div class="row row-cards mb-3">${bloque('col-12', 'Evolutivo de observaciones vencidas', 'ti-chart-line',
-    cuerpo(evolutivoConteos([['Crít/Relev/Mod vencidas', 'OBS_CRIT_RELE_MODE_VENCIDAS_VI'], ['Entorno tecnológico vencidas', 'OBS_AMB_TEC_VENCIDOS']], 'Evolutivo de observaciones vencidas')),
-    notaFechas().replace('Modelos por fecha', 'Observaciones por fecha'))}</div>`;
-  if (FIL.fecha !== ULTIMA) { soloUltimaFecha(el); el.insertAdjacentHTML('afterbegin', evo); return; }
+    cuerpo(evolutivoConteos([['Crít/Relev/Mod vencidas', 'OBS_CRIT_RELE_MODE_VENCIDAS_VI'], ['Entorno tecnológico vencidas', 'OBS_AMB_TEC_VENCIDOS'], ['SBS y auditoría vencidas', 'OBS_SBS_AI_VENCIDAS']], 'Evolutivo de observaciones vencidas')),
+    'Observaciones por fecha')}</div>`;
+  if (!esUltima()) { soloUltimaFecha(el); el.insertAdjacentHTML('afterbegin', evo); return; }
   const mapa = Object.fromEntries(ms.map(m => [m.ID_MODELO, m]));
   const base = OBS.filter(o => mapa[o.id_modelo]);
-  if (!base.length) { el.innerHTML = evo + '<div class="card"><div class="card-body empty">Los modelos seleccionados no tienen observaciones pendientes.</div></div>'; return; }
-  const venc = base.filter(obsVencida), criticas = venc.filter(altaCrit), prontas = base.filter(o => obsPlazo(o) === OBS_PLAZO[1].n);
-  const conAmp = cuenta(base, o => o.ampliaciones > 0);
-  const modelosVenc = new Set(venc.map(o => o.id_modelo));
   const os = base.filter(o => (!obsFil.plazo || obsPlazo(o) === obsFil.plazo) && (!obsFil.criticidad || o.criticidad === obsFil.criticidad) && (!obsFil.ambito || o.ambito === obsFil.ambito))
     .sort((a, b) => obsVencida(b) - obsVencida(a) || OBS_CRIT.indexOf(a.criticidad) - OBS_CRIT.indexOf(b.criticidad) || (diasVencida(b) ?? 0) - (diasVencida(a) ?? 0));
-  const filtros = `<div class="d-flex flex-wrap gap-2">
-    ${selector('o-plazo', 'Vencimiento', [['', 'Todo vencimiento'], ...OBS_PLAZO.map(p => [p.n, p.n])], obsFil.plazo)}
-    ${selector('o-crit', 'Criticidad', [['', 'Toda criticidad'], ...OBS_CRIT.map(c => [c, c])], obsFil.criticidad)}
-    ${selector('o-amb', 'Ámbito', [['', 'Todo ámbito'], ...[...new Set(base.map(o => o.ambito))].sort().map(a => [a, a])], obsFil.ambito)}
-    <button id="o-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
-  el.innerHTML = `<div class="row row-cards mb-3">
-    ${tile('Pendientes', base.length, `en ${new Set(base.map(o => o.id_modelo)).size} modelos`, 'ti-folder-open', 'blue')}
-    ${tile('Vencidas', venc.length, `${pctTxt(venc.length, base.length)} · ${modelosVenc.size} modelos`, 'ti-alert-triangle', 'red')}
-    ${tile('Críticas y relevantes', criticas.length, 'vencidas', 'ti-flame', 'pink')}
-    ${tile('Vencen en 30 días', prontas.length, 'o menos', 'ti-clock', 'orange')}
-    ${tile('Con ampliación', conAmp, `${pctTxt(conAmp, base.length)} del total`, 'ti-calendar-plus', 'azure')}
-  </div>${evo}<div class="row row-cards">
-    ${bloque('col-lg-7', 'Observaciones por criticidad', 'ti-flame', cuerpo(obsApiladas(base, o => o.criticidad, OBS_CRIT)), 'Situación de vencimiento')}
-    ${bloque('col-lg-5', 'Antigüedad de las vencidas', 'ti-hourglass', cuerpo(antiguedadObs(venc)), 'Días desde el compromiso vigente')}
-    ${bloque('col-lg-7', 'Observaciones por ámbito', 'ti-category', cuerpo(obsApiladas(base, o => o.ambito)), 'Ordenado por vencidas')}
-    ${bloque('col-lg-5', 'Modelos con más vencidas', 'ti-list-numbers', cuerpo(topModelosObs(venc, mapa)), 'Top 10')}
-    ${bloque('col-12', 'Observaciones por dimensión', 'ti-chart-bar', cuerpo(obsApiladas(base, o => obsDimVal(o, mapa))), 'Ordenado por vencidas', selector('o-dim', 'Agrupar por', OBS_DIMS.map(d => [d.k, d.t]), obsDim))}
-    ${bloque('col-12', 'Detalle de observaciones', 'ti-clipboard-text', tablaObs(os, mapa), `${os.length} observaciones · clic en una fila para ver la observación y la recomendación`, filtros)}
-  </div>`;
-  el.querySelector('#o-dim').onchange = e => { obsDim = e.target.value; vistaObs(filtrados()); };
-  [['#o-plazo', 'plazo'], ['#o-crit', 'criticidad'], ['#o-amb', 'ambito']].forEach(([s, k]) => { el.querySelector(s).onchange = e => { obsFil[k] = e.target.value; obsLim = 50; vistaObs(filtrados()); }; });
-  const mas = el.querySelector('#obs-mas'); if (mas) mas.onclick = () => { obsLim += 50; vistaObs(filtrados()); };
+  let validacion = evo + '<div class="card"><div class="card-body empty">Los modelos seleccionados no tienen observaciones de validación pendientes.</div></div>';
+  if (base.length) {
+    const venc = base.filter(obsVencida), criticas = venc.filter(altaCrit), prontas = base.filter(o => obsPlazo(o) === OBS_PLAZO[1].n);
+    const conAmp = cuenta(base, o => o.ampliaciones > 0);
+    const filtros = `<div class="d-flex flex-wrap gap-2">
+      ${selector('o-plazo', 'Vencimiento', [['', 'Todo vencimiento'], ...OBS_PLAZO.map(p => [p.n, p.n])], obsFil.plazo)}
+      ${selector('o-crit', 'Criticidad', [['', 'Toda criticidad'], ...OBS_CRIT.map(c => [c, c])], obsFil.criticidad)}
+      ${selector('o-amb', 'Ámbito', [['', 'Todo ámbito'], ...[...new Set(base.map(o => o.ambito))].sort().map(a => [a, a])], obsFil.ambito)}
+      <button id="o-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+    validacion = `<div class="row row-cards mb-3">
+      ${tile('Pendientes', base.length, `en ${new Set(base.map(o => o.id_modelo)).size} modelos`, 'ti-folder-open', 'blue')}
+      ${tile('Vencidas', venc.length, `${pctTxt(venc.length, base.length)} · ${new Set(venc.map(o => o.id_modelo)).size} modelos`, 'ti-alert-triangle', 'red')}
+      ${tile('Críticas y relevantes', criticas.length, 'vencidas', 'ti-flame', 'pink')}
+      ${tile('Vencen en 30 días', prontas.length, 'o menos', 'ti-clock', 'orange')}
+      ${tile('Con ampliación', conAmp, `${pctTxt(conAmp, base.length)} del total`, 'ti-calendar-plus', 'azure')}
+    </div>${evo}<h3 class="titulo-bloque">Observaciones de validación</h3><div class="row row-cards">
+      ${bloque('col-lg-7', 'Observaciones por criticidad', 'ti-flame', cuerpo(obsApiladas(base, o => o.criticidad, OBS_CRIT)), 'Situación de vencimiento')}
+      ${bloque('col-lg-5', 'Antigüedad de las vencidas', 'ti-hourglass', cuerpo(antiguedadObs(venc)), 'Días desde el compromiso vigente')}
+      ${bloque('col-lg-7', 'Observaciones por ámbito', 'ti-category', cuerpo(obsApiladas(base, o => o.ambito)), 'Ordenado por vencidas')}
+      ${bloque('col-lg-5', 'Observaciones por dimensión', 'ti-chart-bar', cuerpo(obsApiladas(base, o => obsDimVal(o, mapa))), 'Ordenado por vencidas', selector('o-dim', 'Agrupar por', OBS_DIMS.map(d => [d.k, d.t]), obsDim))}
+      ${bloque('col-12', 'Detalle de observaciones', 'ti-clipboard-text', tablaObs(os, mapa), `${os.length} observaciones · clic en una fila para ver la observación y la recomendación`, filtros)}
+    </div>`;
+  }
+  el.innerHTML = validacion + bloqueSBS(mapa);
+  const al = (sel, f) => { const x = el.querySelector(sel); if (x) f(x); };
+  al('#o-dim', x => { x.onchange = e => { obsDim = e.target.value; vistaObs(filtrados()); }; });
+  [['#o-plazo', 'plazo'], ['#o-crit', 'criticidad'], ['#o-amb', 'ambito']].forEach(([s, k]) => al(s, x => { x.onchange = e => { obsFil[k] = e.target.value; obsLim = 50; vistaObs(filtrados()); }; }));
+  [['#s-tipo', 'tipo'], ['#s-estado', 'estado']].forEach(([s, k]) => al(s, x => { x.onchange = e => { sbsFil[k] = e.target.value; sbsLim = 50; vistaObs(filtrados()); }; }));
+  al('#obs-mas', x => { x.onclick = () => { obsLim += 50; vistaObs(filtrados()); }; });
+  al('#sbs-mas', x => { x.onclick = () => { sbsLim += 50; vistaObs(filtrados()); }; });
   el.querySelectorAll('.obs-fila').forEach(tr => { tr.onclick = () => { tr.nextElementSibling.hidden = !tr.nextElementSibling.hidden; }; });
-  el.querySelector('#o-csv').onclick = () => {
+  al('#o-csv', x => { x.onclick = () => {
     const cols = ['id', 'id_modelo', 'criticidad', 'ambito', 'tipo_revision', 'vencimiento', 'compromiso', 'ampliaciones', 'observacion', 'recomendacion', 'proyecto', 'manager', 'validador', 'propietario', 'area'];
-    descargar('mrm_observaciones.csv', [[...cols, 'dias_vencida'].join(';'), ...os.map(o => [...cols.map(c => o[c]), diasVencida(o)].map(csvVal).join(';'))].join('\n'));
-  };
+    descargar('mrm_observaciones.csv', [[...cols, 'dias_vencida'].join(';'), ...os.map(o => [...cols.map(c => campo(o, c)), diasVencida(o)].map(csvVal).join(';'))].join('\n'));
+  }; });
+  al('#s-csv', x => { x.onclick = () => {
+    const cols = ['id', 'tipo', 'id_modelo', 'alcance', 'riesgo', 'estado', 'titulo', 'emision', 'vencimiento', 'ampliaciones', 'propietario', 'unidad', 'codigo', 'proyecto', 'observacion', 'recomendacion'];
+    const todas = [...SBS.filter(o => o.id_modelo && mapa[o.id_modelo]), ...SBS.filter(o => !o.id_modelo)];
+    descargar('mrm_observaciones_sbs_ai.csv', [cols.join(';'), ...todas.map(o => cols.map(c => csvVal(campo(o, c))).join(';'))].join('\n'));
+  }; });
 }
 
 /* ===================== IMPLEMENTACIÓN ===================== */
-const AMBIENTES = [{ n: 'PRODUCTIVO', c: 'var(--g)' }, { n: 'MIXTO', c: 'var(--a)' }, { n: 'NO PRODUCTIVO', c: 'var(--r)' }, { n: 'EN REVISIÓN', c: '#8a93a0' }, { n: 'Sin información', c: 'var(--n)' }];
+const AMBIENTES = [{ n: 'PRODUCTIVO', c: 'var(--g-dot)' }, { n: 'MIXTO', c: 'var(--a-dot)' }, { n: 'NO PRODUCTIVO', c: 'var(--r-dot)' }, { n: 'EN REVISIÓN', c: '#64748B' }, { n: 'Sin información', c: 'var(--n-dot)' }];
 const AMB_CLS = { 'PRODUCTIVO': 'bg-green-lt', 'MIXTO': 'bg-yellow-lt', 'NO PRODUCTIVO': 'bg-red-lt' };
 const FRENTES_IMPL = {
   despliegue: { t: 'Despliegue', amb: 'AMBIENTE_DESPLIEGUE', rat: 'RATIO_IMPLEMENTACION', plat: 'PLATAFORMA_IMPLEMENTACION' },
@@ -899,9 +1425,43 @@ function tablaImplementacion(lista) {
   const amb = v => `<span class="badge ${AMB_CLS[v] || 'bg-secondary-lt'}">${esc(v)}</span>`;
   const plat = v => `<td style="white-space:normal;min-width:170px;max-width:240px">${esc(String(v || '-').replace(/,\s*/g, ', '))}</td>`;
   return `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th>Producto</th><th>Plataforma implementación</th><th>Ambiente despliegue</th><th class="text-center">Ratio implementación</th><th>Plataforma data</th><th>Ambiente data</th><th class="text-center">Ratio data</th></tr></thead><tbody>
-    ${lista.slice(0, implLim).map(m => `<tr><td style="min-width:260px;white-space:normal"><b>${esc(m.ID_MODELO)}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td><td class="text-nowrap">${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.PRODUCTO)}</td>
+    ${lista.slice(0, implLim).map(m => `<tr><td style="min-width:260px;white-space:normal"><b>${esc(cod(m.ID_MODELO))}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td><td class="text-nowrap">${esc(m.MODEL_USER)}</td><td class="text-nowrap">${esc(m.PRODUCTO)}</td>
       ${plat(m.PLATAFORMA_IMPLEMENTACION)}<td>${amb(m.AMBIENTE_DESPLIEGUE)}</td><td class="text-center">${pctRatio(m.RATIO_IMPLEMENTACION)}</td>${plat(m.PLATAFORMA_DATA)}<td>${amb(m.AMBIENTE_DATA)}</td><td class="text-center">${pctRatio(m.RATIO_DATA)}</td></tr>`).join('')}
     </tbody></table></div>${verMas('impl-mas', lista.length, implLim)}`;
+}
+/* Detalle del indicador de calidad de datos: una fila por modelo evaluado, solo del último mes */
+const CAL = porModelo(DATOS.calidad);
+const CRIT = DATOS.cal_criterios;
+let calLim = 50;
+function bloqueCalidad(ms) {
+  if (!CAL) return '';
+  const titulo = '<h3 class="titulo-bloque">Calidad de datos</h3>';
+  if (!esUltima()) return `${titulo}<div class="row row-cards">${notaDetalle('El detalle del indicador de calidad de datos')}</div>`;
+  const ev = ms.filter(m => CAL[m.ID_MODELO]).map(m => ({ m, c: CAL[m.ID_MODELO] })).sort((a, b) => a.c.indicador - b.c.indicador);
+  if (!ev.length) return `${titulo}<div class="card"><div class="card-body empty">Ninguno de los modelos seleccionados tiene evaluación de calidad de datos.</div></div>`;
+  // Cumplimiento de un criterio: puntos obtenidos sobre el peso máximo del criterio
+  const pct = (c, i) => c.valores[i] / CRIT[i].peso * 100;
+  const criterios = barras(CRIT.map((k, i) => { const v = avg(ev.map(e => pct(e.c, i))); return { t: k.t, v: clamp(v), txt: `${fmt0(v)}%`, c: tono(v), tip: `${k.t}\nCumplimiento promedio: ${fmt0(v)}%\nPeso en el indicador: ${fmt0(k.peso * 100)}%` }; }), 100);
+  const cobertura = barras([...new Set(ms.map(m => m.TIER_MODELO))].sort().map(t => {
+    const N = cuenta(ms, es('TIER_MODELO', t)), n = cuenta(ev, e => e.m.TIER_MODELO === t);
+    return { t: `Tier ${t} (${n} de ${N})`, v: 100 * n / N, txt: pctTxt(n, N), c: FRENTES[0], tip: `Tier ${t}\n${n} de ${N} modelos evaluados` };
+  }), 100);
+  const celda = v => `<td class="cell" style="${cellStyle(v)}">${fmt0(v)}%</td>`;
+  const tabla = `<div class="table-responsive"><table class="table table-vcenter card-table table-sm alertas-tabla"><thead><tr><th>Modelo</th><th>Tier</th><th>Model User</th><th class="text-center">Indicador</th><th>Rango</th>
+    ${CRIT.map(k => `<th class="text-center" style="white-space:normal;min-width:110px" title="Peso: ${fmt0(k.peso * 100)}%">${esc(k.t)}</th>`).join('')}</tr></thead><tbody>
+    ${ev.slice(0, calLim).map(({ m, c }) => `<tr><td style="min-width:240px;white-space:normal"><b>${esc(cod(m.ID_MODELO))}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td><td class="text-nowrap">${esc(m.MODEL_USER)}</td>
+      ${celda(c.indicador * 100)}<td class="text-nowrap">${esc(c.rango)}</td>${CRIT.map((_, i) => celda(pct(c, i))).join('')}</tr>`).join('')}
+    </tbody></table></div>${verMas('cal-mas', ev.length, calLim)}`;
+  return `${titulo}<div class="row row-cards mb-3">
+    ${tile('Modelos evaluados', ev.length, `de ${ms.length} · ${pctTxt(ev.length, ms.length)}`, 'ti-clipboard-check', 'blue')}
+    ${tile('Indicador promedio', `${fmt0(avg(ev.map(e => e.c.indicador)) * 100)}%`, 'de los modelos evaluados', 'ti-percentage', 'azure')}
+    ${tile('Indicador hasta 50%', cuenta(ev, e => e.c.indicador <= 0.5), 'modelos evaluados', 'ti-alert-triangle', 'red')}
+    ${tile('Todos los criterios en 0', cuenta(ev, e => !e.c.valores.some(v => v)), 'confirmar si fueron evaluados', 'ti-help-circle', 'orange')}
+  </div><div class="row row-cards">
+    ${bloque('col-lg-7', 'Cumplimiento por criterio', 'ti-list-check', cuerpo(criterios), 'Promedio de los modelos evaluados · puntos obtenidos sobre el peso del criterio')}
+    ${bloque('col-lg-5', 'Cobertura de la evaluación', 'ti-target', cuerpo(cobertura), 'Modelos evaluados por Tier')}
+    ${bloque('col-12', 'Detalle de calidad de datos por modelo', 'ti-list-details', tabla, `${ev.length} modelos evaluados · ordenado de menor a mayor indicador · cada criterio como porcentaje de su peso`)}
+  </div>`;
 }
 function vistaImplementacion(ms) {
   const el = document.getElementById('v-implementacion');
@@ -931,45 +1491,363 @@ function vistaImplementacion(ms) {
     ${bloque('col-lg-6', 'Plataformas de implementación', 'ti-server-2', cuerpo(plataformas(ms, FRENTES_IMPL.despliegue)), 'Top 10 · modelos por ambiente de despliegue')}
     ${bloque('col-lg-6', 'Plataformas de data', 'ti-database', cuerpo(plataformas(ms, FRENTES_IMPL.data)), 'Top 10 · modelos por ambiente de data')}
     ${bloque('col-12', 'Detalle de implementación por modelo', 'ti-list-details', tablaImplementacion(lista), `${lista.length} modelos · ordenado de menor a mayor ratio promedio`, selFil)}
-  </div>`;
+  </div>${bloqueCalidad(ms)}`;
+  const masCal = el.querySelector('#cal-mas'); if (masCal) masCal.onclick = () => { calLim += 50; vistaImplementacion(filtrados()); };
   el.querySelector('#impl-dim').onchange = e => { implDim = e.target.value; vistaImplementacion(filtrados()); };
   el.querySelector('#impl-fil').onchange = e => { implFiltro = e.target.value; implLim = 50; vistaImplementacion(filtrados()); };
   el.querySelectorAll('[data-frente]').forEach(b => b.onclick = () => { implFrente = b.dataset.frente; vistaImplementacion(filtrados()); });
   const mas = el.querySelector('#impl-mas'); if (mas) mas.onclick = () => { implLim += 50; vistaImplementacion(filtrados()); };
   el.querySelector('#impl-csv').onclick = () => {
     const cols = ['ID_MODELO', 'NOMBRE_MODELO', 'TIER_MODELO', 'MODEL_USER', 'PRODUCTO', 'PLATAFORMA_IMPLEMENTACION', 'AMBIENTE_DESPLIEGUE', 'RATIO_IMPLEMENTACION', 'PLATAFORMA_DATA', 'AMBIENTE_DATA', 'RATIO_DATA'];
-    descargar('mrm_implementacion.csv', [cols.join(';'), ...lista.map(m => cols.map(c => csvVal(m[c])).join(';'))].join('\n'));
+    descargar('mrm_implementacion.csv', [cols.join(';'), ...lista.map(m => cols.map(c => csvVal(campo(m, c))).join(';'))].join('\n'));
   };
 }
 
+/* ===================== INVENTARIO: MODELOS INPUT Y MOVIMIENTOS ===================== */
+// Del inventario se usan los modelos input y las fechas de uso de los modelos que entran o salen. El estado y los demás datos del modelo salen del input principal.
+const INV = porModelo(DATOS.inventario);
+let invSel = null, invMapa = 'todos';
+const INV_MAPA = [['todos', 'Todos los modelos'], ['con', 'Con modelo input'], ['sin', 'Sin modelo input']];
+const insumosDe = id => ((INV[id] || {}).insumos || []).map(String);
+const MOV_C = { entra: '#0E9384', sale: '#13406F' };
+// Modelos que entraron o salieron del score entre dos meses. Se compara sobre todos los modelos y luego
+// se aplican los filtros a la fila de cada modelo, para que un cambio de Tier o proceso no cuente como movimiento.
+function movimientos(ant, act) {
+  const A = TODOS.filter(m => m.FECHA === ant), B = TODOS.filter(m => m.FECHA === act);
+  const ia = new Set(A.map(m => m.ID_MODELO)), ib = new Set(B.map(m => m.ID_MODELO));
+  return { entran: B.filter(m => !ia.has(m.ID_MODELO) && pasaFiltros(m)), salen: A.filter(m => !ib.has(m.ID_MODELO) && pasaFiltros(m)) };
+}
+function graficoMovimientos() {
+  const F = DATOS.fechas, pares = F.slice(1).map((f, i) => ({ f, ...movimientos(F[i], f) }));
+  const max = Math.max(1, ...pares.flatMap(p => [p.entran.length, p.salen.length]));
+  const col = (n, c, tip) => `<i style="height:${n / max * 100}%;background:${c}" data-tip="${esc(tip)}"><b>${n || ''}</b></i>`;
+  return `<div class="movs">${pares.map(p => `<div class="mov${p.f === ULTIMA ? ' actual' : ''}"><div class="mov-barras">
+      ${col(p.entran.length, MOV_C.entra, `${mesTxt(p.f)}\nEntraron ${p.entran.length} modelos`)}${col(p.salen.length, MOV_C.sale, `${mesTxt(p.f)}\nSalieron ${p.salen.length} modelos`)}</div>
+      <span>${esc(mesTxt(p.f))}</span></div>`).join('')}</div>
+    <div class="mt-2">${leyendaColores([{ n: 'Entraron', c: MOV_C.entra }, { n: 'Salieron', c: MOV_C.sale }])}</div>`;
+}
+function tablaMov(lista, tipo) {
+  if (!lista.length) return `<div class="empty">Ningún modelo ${tipo === 'entra' ? 'entró' : 'salió'} este mes.</div>`;
+  const inv = id => DATOS.inv_mov[id] || {};
+  const extra = tipo === 'entra' ? ['Inicio de uso'] : ['Estado en inventario', 'Retiro de uso'];
+  return `<div class="table-responsive"><table class="table table-sm table-vcenter card-table"><thead><tr><th>Modelo</th><th class="text-center">Tier</th><th>Proceso</th><th>Model User</th><th class="text-center">${tipo === 'entra' ? 'Score' : 'Último score'}</th>${extra.map(t => `<th>${t}</th>`).join('')}</tr></thead><tbody>
+    ${[...lista].sort((a, b) => String(a.TIER_MODELO).localeCompare(String(b.TIER_MODELO)) || String(a.NOMBRE_MODELO).localeCompare(String(b.NOMBRE_MODELO), 'es')).map(m => `<tr><td style="min-width:240px;white-space:normal"><b>${esc(cod(m.ID_MODELO))}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td>
+      <td class="text-center">${esc(m.TIER_MODELO)}</td><td>${esc(m.PROCESO)}</td><td class="text-nowrap">${esc(m.MODEL_USER)}</td><td class="cell" style="${cellStyle(m.global)}">${fmt(m.global)}</td>
+      ${tipo === 'entra' ? `<td class="text-nowrap">${fechaCorta(inv(m.ID_MODELO).inicio)}</td>` : `<td>${esc(inv(m.ID_MODELO).estado || '–')}</td><td class="text-nowrap">${fechaCorta(inv(m.ID_MODELO).retiro)}</td>`}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+function bloqueMovimientos() {
+  const F = DATOS.fechas;
+  if (F.length < 2) return '';
+  const ant = F[F.length - 2], { entran, salen } = movimientos(ant, ULTIMA);
+  const neto = entran.length - salen.length;
+  const cifra = (t, v, c, sub) => `<div class="mov-cifra"><div class="subheader">${t}</div><div class="h1 mb-0" style="color:${c}">${v}</div><div class="text-secondary small">${sub}</div></div>`;
+  const resumen = `<div class="mov-resumen">${cifra('Entraron', entran.length, MOV_C.entra, 'nuevos en producción')}${cifra('Salieron', salen.length, MOV_C.sale, 'retirados del score')}
+    ${cifra('Variación neta', (neto > 0 ? '+' : '') + neto, 'var(--tinta)', `${mesTxt(ant)} → ${mesTxt(ULTIMA)}`)}</div>`;
+  const csv = '<button id="mov-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button>';
+  return `${bloque('col-12', 'Altas y bajas del inventario', 'ti-arrows-exchange', cuerpo(`<div class="row g-4 align-items-center"><div class="col-lg-4">${resumen}</div><div class="col-lg-8">${graficoMovimientos()}</div></div>`), `${mesTxt(ULTIMA)} frente a ${mesTxt(ant)} · cada barra compara un mes con el anterior`)}
+    ${bloque('col-12', 'Modelos que entraron y salieron', 'ti-switch-horizontal', `<div class="card-body pb-0"><div class="subheader mb-2" style="color:${MOV_C.entra}">Entraron (${entran.length})</div></div>${tablaMov(entran, 'entra')}
+      <div class="card-body pb-0"><div class="subheader mb-2" style="color:${MOV_C.sale}">Salieron (${salen.length})</div></div>${tablaMov(salen, 'sale')}`, 'Inicio y retiro de uso según el archivo de inventario', csv)}`;
+}
+function exportarMovimientos() {
+  const F = DATOS.fechas, { entran, salen } = movimientos(F[F.length - 2], ULTIMA);
+  const fila = (m, t) => { const i = DATOS.inv_mov[m.ID_MODELO] || {}; return [t, cod(m.ID_MODELO), m.NOMBRE_MODELO, m.TIER_MODELO, m.PROCESO, m.MODEL_USER, fmt(m.global), i.estado, i.inicio, i.retiro]; };
+  descargar('mrm_altas_bajas.csv', [['movimiento', 'id_modelo', 'modelo', 'tier', 'proceso', 'model_user', 'score', 'estado_inventario', 'inicio_uso', 'retiro_uso'].join(';'),
+    ...[...entran.map(m => fila(m, 'Entró')), ...salen.map(m => fila(m, 'Salió'))].map(f => f.map(csvVal).join(';'))].join('\n'));
+}
+function vistaInventario(ms) {
+  const el = document.getElementById('v-inventario');
+  if (!ms.length) { el.innerHTML = vacio; return; }
+  if (!INV) { el.innerHTML = '<div class="card"><div class="card-body empty">No se cargó el archivo Inventario de modelos.</div></div>'; return; }
+  if (!esUltima()) { soloUltimaFecha(el); return; }
+  const SCORE = Object.fromEntries(MODELOS.map(m => [m.ID_MODELO, m]));   // todos los modelos del mes, sin filtros
+  const nombre = id => (SCORE[id] ? SCORE[id].NOMBRE_MODELO : (DATOS.inv_nombres[id] || {}).n || id);
+  const colorDe = id => (SCORE[id] ? tono(SCORE[id].global) : 'var(--n-dot)');
+  const estado = id => (SCORE[id] ? `Score ${fmt(SCORE[id].global)} · ${SEM_TXT[sem(SCORE[id].global)]}` : `Fuera del score · ${(DATOS.inv_nombres[id] || {}).p || 'sin perímetro'}`);
+  const chip = id => `<span class="chip-m" data-tip="${esc(`${cod(id)} · ${nombre(id)}\n${estado(id)}`)}"><i style="background:${colorDe(id)}"></i><span>${esc(cod(id))} · ${esc(nombre(id))}</span></span>`;
+  const nodo = (id, cls = '') => `<div class="nodo ${cls}" style="--c:${colorDe(id)}"><b>${esc(cod(id))}</b> · ${esc(nombre(id))}<small>${estado(id)}</small></div>`;
+  const con = ms.filter(m => insumosDe(m.ID_MODELO).length);
+  const usos = {};   // insumo -> modelos seleccionados que lo usan
+  con.forEach(m => insumosDe(m.ID_MODELO).forEach(i => (usos[i] ||= []).push(m.ID_MODELO)));
+  const distintos = Object.keys(usos), fuera = distintos.filter(i => !SCORE[i]);
+  const consumidores = id => MODELOS.filter(m => insumosDe(m.ID_MODELO).includes(id)).map(m => m.ID_MODELO);
+  const leyenda = `<div class="leg"><span><i style="background:var(--g)"></i>Modelo input en verde</span><span><i style="background:var(--a)"></i>en ámbar</span><span><i style="background:var(--r)"></i>en rojo</span><span><i style="background:var(--n)"></i>Fuera del score</span></div>`;
+
+  // Mapa por proceso: cada modelo con sus insumos
+  const procesos = [...new Set(ms.map(m => m.PROCESO))].sort((a, b) => a.localeCompare(b, 'es'));
+  // Los modelos sin modelo input se listan al final de cada proceso, con fondo gris y una etiqueta;
+  // se distingue si el inventario no declara modelos input o si el modelo no figura en el inventario.
+  const sinInput = m => (INV[m.ID_MODELO] ? '<span class="sin-input"><i class="ti ti-circle-off"></i>Sin modelo input</span>' : '<span class="sin-input fuera-inv"><i class="ti ti-alert-circle"></i>No figura en el inventario</span>');
+  const filaMapa = m => { const ins = insumosDe(m.ID_MODELO), sin = !ins.length;
+    return `<tr class="${sin ? 'sin' : ''}"><td style="min-width:260px"><b>${esc(cod(m.ID_MODELO))}</b><div class="text-secondary small">${esc(m.NOMBRE_MODELO)}</div></td><td class="text-center">${esc(m.TIER_MODELO)}</td>
+      <td class="cell" style="${cellStyle(m.global)}">${fmt(m.global)}</td><td>${sin ? sinInput(m) : ins.map(chip).join('')}</td></tr>`; };
+  const verMapa = m => invMapa === 'todos' || (invMapa === 'con') === insumosDe(m.ID_MODELO).length > 0;
+  const procMapa = procesos.filter(p => ms.some(m => m.PROCESO === p && verMapa(m)));
+  const mapa = procMapa.length ? `<div class="table-responsive"><table class="table table-sm card-table insumos"><thead><tr><th>Modelo</th><th class="text-center">Tier</th><th class="text-center">Score</th><th>Modelos input que usa</th></tr></thead><tbody>
+    ${procMapa.map(p => {
+      const de = ms.filter(m => m.PROCESO === p), conP = de.filter(m => insumosDe(m.ID_MODELO).length);
+      const orden = [...de].sort((a, b) => insumosDe(b.ID_MODELO).length - insumosDe(a.ID_MODELO).length || String(a.NOMBRE_MODELO).localeCompare(String(b.NOMBRE_MODELO), 'es')).filter(verMapa);
+      return `<tr class="proceso"><td colspan="4">${esc(p)} <span class="text-secondary fw-normal">· ${de.length} modelos: ${conP.length} con modelo input y ${de.length - conP.length} sin modelo input</span></td></tr>`
+        + orden.map(filaMapa).join('');
+    }).join('')}</tbody></table></div><div class="card-body pt-2">${leyenda.replace('</div>', '<span class="sin-input"><i class="ti ti-circle-off"></i>Sin modelo input</span><span class="sin-input fuera-inv"><i class="ti ti-alert-circle"></i>No figura en el inventario</span></div>')}</div>` : '<div class="empty">Ningún modelo cumple el criterio seleccionado.</div>';
+
+  // Explorador: insumos -> modelo -> modelos que lo usan
+  const opciones = ms.filter(m => insumosDe(m.ID_MODELO).length || consumidores(m.ID_MODELO).length);
+  if (!opciones.some(m => m.ID_MODELO === invSel)) invSel = opciones.length ? [...opciones].sort((a, b) => insumosDe(b.ID_MODELO).length - insumosDe(a.ID_MODELO).length)[0].ID_MODELO : null;
+  const flecha = '<div class="flujo-flecha" aria-hidden="true"><i class="ti ti-arrow-right"></i></div>';
+  const columna = (t, ids, sin) => `<div class="mapa-col"><div class="subheader">${t} (${ids.length})</div>${ids.length ? ids.map(i => nodo(i)).join('') : `<div class="text-secondary small">${sin}</div>`}</div>`;
+  const explorador = invSel ? `<div class="mapa-insumos">${columna('Modelos input', insumosDe(invSel), 'No declara modelos input')}${flecha}
+    <div class="mapa-col"><div class="subheader">Modelo · ${esc(SCORE[invSel].PROCESO)}</div>${nodo(invSel, 'centro')}</div>${flecha}
+    ${columna('Modelos que lo usan', consumidores(invSel), 'Ningún modelo del score lo usa')}</div>` : '<div class="empty">Sin modelos con relaciones de modelo input.</div>';
+  const selModelo = invSel ? `<select id="inv-sel" class="form-select form-select-sm toolbar" style="width:auto;max-width:100%" aria-label="Modelo">${opciones.map(m => `<option value="${esc(m.ID_MODELO)}" ${m.ID_MODELO === invSel ? 'selected' : ''}>${esc(cod(m.ID_MODELO))} · ${esc(m.NOMBRE_MODELO)}</option>`).join('')}</select>` : '';
+
+  const exportar = `<div class="d-flex flex-wrap gap-2">${selector('inv-mapa', 'Mostrar', INV_MAPA, invMapa)}<button id="inv-csv" class="btn btn-sm btn-outline-secondary toolbar"><i class="ti ti-file-export me-1"></i>Exportar</button></div>`;
+  el.innerHTML = `<div class="row row-cards mb-3">
+    ${tile('Modelos con modelo input', con.length, `de ${ms.length} · ${pctTxt(con.length, ms.length)}`, 'ti-affiliate', 'blue')}
+    ${tile('Modelos input distintos', distintos.length, 'usados por los modelos seleccionados', 'ti-stack-2', 'azure')}
+    ${tile('Modelos input dentro del score', distintos.length - fuera.length, 'tienen score propio', 'ti-gauge', 'green')}
+    ${tile('Modelos input fuera del score', fuera.length, 'módulos o modelos sin score', 'ti-eye-off', 'orange')}
+    ${tile('Modelos input en rojo', cuenta(distintos, i => SCORE[i] && sem(SCORE[i].global) === 'rojo'), 'con score menor que ' + UMBRALES.rojo, 'ti-alert-triangle', 'red')}
+  </div><div class="row row-cards">
+    ${bloqueMovimientos()}
+    ${bloque('col-12', 'Explorador de modelos input', 'ti-route', cuerpo(`<div class="mb-3">${selModelo}</div>${explorador}`), 'Elige un modelo para ver qué modelos input usa y qué modelos lo usan a él')}
+    ${bloque('col-12', 'Mapa de modelos input por proceso', 'ti-sitemap', mapa, `${con.length} de ${ms.length} modelos con modelo input en ${procesos.length} procesos · el color de cada modelo input es el semáforo de su score; los modelos sin modelo input van al final de cada proceso, en gris`, exportar)}
+  </div>`;
+  const movCsv = el.querySelector('#mov-csv'); if (movCsv) movCsv.onclick = exportarMovimientos;
+  const sel = el.querySelector('#inv-sel'); if (sel) sel.onchange = e => { invSel = e.target.value; vistaInventario(filtrados()); };
+  el.querySelector('#inv-mapa').onchange = e => { invMapa = e.target.value; vistaInventario(filtrados()); };
+  el.querySelector('#inv-csv').onclick = () => {
+    const filas = ms.filter(verMapa).flatMap(m => !insumosDe(m.ID_MODELO).length ? [[m.PROCESO, cod(m.ID_MODELO), m.NOMBRE_MODELO, m.TIER_MODELO, fmt(m.global), '', INV[m.ID_MODELO] ? 'Sin modelo input' : 'No figura en el inventario', '', '']] : insumosDe(m.ID_MODELO).map(i => [m.PROCESO, cod(m.ID_MODELO), m.NOMBRE_MODELO, m.TIER_MODELO, fmt(m.global), cod(i), nombre(i), SCORE[i] ? 'Sí' : 'No', SCORE[i] ? fmt(SCORE[i].global) : '']));
+    descargar('mrm_modelos_input.csv', [['proceso', 'id_modelo', 'modelo', 'tier', 'score', 'id_modelo_input', 'modelo_input', 'modelo_input_en_score', 'score_modelo_input'].join(';'), ...filas.map(f => f.map(csvVal).join(';'))].join('\n'));
+  };
+}
+
+/* ===================== GOBIERNO ===================== */
+// La nota se asigna a cada modelo por PO usuario y model developer (ver generar_reporte.py)
+const GOB = DATOS.gobierno;
+function notaGobierno(ms) {
+  if (!GOB) return '';
+  if (!esUltima()) return notaDetalle('El detalle de la nota de gobierno');
+  const grupos = {}; let sin = 0;
+  ms.forEach(m => { const i = DATOS.gob_de[m.ID_MODELO]; if (i == null) sin++; else (grupos[i] ||= []).push(m); });
+  const filas = Object.entries(grupos).map(([i, de]) => ({ g: GOB[i], n: de.length })).sort((a, b) => a.g.nota - b.g.nota);
+  if (!filas.length) return bloque('col-12', 'Nota de gobierno por PO usuario', 'ti-scale', '<div class="empty">Los modelos seleccionados no tienen nota de gobierno.</div>');
+  const celda = v => (v == null ? `<td class="cell" style="${cellStyle(null)}">-</td>` : `<td class="cell" style="${cellStyle(v)}">${fmt0(v)}</td>`);
+  const tabla = `<div class="table-responsive"><table class="table table-vcenter table-sm card-table"><thead><tr><th>PO usuario</th><th>Model developer</th><th>Model User</th><th class="text-center"># Modelos</th><th class="text-center">Nota</th>
+    ${DATOS.gob_componentes.map(c => `<th class="text-center">${esc(c)}</th>`).join('')}</tr></thead><tbody>
+    ${filas.map(({ g, n }) => `<tr><td class="fw-bold">${esc(g.po)}</td><td>${esc(g.dev)}</td><td>${esc(g.user)}</td><td class="text-center">${n}</td>${celda(g.nota)}${g.comp.map(celda).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+  return bloque('col-12', 'Nota de gobierno por PO usuario', 'ti-scale', tabla,
+    `La nota es el promedio de los componentes con dato · "-" indica que el componente no aplica${sin ? ` · ${sin} modelos seleccionados no tienen nota` : ''}`);
+}
 const INPUTS = [
-  { c: '#096AAD', t: 'Input principal Score MRM', d: 'Una fila por modelo y fecha: inventario, seguimiento, alertas, validación, observaciones, implementación y gobierno. Guarda el historial mensual.', id: 'ID_MODELO' },
-  { c: '#FF6600', t: 'Reporte de observaciones', d: 'Detalle de cada observación pendiente. Corresponde solo a la última fecha.', id: 'ID_Model' },
-  { c: '#2fb344', t: 'Tablón de coberturas', d: 'Cobertura metodológica y de implementación de cada modelo. Corresponde solo a la última fecha.', id: 'Modelo_ID' }
+  { c: '#096AAD', t: 'Input principal histórico', d: 'Una fila por modelo y mes. Con él se calculan los indicadores, el score y los evolutivos.' },
+  { c: '#0E9384', t: 'Inventario de modelos', d: 'Modelos input que usa cada modelo y modelos que entran o salen del inventario.' },
+  { c: '#0F766E', t: 'TTM', d: 'Plan de acción y tiempo de atención de los modelos en alerta.' },
+  { c: '#6250d6', t: 'Tablón de coberturas', d: 'Cobertura metodológica y de implementación.' },
+  { c: '#e87ba4', t: 'Reporte de observaciones', d: 'Detalle de las observaciones de validación.' },
+  { c: '#B84A00', t: 'Observaciones SBS & AI', d: 'Detalle de las observaciones de SBS y auditoría interna.' },
+  { c: '#64748B', t: 'Calidad de Datos', d: 'Criterios del indicador de calidad de datos.' },
+  { c: '#e34948', t: 'Nota de Gobierno', d: 'Componentes de la nota, por PO usuario.' }
 ];
-const SECCIONES = [['Reporte', [0]], ['Macro', [0]], ['Seguimiento', [0]], ['Validación', [0, 2]], ['Observaciones', [0, 1]], ['Implementación', [0]]];
+const SECCIONES = [['Reporte', [0]], ['Macro', [0]], ['Seguimiento', [0, 2]], ['Validación', [0, 3]], ['Observaciones', [0, 4, 5]], ['Implementación', [0, 6]], ['Inventario', [0, 1]], ['Gobierno', [7]]];
 function flujoInputs() {
   const flecha = '<div class="flujo-flecha" aria-hidden="true"><i class="ti ti-arrow-right"></i></div>';
   const paso = (n, t, cuerpo) => `<div class="flujo-paso"><div class="flujo-num">Paso ${n} · ${t}</div>${cuerpo}</div>`;
-  const inputs = INPUTS.map(i => `<div class="flujo-caja input" style="--input:${i.c}"><b>${i.t}</b>${i.d}<div class="text-secondary small mt-1">Identificador: ${i.id}</div></div>`).join('');
-  const origen = i => `<span class="flujo-origen" style="--input:${INPUTS[i].c}"><i></i>${INPUTS[i].t.replace(' Score MRM', '')}</span>`;
+  const inputs = INPUTS.map(i => `<div class="flujo-caja input" style="--input:${i.c}"><b>${i.t}</b>${i.d}</div>`).join('');
+  const origen = i => `<span class="flujo-origen" style="--input:${INPUTS[i].c}"><i></i>${INPUTS[i].t}</span>`;
   const secciones = SECCIONES.map(([t, os]) => `<div class="flujo-caja flujo-seccion"><span class="fw-bold">${t}</span><span class="d-inline-flex gap-2 flex-wrap">${os.map(origen).join('')}</span></div>`).join('');
   return `<div class="flujo">
     ${paso(1, 'Información', inputs)}${flecha}
-    ${paso(2, 'Unión', '<div class="flujo-caja ancha"><b>Se unen por modelo</b>Los tres archivos se relacionan con el ID del modelo. Solo se usan los modelos que están en el input principal.</div>')}${flecha}
+    ${paso(2, 'Unión', '<div class="flujo-caja ancha"><b>Se validan y se unen por modelo</b>Se revisa la calidad de cada archivo y todos se relacionan con el ID del modelo. La Nota de Gobierno se une por PO usuario. Los archivos de detalle corresponden solo al último mes.</div>')}${flecha}
     ${paso(3, 'Cálculo', '<div class="flujo-caja ancha"><b>Se calculan indicadores y score</b>Cada indicador recibe un puntaje de 0 a 100 según las reglas definidas en el archivo Indicadores, y con ellos se obtiene el score.</div>')}${flecha}
     ${paso(4, 'Reporte', secciones)}
   </div>
-  <div class="text-secondary small mt-3"><b>Actualización mensual:</b> se agregan las filas del nuevo mes al input principal, se reemplazan el reporte de observaciones y el tablón de coberturas, y se vuelve a generar el reporte.</div>`;
+  <div class="text-secondary small mt-3"><b>Actualización mensual:</b> se agregan las filas del nuevo mes al input principal, se reemplazan los siete archivos de detalle y se vuelve a generar el reporte. El detalle solo se muestra con el último mes seleccionado.</div>`;
 }
-function vistaGobierno() {
-  const tabla = `<div class="table-responsive"><table class="table table-vcenter card-table"><thead><tr><th>Driver</th><th>Indicador</th><th>¿Cómo se obtiene la puntuación?</th></tr></thead><tbody>
+/* Contenido de gobierno: viene de un YAML de la carpeta de inputs (resume la norma interna, no está en el repositorio) */
+const GC = DATOS.gob_contenido;
+let gfSel = null, gfPaso = 0, gfRol = null;
+const rolDe = id => ((GC && GC.roles) || []).find(r => r.id === id) || { nombre: id };
+const LINEA_TXT = { 1: '1ª línea', 2: '2ª línea', 3: '3ª línea', 0: 'Instancia de aprobación' };
+const porConfirmar = t => esc(t).replace(/\[(Por confirmar|detalle por confirmar)\]/gi, m => `<span class="g-pc">${m.slice(1, -1)}</span>`);
+
+// Flujos didácticos: un selector de flujo, los pasos en línea y el detalle del paso elegido
+function flujosGobierno() {
+  const fs = GC.flujos || [];
+  if (!fs.length) return '';
+  const f = fs.find(x => x.id === gfSel) || fs[0]; gfSel = f.id;
+  gfPaso = Math.min(gfPaso, f.pasos.length - 1);
+  const rolesF = [...new Set(f.pasos.flatMap(x => x.quien || []))];
+  if (gfRol && !rolesF.includes(gfRol)) gfRol = null;
+  const tabs = fs.map(x => `<button type="button" class="gf-tab${x.id === f.id ? ' on' : ''}" data-gf="${esc(x.id)}" aria-pressed="${x.id === f.id}">${esc(x.titulo)}</button>`).join('');
+  const pasos = f.pasos.map((x, i) => {
+    const dec = x.tipo === 'decision', apaga = gfRol && !(x.quien || []).includes(gfRol);
+    return `<li class="gf-paso${i === gfPaso ? ' on' : ''}${dec ? ' dec' : ''}${apaga ? ' apaga' : ''}">
+      <button type="button" data-paso="${i}" aria-pressed="${i === gfPaso}" aria-label="Paso ${i + 1}: ${esc(x.t)}${dec ? ' (aprobación)' : ''}">
+        <span class="gf-num">${dec ? '<i class="ti ti-gavel"></i>' : i + 1}</span>
+        <span class="gf-t">${esc(x.t)}</span>
+        <span class="gf-q">${(x.quien || []).map(r => esc(rolDe(r).nombre)).join(' · ')}</span>
+      </button></li>`;
+  }).join('');
+  const x = f.pasos[gfPaso], fila = (ic, t, v) => (v ? `<div class="gf-dato"><div class="subheader"><i class="ti ${ic} me-1"></i>${t}</div><div>${porConfirmar(v)}</div></div>` : '');
+  const det = `<div class="gf-det${x.tipo === 'decision' ? ' dec' : ''}" aria-live="polite">
+    <div class="gf-det-cab"><div><span class="gf-det-n">Paso ${gfPaso + 1} de ${f.pasos.length}${x.tipo === 'decision' ? ' · Punto de aprobación' : ''}</span><h4>${esc(x.t)}</h4>${x.nota ? `<div class="text-secondary small">${porConfirmar(x.nota)}</div>` : ''}</div>
+      <div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-outline-secondary" data-mover="-1" ${gfPaso ? '' : 'disabled'} aria-label="Paso anterior"><i class="ti ti-chevron-left"></i></button><button type="button" class="btn btn-sm btn-outline-secondary" data-mover="1" ${gfPaso < f.pasos.length - 1 ? '' : 'disabled'} aria-label="Paso siguiente"><i class="ti ti-chevron-right"></i></button></div></div>
+    <div class="gf-datos">${fila('ti-users', 'Responsables', (x.quien || []).map(r => rolDe(r).nombre).join(', '))}${fila('ti-login-2', 'Qué entra', x.entra)}${fila('ti-logout-2', 'Qué sale', x.sale)}${fila('ti-gavel', 'Quién aprueba', x.aprueba)}</div></div>`;
+  const roles = rolesF.map(r => `<button type="button" class="gf-rol${gfRol === r ? ' on' : ''}" data-rol="${esc(r)}" aria-pressed="${gfRol === r}" title="${esc(LINEA_TXT[rolDe(r).linea] || '')}">${esc(rolDe(r).nombre)}</button>`).join('');
+  return `<div class="gf-tabs" role="group" aria-label="Flujo">${tabs}</div>
+    <div class="gf-cab"><div><h4 class="mb-1">${esc(f.titulo)}</h4><div class="gf-para"><b>¿Para qué sirve?</b> ${esc(f.para_que)}</div></div></div>
+    <ol class="gf-pasos" style="--n:${f.pasos.length}">${pasos}</ol>
+    <div class="gf-roles"><span class="text-secondary small fw-semibold">Resaltar los pasos de:</span>${roles}</div>
+    ${det}
+    <div class="text-secondary small mt-2"><i class="ti ti-hand-click me-1"></i>Haz clic en un paso para ver su detalle. <i class="ti ti-gavel ms-2 me-1"></i>marca los puntos de aprobación.</div>`;
+}
+function conectarFlujos(el) {
+  const box = el.querySelector('#gf'); if (!box) return;
+  const redibujar = () => { box.innerHTML = flujosGobierno(); conectarFlujos(el); };
+  box.querySelectorAll('[data-gf]').forEach(b => b.onclick = () => { gfSel = b.dataset.gf; gfPaso = 0; gfRol = null; redibujar(); });
+  box.querySelectorAll('[data-paso]').forEach(b => b.onclick = () => { gfPaso = +b.dataset.paso; redibujar(); box.querySelector(`[data-paso="${gfPaso}"]`).focus(); });
+  box.querySelectorAll('[data-mover]').forEach(b => b.onclick = () => { gfPaso += +b.dataset.mover; redibujar(); });
+  box.querySelectorAll('[data-rol]').forEach(b => b.onclick = () => { gfRol = gfRol === b.dataset.rol ? null : b.dataset.rol; redibujar(); });
+}
+// ¿Quién aprueba qué?
+function matrizAprobaciones() {
+  const ap = GC.aprobaciones || [];
+  if (!ap.length) return '';
+  const celda = t => `<td style="white-space:normal">${porConfirmar(t).replace(/Comité de Riesgos/g, '<b class="g-cr">Comité de Riesgos</b>')}</td>`;
+  return `<div class="table-responsive"><table class="table table-sm table-vcenter card-table g-aprob"><thead><tr><th>¿Qué se aprueba?</th><th>Tier I</th><th>Tier II, III y IV</th></tr></thead><tbody>
+    ${ap.map(a => `<tr><td class="fw-semibold" style="white-space:normal">${esc(a.que)}</td>${a.todos ? celda(a.todos).replace('<td', '<td colspan="2"') : celda(a.tier1) + celda(a.resto)}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+function jerarquiaComites() {
+  const cs = GC.comites || [];
+  if (!cs.length) return '';
+  return `<div class="g-comites">${cs.map((c, i) => `${i ? '<div class="g-flecha" aria-hidden="true"><i class="ti ti-arrow-up"></i></div>' : ''}<div class="g-comite n${i}">
+    <b>${esc(c.nombre)}</b>
+    <div class="small text-secondary mt-1">${porConfirmar(c.detalle)}</div>
+    <div class="small mt-2"><b>Miembros:</b> ${porConfirmar(c.miembros)} · <b>Frecuencia:</b> ${porConfirmar(c.frecuencia)}</div>
+    ${c.sesiones ? `<div class="mt-2 d-flex flex-wrap gap-1">${c.sesiones.map(x => `<span class="g-sesion">Sesión ${esc(x)}</span>`).join('')}</div>` : ''}</div>`).join('')}</div>
+    <div class="text-secondary small mt-2">De mayor a menor instancia. Las flechas indican hacia dónde se elevan los temas.</div>`;
+}
+// Tabla 16.3: qué etapas del gobierno aplican a cada perímetro
+function tablaAmbitos() {
+  const A = GC.ambitos;
+  if (!A || !A.filas) return '';
+  const val = v => `<td style="white-space:normal"><span class="g-si ${v.si ? 'si' : 'no'}"><i class="ti ${v.si ? 'ti-check' : 'ti-minus'}"></i></span>${esc(v.texto)}</td>`;
+  return `<div class="table-responsive"><table class="table table-sm table-vcenter card-table g-ambitos"><thead><tr><th>Ámbito</th>${A.perimetros.map(x => `<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>
+    ${A.filas.map(f => `<tr><td class="fw-semibold">${esc(f.ambito)}</td>${f.valores.map(val).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="card-body pt-2"><div class="leg"><span><span class="g-si si"><i class="ti ti-check"></i></span>Aplica</span><span><span class="g-si no"><i class="ti ti-minus"></i></span>No aplica o no requiere</span></div></div>`;
+}
+// Definición de indicadores: qué mide, por qué importa, cómo se calcula y su semáforo actual
+function tablaDefIndicadores(ms) {
+  const D = (GC && GC.indicadores) || {}, R = ms.length ? medidas(ms) : null;
+  const semaforo = i => {
+    const r = R && R.ind[i.key];
+    const actual = r ? `<div class="d-flex align-items-center gap-2">${dot(r.p)}<b style="color:var(--${col(r.p)})">${r.p == null ? 'No aplica' : fmt0(r.p)}</b></div>` : '';
+    return `${actual}<div class="text-secondary small mt-1">Rojo &lt; ${UMBRALES.rojo}<br>Verde &gt; ${UMBRALES.verde}</div>`;
+  };
+  return `<div class="table-responsive"><table class="table table-vcenter card-table g-ind"><colgroup><col style="width:18%"><col style="width:28%"><col style="width:25%"><col style="width:19%"><col style="width:10%"></colgroup><thead><tr><th>Indicador</th><th>Qué mide</th><th>Por qué importa</th><th>Cómo se calcula</th><th>Semáforo</th></tr></thead><tbody>
+    ${CFG.drivers.map(dr => `<tr class="g-drv"><td colspan="5"><i class="ti ${dr.icono} me-1"></i>${dr.nombre}</td></tr>` + dr.ind.map(i => {
+      const d = D[i.key] || {};
+      return `<tr><td class="fw-semibold">${esc(i.nombre)}</td><td>${d.que ? porConfirmar(d.que) : '<span class="g-pc">Por confirmar</span>'}</td>
+        <td>${d.por_que ? porConfirmar(d.por_que) : '<span class="g-pc">Por confirmar</span>'}</td><td>${esc(i.lp)}</td><td>${semaforo(i)}</td></tr>`;
+    }).join('')).join('')}
+  </tbody></table></div>`;
+}
+// Mapa de normas y políticas: grupos desplegables, solo informativo
+const SERIE_C = { 'Grupo Crédito': 'var(--marino-3)', 'Políticas de Administración de Riesgos': '#0E9384', 'Políticas Corporativas Credicorp': '#8B5CF6' };
+function mapaNormativo() {
+  const gs = GC.mapa_normativo || [];
+  if (!gs.length) return '';
+  const total = gs.reduce((a, g) => a + g.docs.length, 0);
+  return `<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+      <div class="input-icon" style="max-width:320px;flex:1"><span class="input-icon-addon"><i class="ti ti-search"></i></span><input type="search" id="mn-q" class="form-control form-control-sm" placeholder="Buscar por código o nombre…" aria-label="Buscar en el mapa normativo"></div>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-mn="abrir"><i class="ti ti-arrows-maximize me-1"></i>Desplegar todo</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-mn="cerrar"><i class="ti ti-arrows-minimize me-1"></i>Contraer todo</button>
+      <span class="text-secondary small ms-auto">${total} documentos en ${gs.length} grupos</span></div>
+    <div class="mn">${gs.map((g, i) => `<details class="mn-g"${i === 0 ? ' open' : ''}><summary><i class="ti ti-chevron-right mn-ch"></i><span class="fw-semibold">${esc(g.grupo)}</span><span class="mn-n">${g.docs.length}</span></summary>
+      <table class="table table-sm card-table mb-0"><tbody>${g.docs.map(d => `<tr class="mn-doc"><td class="text-nowrap mn-cod">${esc(d.codigo)}</td><td style="white-space:normal">${esc(d.nombre)}</td>
+        <td class="text-end"><span class="mn-serie" style="--c:${SERIE_C[d.serie] || 'var(--tinta-2)'}">${esc(d.serie)}</span></td></tr>`).join('')}</tbody></table></details>`).join('')}
+      <div class="empty" id="mn-vacio" hidden>Ningún documento coincide con la búsqueda.</div></div>`;
+}
+function conectarMapa(el) {
+  const q = el.querySelector('#mn-q'); if (!q) return;
+  const gs = [...el.querySelectorAll('.mn-g')];
+  el.querySelectorAll('[data-mn]').forEach(b => b.onclick = () => gs.forEach(g => { g.open = b.dataset.mn === 'abrir'; }));
+  q.oninput = () => {
+    const t = q.value.trim().toLowerCase(); let hay = 0;
+    gs.forEach(g => {
+      let n = 0;
+      g.querySelectorAll('.mn-doc').forEach(tr => { const ok = !t || tr.textContent.toLowerCase().includes(t); tr.hidden = !ok; n += ok; });
+      g.hidden = !n; if (t) g.open = n > 0; hay += n;
+    });
+    el.querySelector('#mn-vacio').hidden = !!hay;
+  };
+}
+// Flujo de información del reporte: fuentes (owner, recurrencia, corte) y proceso de actualización
+const FI_C = ['#0E9384', '#096AAD', '#6250d6', '#e87ba4', '#B84A00', '#64748B', '#0F766E', '#e34948'];
+let fiFuente = 0, fiRec = null, fiPaso = 0;
+const recTag = r => `<span class="fi-tag r-${esc(String(r).toLowerCase())}">${esc(r)}</span>`;
+function flujoInformacion() {
+  const F = GC.flujo_informacion, fs = F.fuentes || [], ps = F.pasos || [];
+  const recs = [...new Set(fs.map(f => f.recurrencia))];
+  const indDe = k => { const dr = CFG.drivers.find(d => d.ind.some(i => i.key === k)); const i = dr && dr.ind.find(x => x.key === k); return i ? `<span class="fi-ind">${esc(i.nombre)} <small>· ${esc(dr.nombre)}</small></span>` : ''; };
+  const filtro = recs.map(r => `<button type="button" class="gf-rol${fiRec === r ? ' on' : ''}" data-rec="${esc(r)}" aria-pressed="${fiRec === r}">${esc(r)}</button>`).join('');
+  const tarjetas = fs.map((f, i) => `<button type="button" class="fi-f${i === fiFuente ? ' on' : ''}${fiRec && f.recurrencia !== fiRec ? ' apaga' : ''}" style="--c:${FI_C[i % FI_C.length]}" data-fuente="${i}" aria-pressed="${i === fiFuente}">
+      <b>${esc(f.nombre)}</b><span class="fi-own"><i class="ti ti-user me-1"></i>${esc(f.owner)}</span>
+      <span class="fi-tags">${recTag(f.recurrencia)}<span class="fi-tag">${esc(f.sistema)}</span></span></button>`).join('');
+  const f = fs[fiFuente] || fs[0];
+  const dato = (ic, t, v) => `<div class="gf-dato"><div class="subheader"><i class="ti ${ic} me-1"></i>${t}</div><div>${v}</div></div>`;
+  const detF = f ? `<div class="gf-det mt-3" style="border-left-color:${FI_C[fiFuente % FI_C.length]}" aria-live="polite">
+      <div class="gf-det-cab"><div><span class="gf-det-n">Fuente ${fiFuente + 1} de ${fs.length}</span><h4>${esc(f.nombre)}</h4></div></div>
+      <div class="gf-datos">${dato('ti-user', 'Owner', esc(f.owner))}${dato('ti-repeat', 'Recurrencia', recTag(f.recurrencia))}${dato('ti-calendar', 'Día o fecha de corte', f.corte && f.corte !== '-' ? esc(f.corte) : 'Sin fecha fija')}${dato('ti-database', 'Sistema u origen', esc(f.sistema))}</div>
+      <div class="gf-datos mt-3">${dato('ti-chart-dots', 'Indicadores que alimenta', (f.alimenta || []).map(indDe).join('') || '-')}${dato('ti-layout-dashboard', 'Secciones del reporte', (f.secciones || []).map(x => `<span class="fi-ind">${esc(x)}</span>`).join('') || '-')}</div></div>` : '';
+  fiPaso = Math.min(fiPaso, ps.length - 1);
+  const pasos = ps.map((x, i) => {
+    const dec = x.tipo === 'decision';
+    return `<li class="gf-paso${i === fiPaso ? ' on' : ''}${dec ? ' dec' : ''}"><button type="button" data-fpaso="${i}" aria-pressed="${i === fiPaso}" aria-label="Paso ${i + 1}: ${esc(x.t)}">
+      <span class="gf-num">${dec ? '<i class="ti ti-message-check"></i>' : i + 1}</span><span class="gf-t">${esc(x.t)}</span><span class="gf-q">${esc(x.quien)}</span>${recTag(x.cadencia)}</button></li>`;
+  }).join('');
+  const x = ps[fiPaso];
+  const detP = x ? `<div class="gf-det mt-3${x.tipo === 'decision' ? ' dec' : ''}" aria-live="polite">
+      <div class="gf-det-cab"><div><span class="gf-det-n">Paso ${fiPaso + 1} de ${ps.length}${x.tipo === 'decision' ? ' · Punto de revisión con los usuarios' : ''}</span><h4>${esc(x.t)}</h4>${x.nota ? `<div class="text-secondary small">${porConfirmar(x.nota)}</div>` : ''}</div>
+        <div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-outline-secondary" data-fmover="-1" ${fiPaso ? '' : 'disabled'} aria-label="Paso anterior"><i class="ti ti-chevron-left"></i></button><button type="button" class="btn btn-sm btn-outline-secondary" data-fmover="1" ${fiPaso < ps.length - 1 ? '' : 'disabled'} aria-label="Paso siguiente"><i class="ti ti-chevron-right"></i></button></div></div>
+      <div class="gf-datos">${dato('ti-users', 'Responsables', esc(x.quien))}${dato('ti-repeat', 'Recurrencia', recTag(x.cadencia))}${dato('ti-login-2', 'Qué entra', esc(x.entra || '-'))}${dato('ti-logout-2', 'Qué sale', esc(x.sale || '-'))}</div></div>` : '';
+  return `<div class="fi-sub">1 · Fuentes de información y sus owners</div>
+    <div class="fi-filtros"><span class="text-secondary small fw-semibold">Resaltar por recurrencia:</span>${filtro}</div>
+    <div class="fi-fuentes">${tarjetas}</div>${detF}
+    <div class="fi-sub">2 · Proceso de actualización del reporte${F.responsable ? ` <span class="text-secondary fw-normal text-none" style="text-transform:none;letter-spacing:0">· ${esc(F.responsable)}</span>` : ''}</div>
+    <ol class="gf-pasos" style="--n:${ps.length}">${pasos}</ol>${detP}`;
+}
+function conectarFlujoInfo(el) {
+  const box = el.querySelector('#fi'); if (!box) return;
+  const redibujar = foco => { box.innerHTML = flujoInformacion(); conectarFlujoInfo(el); if (foco) box.querySelector(foco)?.focus(); };
+  box.querySelectorAll('[data-fuente]').forEach(b => b.onclick = () => { fiFuente = +b.dataset.fuente; redibujar(`[data-fuente="${fiFuente}"]`); });
+  box.querySelectorAll('[data-rec]').forEach(b => b.onclick = () => {
+    fiRec = fiRec === b.dataset.rec ? null : b.dataset.rec;
+    const fs = GC.flujo_informacion.fuentes; if (fiRec && fs[fiFuente].recurrencia !== fiRec) fiFuente = fs.findIndex(f => f.recurrencia === fiRec);
+    redibujar();
+  });
+  box.querySelectorAll('[data-fpaso]').forEach(b => b.onclick = () => { fiPaso = +b.dataset.fpaso; redibujar(`[data-fpaso="${fiPaso}"]`); });
+  box.querySelectorAll('[data-fmover]').forEach(b => b.onclick = () => { fiPaso += +b.dataset.fmover; redibujar(); });
+}
+function vistaGobierno(ms) {
+  const el = document.getElementById('v-gobierno');
+  const tablaSimple = `<div class="table-responsive"><table class="table table-vcenter card-table"><thead><tr><th>Driver</th><th>Indicador</th><th>¿Cómo se obtiene la puntuación?</th></tr></thead><tbody>
     ${CFG.drivers.map(dr => dr.ind.map((i, j) => `<tr>${j === 0 ? `<td rowspan="${dr.ind.length}"><b>${dr.nombre}</b></td>` : ''}<td style="white-space:normal">${esc(i.nombre)}</td><td style="white-space:normal">${esc(i.lp)}</td></tr>`).join('')).join('')}
     </tbody></table></div>`;
-  document.getElementById('v-gobierno').innerHTML = `<div class="row row-cards">
-    ${bloque('col-12', 'Flujo de información del reporte', 'ti-route', cuerpo(flujoInputs()), 'De dónde sale la información y cómo llega a cada sección')}
-    ${bloque('col-12', 'Puntuación de los indicadores', 'ti-list-details', tabla, 'Cada indicador va de 0 a 100, donde 100 es el mejor resultado')}
+  el.innerHTML = `<div class="row row-cards">
+    ${GC && (GC.flujos || []).length ? bloque('col-12', 'Flujos del gobierno de modelos', 'ti-route-2', `<div class="card-body" id="gf">${flujosGobierno()}</div>`, 'Cada proceso del gobierno de modelos en pocos pasos') : ''}
+    ${GC && (GC.aprobaciones || []).length ? bloque('col-xl-8', '¿Quién aprueba qué?', 'ti-gavel', matrizAprobaciones(), 'Instancia que aprueba cada asunto según el Tier del modelo') : ''}
+    ${GC && (GC.comites || []).length ? bloque('col-xl-4', 'Jerarquía de comités', 'ti-hierarchy-3', cuerpo(jerarquiaComites()), 'Instancias que aprueban los asuntos de modelos') : ''}
+    ${GC && GC.ambitos ? bloque('col-12', 'Aplicabilidad del gobierno según el perímetro', 'ti-table-options', tablaAmbitos(), 'Qué etapas del gobierno aplican a cada tipo de entidad analítica') : ''}
+    ${bloque('col-12', 'Definición de indicadores', 'ti-list-details', GC ? tablaDefIndicadores(ms) : tablaSimple, GC ? `Cada indicador va de 0 a 100, donde 100 es el mejor resultado · el semáforo usa los umbrales activos (${esc(UMBRALES.regla)}) y la puntuación de los modelos filtrados` : 'Cada indicador va de 0 a 100, donde 100 es el mejor resultado')}
+    ${GC && (GC.mapa_normativo || []).length ? bloque('col-12', 'Mapa de normas y políticas de modelos', 'ti-books', cuerpo(mapaNormativo()), 'Documentos normativos vigentes, por grupo · haz clic en un grupo para ver sus documentos') : ''}
+    ${GC && GC.flujo_informacion ? bloque('col-12', 'Flujo de información del reporte', 'ti-route', `<div class="card-body" id="fi">${flujoInformacion()}</div>`, 'Quién entrega cada fuente, cada cuánto se actualiza y cómo llega al reporte') : bloque('col-12', 'Flujo de información del reporte', 'ti-route', cuerpo(flujoInputs()), 'De dónde sale la información y cómo llega a cada sección')}
+    ${notaGobierno(ms)}
   </div>`;
+  conectarFlujos(el); conectarMapa(el); conectarFlujoInfo(el);
 }
 
 /* ===================== EXPORTAR ===================== */
@@ -985,7 +1863,14 @@ function exportar() {
 
 /* ===================== INICIO ===================== */
 function irA(v) {
-  document.querySelectorAll('#tabs .nav-link[data-v]').forEach(x => x.parentElement.classList.toggle('active', x.dataset.v === v));
+  if (!document.getElementById('v-' + v)) v = 'resumen';
+  // La sección queda en la dirección (#macro, #seguimiento…) para poder compartirla o volver con Atrás
+  if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v);
+  document.querySelectorAll('#tabs .nav-link[data-v]').forEach(x => {
+    x.parentElement.classList.toggle('active', x.dataset.v === v);
+    x.setAttribute('href', '#' + x.dataset.v);
+    if (x.dataset.v === v) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current');
+  });
   document.querySelectorAll('.view').forEach(x => x.classList.toggle('active', x.id === 'v-' + v));
   window.scrollTo(0, 0);
 }
@@ -999,7 +1884,7 @@ document.body.insertAdjacentHTML('beforeend', '<div id="tip" hidden></div>');
 const tipEl = document.getElementById('tip');
 const verTip = e => {
   const t = e.target.closest && e.target.closest('[data-tip]');
-  if (!t) { tipEl.hidden = true; return; }
+  if (!t || !t.dataset.tip) { tipEl.hidden = true; return; }
   tipEl.textContent = t.dataset.tip; tipEl.hidden = false;
   const r = t.getBoundingClientRect(), a = tipEl.offsetWidth / 2 + 8, h = tipEl.offsetHeight + 8;
   tipEl.style.left = `${Math.min(innerWidth - a, Math.max(a, r.left + r.width / 2))}px`;
@@ -1007,9 +1892,16 @@ const verTip = e => {
 };
 document.addEventListener('mouseover', verTip);
 document.addEventListener('focusin', verTip);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') tipEl.hidden = true;
+  // Encabezados ordenables: Enter o espacio ordenan igual que un clic
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('th[data-k]')) { e.preventDefault(); e.target.click(); }
+});
+window.addEventListener('hashchange', () => irA(location.hash.slice(1)));
 TODOS = preparar(DATOS.modelos);
 resetFil();
-construirFiltros(); vistaGobierno(); aplicar();
+construirFiltros(); aplicar();
+if (location.hash) irA(location.hash.slice(1));
 </script>
 </body>
 </html>

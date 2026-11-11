@@ -30,11 +30,16 @@ def carpeta_configurada():
     return re.search(r"^carpeta_inputs:\s*'?(.*?)'?\s*$", CONFIG.read_text(encoding="utf-8"), re.M).group(1)
 
 
-def faltantes(carpeta):
-    """Excel de config.yaml que no están en la carpeta."""
-    archivos = re.findall(r"^\s+(?:input_principal|observaciones|coberturas):\s*(.+?)\s*$",
-                          CONFIG.read_text(encoding="utf-8"), re.M)
-    return [a for a in archivos if not (Path(carpeta) / a).is_file()]
+def archivos_config():
+    """Archivos de la sección "archivos" de config.yaml, como {clave: nombre}."""
+    bloque = re.search(r"^archivos:[ \t]*\n((?:[ \t]+.*\n?)+)", CONFIG.read_text(encoding="utf-8"), re.M)
+    return dict(re.findall(r"^[ \t]+(\w+):[ \t]*(.+?)[ \t]*$", bloque.group(1) if bloque else "", re.M))
+
+
+def faltantes(carpeta, detalle=False):
+    """Excel de config.yaml que no están en la carpeta: el input principal o, con detalle, los demás."""
+    return [nombre for clave, nombre in archivos_config().items()
+            if (clave != "input_principal") == detalle and not (Path(carpeta) / nombre).is_file()]
 
 
 def pedir_carpeta():
@@ -44,7 +49,7 @@ def pedir_carpeta():
         faltan = faltantes(carpeta)
         if not faltan:
             return carpeta
-        print(f"  En esa carpeta no están: {', '.join(faltan)}")
+        print(f"  En esa carpeta no está el input principal: {', '.join(faltan)}")
 
 
 def main():
@@ -80,10 +85,14 @@ def main():
                        CONFIG.read_text(encoding="utf-8"), flags=re.M)
         CONFIG.write_text(texto, encoding="utf-8")
         print("  Carpeta guardada en config.yaml.")
+    sin_detalle = faltantes(carpeta_configurada(), detalle=True)
+    if sin_detalle:
+        print(f"  Aviso: faltan estos archivos de detalle y sus bloques no se mostrarán: {', '.join(sin_detalle)}")
 
-    paso(5, "Generar el reporte", "Lee los Excel, los une por ID de modelo y abre el reporte en el navegador.")
+    paso(5, "Generar el reporte", "Lee los Excel, revisa su calidad, los une por ID de modelo y abre el reporte.")
     correr(str(PYTHON), "src/generar_reporte.py", "--abrir")
-    print("\nListo. El reporte está en output/reporte_mrm.html. La próxima vez, vuelve a ejecutar este archivo.")
+    print("\nListo. El reporte está en output/reporte_mrm.html y los hallazgos de calidad en output/control_calidad.txt.")
+    print("La próxima vez, vuelve a ejecutar este archivo.")
 
 
 if __name__ == "__main__":

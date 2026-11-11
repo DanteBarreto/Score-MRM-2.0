@@ -4,16 +4,33 @@
 # Carpeta de tu equipo donde están los Excel. Usa comillas simples.
 carpeta_inputs: 'C:\Users\TU_USUARIO\Documents\Score MRM\Inputs'
 
-# Nombres de los archivos dentro de esa carpeta
+# Nombres de los archivos dentro de esa carpeta.
+# Solo input_principal es obligatorio. Los demás son de detalle y corresponden al último mes
+# del input principal: si borras una línea o el archivo no está, su bloque no se muestra.
 archivos:
-  input_principal: Input_principal_Score MRM.xlsx
+  input_principal: Input_principal_Score MRM_hist.xlsx
+  inventario: Inventario de modelos.xlsx
+  ttm: TTM.xlsx
   observaciones: Reporte de observaciones.xlsx
+  observaciones_sbs_ai: Observaciones SBS & AI.xlsx
+  nota_gobierno: Nota de Gobierno.xlsx
+  calidad_datos: Calidad de Datos.xlsx
   coberturas: Tablón de coberturas.xlsx
+  # Contenido de la sección Gobierno (flujos, aprobaciones, definiciones y mapa normativo).
+  # Es un YAML que se edita a mano y no se sube a Git porque resume la norma interna.
+  gobierno_contenido: Gobierno de modelos.yaml
 
-# Reporte generado, relativo a la carpeta del proyecto
+# Reporte generado, relativo a la carpeta del proyecto.
+# Junto a él se guarda control_calidad.txt, con los hallazgos de calidad de datos.
 salida: output/reporte_mrm.html
 
-# Solo para pruebas: crea meses ficticios (mayo a julio de 2026) a partir de un input de agosto de 2026
-simulacion:
-  activa: false
-  salida: output/input_con_historico_simulado.xlsx
+# Homologación de catálogos: valores que se escriben distinto y significan lo mismo.
+# Formato:  archivo -> columna -> {valor en el archivo: valor que usa el reporte}
+homologacion:
+  input_principal:
+    PROCESO: {Gestión del portafolio: Gestión del Portafolio}
+  # La Nota de Gobierno se une al input principal por PO usuario y model developer,
+  # así que sus áreas deben llamarse igual que en el input principal.
+  nota_gobierno:
+    MODELO_DEVELOPER: {MMGR: COE IRM, Pricing: Pricing Analytics}
+    MODEL_USER: {COE MMGR: COE IRM}
