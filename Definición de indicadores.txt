@@ -1,0 +1,48 @@
+1) Seguimiento 
+
+Modelos Sin Seguimiento: Modelos en los que no se realizaron revisiones ni monitoreo para evaluar su desempeño en el último periodo de seguimiento.
+
+Modelos con Alerta de Salud: Modelos donde el indicador de seguimiento del modelo ha salido del rango aceptable, lo que puede reflejar problemas en su capacidad de estimación o discriminación del modelo.
+
+Modelos que exceden el TTM (Time-To-Market): Modelos con alerta de salud que excedieron el tiempo máximo de atención.
+
+Mitigante: Es el plan de subsanación o cualquier otra acción de carácter preventiva que permita regular, prevenir y estabilizar los impactos por exposición del riesgo observado mientras se implementa la recomendación que subsanaría la alerta de salud del modelo.
+
+Nivel de Completitud de Seguimiento: Nota emitida por el equipo de validación de modelos, considerando los controles de discriminación y precisión, base de datos, gobierno, granularidad, análisis descriptivos y representatividad.
+
+2) Validación:
+
+Modelos sin Validación de 1er vez: Modelos que no se les realizó la validación metodológica e implementación de 1er vez el cual se evalúa rigurosamente un modelo antes de que sea aprobado para su uso en producción.
+
+Modelos sin Validación periódica: Modelos que no se les realizó la validación periódica para asegurarse de que el modelo sigue siendo adecuado, preciso y seguro para su uso continuo. 
+
+Nota Dinámica de Validación: La nota del ultimo proyecto de validación periódica (metodológico o implementación).
+
+3) Observaciones
+
+Observaciones vencidas de validación: Observaciones de validación que excedieron el plazo de subsanación. 
+
+Observaciones vencidas del regulador Local: Observaciones de la SBS que excedieron el plazo de subsanación. 
+
+4) Implementación
+
+Ambiente No productivo: Ambiente que no tiene ambiente de desarrollo, certificación ni producción separados. Todo coexiste en un mismo ambiente, las modificaciones pueden ser realizadas por cualquier persona que tenga acceso al dominio. No hay trazabilidad, ni control de cambios, ni versionamiento de las modificaciones realizadas.
+
+Nota de Cumplimiento de la Calidad de Datos: Indica el % de cumplimiento de
+
+Documentación de incidencias por alertas (10%)
+Gobierno formal de calidad de datos y umbrales definidos para alertas (20%)
+Roles definidos y atención a alertas en calidad de datos (20%)
+Notificación de alertas al usuario (10%)
+Controles sobre variables insumo del modelo (15%)
+Controles sobre variables salida del modelo (20%)
+Monitoreo automático o reportes adhoc (5%)
+5) Gobierno
+
+Incidentes en el inventario: Campos incompletos o información desactualizada en el inventario MRM (Tier, Estado del modelo, etc)
+
+Nota de documentación: Nota de emitida por el equipo de control de riesgo de modelo, sobre el cumplimiento de las políticas y estándares.
+
+6) Desarrollo
+
+Nota de 10 lineamientos de desarrollo: Nota emitida por el equipo de validación, sobre el cumplimiento de los 10 lineamientos de desarrollo para la transformación de riesgos.
