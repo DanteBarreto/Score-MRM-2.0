@@ -7,6 +7,7 @@ El input principal es obligatorio y guarda el historial mensual. Los demás arch
 corresponden solo al último mes del input y son opcionales: si falta uno, su bloque no se muestra.
 """
 import argparse
+import base64
 import json
 import re
 import sys
@@ -25,6 +26,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 PLANTILLA = RAIZ / "templates" / "plantilla_reporte.html"
 GOBIERNO = RAIZ / "contenido" / "gobierno_modelos.yaml"
 MARCA = "/*__DATOS__*/null"
+VENDOR = RAIZ / "templates" / "vendor"
 SIN_INSUMO = ("no aplica", "pendiente")  # nombres del inventario que significan "sin modelo insumo"
 
 COLUMNAS = ARCHIVOS["input_principal"].nombres
@@ -218,6 +220,34 @@ def movimientos_inventario(filas, ids):
                 "retiro": real(por_id[k].get("FECHA_RETIRO_USO"))} for k in ids if k in por_id}
 
 
+def _vendor(nombre):
+    texto = (VENDOR / nombre).read_text(encoding="utf-8")
+    return re.sub(r"/[*/]# sourceMappingURL=\S+(\s*\*/)?", "", texto)
+
+
+def _woff2(nombre):
+    return "data:font/woff2;base64," + base64.b64encode((VENDOR / nombre).read_bytes()).decode("ascii")
+
+
+def incrustar_recursos(html):
+    """Reemplaza los estilos, íconos, fuente y script del CDN por su contenido, guardado en templates/vendor.
+    Así el reporte se ve bien sin internet y en visores que bloquean recursos externos (SharePoint, Outlook, Teams)."""
+    iconos = re.sub(r'src:url\("\./fonts/tabler-icons\.woff2[^;}]*', f'src:url("{_woff2("tabler-icons.woff2")}") format("woff2")',
+                    _vendor("tabler-icons.min.css"), count=1)
+    fuente = re.sub(r"url\(\./([\w-]+\.woff2)\)", lambda m: f"url({_woff2(m.group(1))})", _vendor("archivo.css"))
+    reemplazos = {  # marca de la plantilla -> contenido
+        "<!--__ESTILOS__-->": "\n".join(f"<style>\n{css.strip()}\n</style>" for css in (_vendor("tabler.min.css"), iconos, fuente)),
+        "<!--__SCRIPT_TABLER__-->": f"<script>\n{_vendor('tabler.min.js').strip()}\n</script>",
+    }
+    for marca, contenido in reemplazos.items():
+        if html.count(marca) != 1:
+            sys.exit(f"La plantilla debe tener una vez la marca {marca}")
+        html = html.replace(marca, contenido)
+    if re.search(r'(href|src)="https?://', html):
+        sys.exit("La plantilla carga recursos externos que no se incrustaron")
+    return html
+
+
 def leer_contenido_gobierno(ruta=GOBIERNO):
     """Flujos, aprobaciones, comités, definiciones, mapa normativo y flujo de información de la sección Gobierno.
     Es un YAML del repositorio que se edita a mano."""
@@ -304,7 +334,7 @@ def main():
         sys.exit(f"La plantilla no contiene la marca {MARCA}")
     json_datos = json.dumps(datos, ensure_ascii=False).replace("</", "<\\/")
     salida.parent.mkdir(parents=True, exist_ok=True)
-    salida.write_text(plantilla.replace(MARCA, json_datos), encoding="utf-8")
+    salida.write_text(incrustar_recursos(plantilla).replace(MARCA, json_datos), encoding="utf-8")
     print(f"{salida.name}: {len(fechas)} meses ({fechas[0][:7]} a {corte[:7]}), {len(ids)} modelos en el último mes")
     for linea in lector.leidos.values():
         print(f"  - {linea}")

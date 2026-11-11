@@ -54,7 +54,7 @@ La tabla base es el input principal. Los archivos de detalle se unen solo con lo
 
 ### 6. Inserción en la plantilla
 
-Los datos se convierten a JSON y reemplazan la marca `/*__DATOS__*/null` de `templates/plantilla_reporte.html`. El resultado es un único archivo HTML que incluye todos los datos.
+Los datos se convierten a JSON y reemplazan la marca `/*__DATOS__*/null` de `templates/plantilla_reporte.html`. Los estilos de Tabler, los íconos y la fuente de `templates/vendor` reemplazan las marcas `<!--__ESTILOS__-->` y `<!--__SCRIPT_TABLER__-->`. El resultado es un único archivo HTML autocontenido, que no carga nada de internet.
 
 ### 7. Cálculo en el navegador
 
