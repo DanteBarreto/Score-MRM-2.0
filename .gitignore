@@ -20,5 +20,3 @@ config.yaml
 # Bloqueos temporales de Excel
 ~$*
 
-# Contenido de la sección Gobierno: resume la norma interna, vive en la carpeta de inputs
-Gobierno de modelos.yaml

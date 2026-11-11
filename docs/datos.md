@@ -18,7 +18,6 @@ El proceso lee la primera hoja de cada Excel, con los títulos en la primera fil
 | Nota de Gobierno | No | Una fila por PO usuario y model developer | `PO_USUARIO` y `MODELO_DEVELOPER` | Gobierno |
 | Calidad de Datos | No | Una fila por modelo evaluado | `ID` | Implementación |
 | Tablón de coberturas | No | Una fila por modelo | `Modelo_ID` | Validación |
-| Gobierno de modelos.yaml | No | Texto editable, no es Excel | No aplica | Gobierno |
 
 Los nombres de los archivos se definen en `archivos` de `config.yaml`.
 
@@ -59,7 +58,7 @@ erDiagram
 
 ## Contenido de Gobierno
 
-`Gobierno de modelos.yaml` resume la norma interna y por eso vive en la carpeta de inputs y no en el repositorio. Se edita a mano y tiene estas secciones:
+El contenido de la sección Gobierno no es un input mensual: está en el repositorio, en `contenido/gobierno_modelos.yaml`, y llega a todos con **Git: Pull**. Se edita a mano y tiene estas secciones:
 
 | Sección | Qué contiene |
 |---|---|
@@ -72,7 +71,7 @@ erDiagram
 | `mapa_normativo` | Normas y políticas de modelos, por grupo |
 | `flujo_informacion` | Fuentes del reporte (owner, recurrencia, fecha de corte, sistema e indicadores que alimentan) y proceso de actualización |
 
-Un texto `[Por confirmar]` se muestra resaltado en el reporte. Si el archivo falta, Gobierno muestra solo la nota de gobierno, la explicación de las puntuaciones y el flujo básico de archivos.
+Un texto `[Por confirmar]` se muestra resaltado en el reporte. Después de editarlo, vuelve a generar el reporte y sube el cambio al repositorio.
 
 ## Controles de calidad
 

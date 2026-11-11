@@ -60,7 +60,8 @@ La versión 2 incorpora el input principal histórico y siete archivos de detall
 | `src/generar_reporte.py` | Lee los ocho archivos, valida y une |
 | `src/simular_historico.py` | Eliminado |
 | `templates/plantilla_reporte.html` | Bloques y secciones nuevos, simulador, filtros múltiples y umbrales por Tier |
-| `config.ejemplo.yaml` | Ocho archivos, contenido de Gobierno y homologación |
+| `config.ejemplo.yaml` | Ocho archivos y homologación |
+| `contenido/gobierno_modelos.yaml` | Nuevo: contenido de la sección Gobierno |
 | `ejecutar.py` | Revisa el input principal y avisa qué archivos de detalle faltan |
 | `tests/test_reporte.py` | 16 pruebas con los ocho archivos y el contenido de Gobierno |
 | `docs/` | Nuevos `calidad_datos.md`, `cambios_v2.md` y diccionario de datos; guías actualizadas |
@@ -69,7 +70,7 @@ La versión 2 incorpora el input principal histórico y siete archivos de detall
 
 1. Copia la nueva sección `archivos` y `homologacion` de `config.ejemplo.yaml` a tu `config.yaml`.
 2. Borra la sección `simulacion` de tu `config.yaml`; ya no se usa.
-3. Guarda los ocho Excel y `Gobierno de modelos.yaml` en tu carpeta de inputs, agrega `gobierno_contenido` a `archivos` y genera el reporte.
+3. Guarda los ocho Excel en tu carpeta de inputs y genera el reporte. El contenido de Gobierno ya viene en el repositorio (`contenido/gobierno_modelos.yaml`); si tu `config.yaml` tiene la línea `gobierno_contenido`, puedes borrarla.
 
 ## Pendiente de confirmar
 

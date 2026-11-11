@@ -6,7 +6,7 @@ Reporte HTML de indicadores de riesgo de modelo del COE Model Risk Management. T
 
 ## Inicio rápido
 
-Necesitas [Python 3.10 o superior](https://www.python.org/downloads/), [Visual Studio Code](https://code.visualstudio.com/) y los inputs en una carpeta de tu equipo: el input principal histórico, los siete archivos de detalle y `Gobierno de modelos.yaml`.
+Necesitas [Python 3.10 o superior](https://www.python.org/downloads/), [Visual Studio Code](https://code.visualstudio.com/) y los inputs en una carpeta de tu equipo: el input principal histórico y los siete archivos de detalle.
 
 1. Clona el repositorio y abre la carpeta en Visual Studio Code.
 2. Abre `Terminal > Run Task…` y ejecuta **1. Preparar entorno** (solo la primera vez). Esto crea tu archivo `config.yaml`.
@@ -45,11 +45,10 @@ flowchart LR
     subgraph L[Carpeta local del usuario]
       A[Input principal histórico]
       B[Siete archivos de detalle]
-      G[Gobierno de modelos.yaml]
     end
     A --> D[generar_reporte.py]
     B --> D
-    G --> D
+    G[contenido/gobierno_modelos.yaml] --> D
     T[Plantilla HTML] --> D
     D --> Q[output/control_calidad.txt]
     D --> R[output/reporte_mrm.html]
@@ -71,6 +70,7 @@ Score-MRM-2.0/
 │   ├── calidad.py             Controles de calidad de datos
 │   └── generar_diccionario.py Crea el diccionario de datos y el anexo de la guía
 ├── templates/         Plantilla del reporte: diseño e indicadores
+├── contenido/         Contenido de la sección Gobierno (gobierno_modelos.yaml)
 ├── tests/             Pruebas automáticas
 ├── .vscode/           Tareas y configuración de Visual Studio Code
 ├── config.yaml        Tu configuración local (no se sube a Git)

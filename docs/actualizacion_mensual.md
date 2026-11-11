@@ -9,7 +9,7 @@ Los archivos se actualizan en tu carpeta local, la de `carpeta_inputs` en `confi
 ## Pasos
 
 1. **Input principal histórico:** agrega las filas del nuevo mes, sin borrar los meses anteriores. Mantén los nombres de las columnas.
-2. **Archivos de detalle:** reemplaza los siete por los del nuevo mes: Inventario, TTM, Reporte de observaciones, Observaciones SBS & AI, Nota de Gobierno, Calidad de Datos y Tablón de coberturas. Deben corresponder al mismo mes que acabas de agregar al input principal. `Gobierno de modelos.yaml` solo se cambia cuando cambian la norma, los flujos o las fuentes.
+2. **Archivos de detalle:** reemplaza los siete por los del nuevo mes: Inventario, TTM, Reporte de observaciones, Observaciones SBS & AI, Nota de Gobierno, Calidad de Datos y Tablón de coberturas. Deben corresponder al mismo mes que acabas de agregar al input principal. El contenido de Gobierno (`contenido/gobierno_modelos.yaml`) no se cambia cada mes: está en el repositorio y solo se edita cuando cambian la norma, los flujos o las fuentes.
 3. **Configuración:** si algún archivo cambió de nombre, actualízalo en `archivos` de `config.yaml`.
 4. **Generación:** presiona `Ctrl+Shift+B` en Visual Studio Code, o ejecuta `python ejecutar.py`.
 5. **Calidad de datos:** abre `output/control_calidad.txt`. Revisa primero las alertas y consulta su significado en [calidad_datos.md](calidad_datos.md).

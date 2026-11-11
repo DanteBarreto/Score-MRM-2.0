@@ -16,9 +16,6 @@ archivos:
   nota_gobierno: Nota de Gobierno.xlsx
   calidad_datos: Calidad de Datos.xlsx
   coberturas: Tablón de coberturas.xlsx
-  # Contenido de la sección Gobierno (flujos, aprobaciones, definiciones y mapa normativo).
-  # Es un YAML que se edita a mano y no se sube a Git porque resume la norma interna.
-  gobierno_contenido: Gobierno de modelos.yaml
 
 # Reporte generado, relativo a la carpeta del proyecto.
 # Junto a él se guarda control_calidad.txt, con los hallazgos de calidad de datos.

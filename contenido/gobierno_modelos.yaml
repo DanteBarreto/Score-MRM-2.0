@@ -1,0 +1,567 @@
+# Contenido de la sección Gobierno del reporte Score MRM.
+# Se edita a mano y se publica con el repositorio. Después de editarlo, vuelve a generar el reporte.
+# Textos entre corchetes, como [Por confirmar], se muestran resaltados en el reporte.
+
+# Roles que participan en los flujos
+roles:
+  - {id: usuaria, nombre: Unidad usuaria, linea: 1}
+  - {id: modeladora, nombre: Unidad modeladora, linea: 1}
+  - {id: seguimiento, nombre: Unidad de seguimiento, linea: 1}
+  - {id: implementacion, nombre: Implementación técnica, linea: 1}
+  - {id: datos, nombre: Proveedora de datos, linea: 1}
+  - {id: validacion, nombre: Validación Interna, linea: 2}
+  - {id: control, nombre: Control de Riesgo de Modelo, linea: 2}
+  - {id: auditoria, nombre: Auditoría Interna, linea: 3}
+  - {id: gerentes, nombre: Gerentes de área, linea: 0}
+  - {id: cm, nombre: Comité de Modelos, linea: 0}
+  - {id: cr, nombre: Comité de Riesgos, linea: 0}
+
+# Flujos didácticos. tipo: paso | decision. quien: ids de roles.
+flujos:
+  - id: ciclo
+    titulo: Ciclo de vida del modelo
+    para_que: Muestra el camino completo de un modelo, desde que se planifica hasta que se retira, y dónde se aprueba cada etapa.
+    pasos:
+      - t: Plan Director y Backlog
+        quien: [modeladora, usuaria]
+        entra: Necesidades de las unidades usuarias y tiering aprobado de todos los modelos del plan
+        sale: Plan Director de Modelos (PDM) con plazos end-to-end
+        aprueba: Comité de Modelos y, luego, Comité de Riesgos
+      - t: Desarrollo del modelo
+        nota: Construcción, reestructuración o calibración
+        quien: [modeladora, datos]
+        entra: PDM aprobado y datos de la proveedora
+        sale: Modelo con propósito, supuestos, limitaciones y documentación
+      - t: Implementación técnica
+        quien: [implementacion, modeladora]
+        entra: Especificaciones funcionales de la modeladora
+        sale: Modelo operando en un entorno automatizado, con pruebas y evidencias
+      - t: Validación metodológica y de implementación
+        quien: [validacion]
+        entra: Documentación completa y final
+        sale: Informe de Validación Interna con pronunciamiento y recomendaciones
+      - t: Aprobación técnica
+        tipo: decision
+        quien: [cm, cr]
+        entra: Presentación de la modeladora e informe de validación
+        sale: Modelo aprobado para su uso
+        aprueba: Comité de Modelos. Tier I, además, Comité de Riesgos
+      - t: Integración a la gestión
+        quien: [usuaria]
+        entra: Modelo aprobado
+        sale: Modelo en producción dentro del proceso de negocio
+        aprueba: Comité o foro de la política. Tier I, además, Comité de Riesgos
+      - t: Seguimiento y validación periódica
+        quien: [seguimiento, validacion]
+        entra: Modelo en uso
+        sale: Reporte de salud, alertas, planes de acción e informe de validación periódica
+      - t: Baja del modelo
+        tipo: decision
+        quien: [modeladora, usuaria]
+        entra: Justificación de reemplazo o retiro
+        sale: Modelo retirado
+        aprueba: La misma instancia que dio la aprobación técnica
+
+  - id: tiering
+    titulo: Tiering de modelos
+    para_que: Clasifica cada modelo por su relevancia (Tier I es el de mayor riesgo) para priorizar qué controles y aprobaciones necesita.
+    pasos:
+      - t: Cálculo del tier
+        quien: [seguimiento, modeladora]
+        entra: "Factores: materialidad, uso, complejidad e importancia estratégica (opcional)"
+        sale: Tier propuesto de cada modelo
+      - t: Revisión de la metodología
+        quien: [control]
+        entra: Metodología y fórmulas de cálculo
+        sale: Conformidad sobre el uso de los factores, la distribución del tiering y la razonabilidad de los cambios
+      - t: Revisión de responsables
+        quien: [control, validacion, modeladora, usuaria]
+        entra: Tier propuesto
+        sale: Tier revisado por los responsables o gerentes de Control, Validación, Modelamiento y Usuario
+      - t: Aprobación de gerentes de área
+        tipo: decision
+        quien: [gerentes]
+        entra: Tier revisado
+        sale: Tier aprobado por los gerentes de área usuaria, de modelamiento y de validación
+        aprueba: Gerente de área usuaria, gerente de área de modelamiento y gerente de área de validación
+      - t: Aprobación en comité
+        tipo: decision
+        quien: [cm, cr]
+        entra: Tier aprobado por los gerentes
+        sale: Tier oficial
+        aprueba: Tier I, Comité de Riesgos. Tier II, III y IV, Comité de Modelos
+      - t: Cambios excepcionales
+        tipo: decision
+        quien: [cm]
+        entra: Propuesta de subir o bajar más de una categoría (Tier II, III y IV)
+        sale: Tier ajustado
+        aprueba: Comité de Modelos, con al menos un Gerente de División
+      - t: Revisión anual y a demanda
+        quien: [seguimiento]
+        entra: Todos los modelos cada año, o un modelo que se sustituye, ajusta o da de baja
+        sale: Tier actualizado. Si no cambia, solo se informa
+
+  - id: validacion
+    titulo: Validación y aprobación técnica
+    para_que: Explica cómo un modelo nuevo o modificado obtiene la opinión independiente de Validación Interna y la aprobación para usarse.
+    pasos:
+      - t: Entrega de documentación
+        quien: [modeladora]
+        entra: Modelo desarrollado
+        sale: Documentación completa y final, en los plazos acordados
+      - t: Requisitos de inicio
+        tipo: decision
+        quien: [validacion]
+        entra: Documentación recibida
+        sale: Inicio de la validación. Sin documentación completa no se emite informe
+      - t: Validación del modelo
+        nota: Clásica (al final del desarrollo) o ágil (durante el desarrollo)
+        quien: [validacion]
+        entra: Desarrollo metodológico e implementación
+        sale: Revisión con intensidad según el tier, los recursos y las necesidades del negocio
+      - t: Controles de implementación operativa
+        quien: [modeladora, implementacion, validacion]
+        entra: Modelo implementado
+        sale: Sistema formal, seguridad de acceso e integridad, controles de entrada y salida operativos, manual de implementación y verificación de la modeladora y de Validación Interna
+      - t: Informe de Validación Interna
+        quien: [validacion]
+        entra: Resultados de la validación
+        sale: Pronunciamiento independiente y lista de recomendaciones
+      - t: Aprobación técnica
+        tipo: decision
+        quien: [cm, cr]
+        entra: Presentación de la modeladora e informe de validación
+        sale: Modelo aprobado
+        aprueba: Comité de Modelos o Comité de Modelos Ad Hoc. Tier I, además, Comité de Riesgos
+      - t: Excepción por debilidades
+        tipo: decision
+        quien: [cr]
+        entra: Modelo con debilidades relevantes en su desarrollo
+        sale: Uso aprobado con conocimiento explícito de sus riesgos
+        aprueba: Comité de Riesgos
+
+  - id: integracion
+    titulo: Integración a la gestión
+    para_que: Describe cómo la unidad usuaria pone en operación un modelo aprobado dentro de su proceso de negocio.
+    pasos:
+      - t: Definir el uso
+        quien: [usuaria, modeladora]
+        entra: Modelo con aprobación técnica
+        sale: Segmentos aplicables, límites y lineamientos complementarios
+      - t: Adecuar los procesos
+        quien: [usuaria]
+        entra: Uso definido
+        sale: "Procesos de decisión ajustados: puntos de corte, pautas, ofertas o parámetros de precios"
+      - t: Validar usos e integración
+        quien: [validacion]
+        entra: Pautas y políticas de uso
+        sale: Opinión sobre los usos del modelo y su integración
+      - t: Aprobación de la integración
+        tipo: decision
+        quien: [usuaria, cm, cr]
+        entra: Solicitud de la unidad usuaria
+        sale: Integración aprobada
+        aprueba: Comité o foro de la política. Tier I, además, Comité de Riesgos
+      - t: Documentar
+        quien: [usuaria]
+        entra: Integración aprobada
+        sale: Ajustes registrados, y acta y presentación en SharePoint
+      - t: Uso adecuado
+        quien: [usuaria]
+        entra: Modelo en uso
+        sale: Uso coherente con su propósito. Todo uso adicional se comunica al CoE MRM, al equipo modelador y al de seguimiento
+
+  - id: seguimiento
+    titulo: Seguimiento, alertas y planes de acción
+    para_que: Explica cómo se vigila la salud de los modelos en uso y qué pasa cuando un indicador sale de su rango.
+    pasos:
+      - t: KPIs y umbrales
+        quien: [modeladora, cr]
+        entra: Mejores prácticas para cada tipología de modelo
+        sale: KPIs con umbrales de semáforo
+        aprueba: Comité de Riesgos aprueba los criterios y umbrales
+      - t: Cronograma trimestral
+        tipo: decision
+        quien: [cr]
+        entra: Actividades de seguimiento del trimestre siguiente
+        sale: Cronograma aprobado
+        aprueba: Comité de Riesgos
+      - t: Monitoreo periódico
+        quien: [seguimiento]
+        entra: Resultados esperados frente a observados
+        sale: Informe de seguimiento, como mínimo anual, con el contenido que exige la SBS
+      - t: Alerta y plan de acción
+        quien: [seguimiento]
+        entra: Indicador fuera de su umbral
+        sale: Plan predefinido según tier, tipo de modelo e indicador, con acciones, plazos y mitigantes temporales
+      - t: Mitigantes temporales
+        quien: [seguimiento, usuaria, modeladora]
+        entra: Acción que no puede implementarse de inmediato
+        sale: Medidas que permiten seguir usando el modelo de forma segura
+      - t: Reporte al Comité de Modelos
+        tipo: decision
+        quien: [seguimiento, cm, cr]
+        entra: Estado de salud, alertas y planes de acción
+        sale: Reporte y acciones aprobados, con plazos
+        aprueba: Comité de Modelos. Tier I, el Comité de Modelos preaprueba y el Comité de Riesgos aprueba la reestructuración o reconstrucción ante alertas rojas
+      - t: Validación periódica
+        nota: La frecuencia y los criterios se definen en la Política de Validación Interna [detalle por confirmar]
+        quien: [validacion]
+        entra: Modelos en uso
+        sale: Informe de validación periódica
+        aprueba: Comité de Modelos. Tier I, Comité de Riesgos
+      - t: Reporte trimestral de Tier I
+        quien: [control, cr]
+        entra: Estado de salud, seguimiento y validación de los modelos Tier I
+        sale: Reporte aprobado por el Comité de Riesgos
+
+  - id: observaciones
+    titulo: Observaciones e incidentes
+    para_que: Muestra cómo se corrigen los hallazgos y cómo se reportan los errores para que no se repitan.
+    pasos:
+      - t: Registro de observaciones
+        quien: [validacion, auditoria]
+        entra: Hallazgos de Validación Interna, Auditoría Interna, auditores externos y la SBS
+        sale: Observaciones registradas y asignadas
+      - t: Subsanación
+        quien: [usuaria, modeladora, seguimiento, implementacion, datos, validacion]
+        entra: Observación de su competencia
+        sale: Observación subsanada en tiempo y forma
+      - t: Reporte de incidentes
+        quien: [usuaria, modeladora, seguimiento, implementacion, datos]
+        entra: Error o suceso en cualquier etapa del ciclo de vida
+        sale: Incidente registrado en la plataforma
+      - t: Gestión del incidente
+        quien: [control]
+        entra: Incidente registrado
+        sale: Incidente gestionado según el Protocolo de Control y Comunicación de Incidentes de Riesgo de Modelo
+      - t: Escalamiento
+        tipo: decision
+        quien: [control]
+        entra: Incidente que se repite sin resolverse
+        sale: Observación de mayor criticidad
+      - t: Comunicación
+        quien: [control]
+        entra: Incidentes identificados
+        sale: Incidentes consolidados y comunicados a los órganos competentes
+      - t: Seguimiento de recomendaciones
+        quien: [auditoria]
+        entra: Recomendaciones de auditorías y supervisores
+        sale: Verificación de su implementación
+
+  - id: baja
+    titulo: Baja del modelo
+    para_que: Explica cómo se retira un modelo de forma ordenada y quién lo aprueba.
+    pasos:
+      - t: Identificar la necesidad
+        quien: [modeladora, usuaria]
+        entra: Modelo en uso
+        sale: "Escenario: reemplazo por un modelo de mejor desempeño o retiro sin reemplazo"
+      - t: Justificación
+        quien: [modeladora, usuaria]
+        entra: Escenario de baja
+        sale: "Razones, por ejemplo: sustitución por reglas de negocio o eliminación del producto o proceso"
+      - t: Ficha de baja definitiva
+        quien: [usuaria, validacion, control]
+        entra: Justificación
+        sale: Ficha completa (usuaria), revisada en su razonabilidad (Validación Interna) y verificada (Control de Riesgo de Modelo)
+      - t: Aprobación de la baja
+        tipo: decision
+        quien: [cm, cr]
+        entra: Solicitud justificada
+        sale: Baja aprobada
+        aprueba: La misma instancia que otorga la aprobación técnica
+      - t: Actualizar el inventario
+        quien: [modeladora]
+        entra: Baja aprobada
+        sale: Inventario de modelos actualizado
+
+# ¿Quién aprueba qué? (tier1 = Tier I; resto = Tier II, III y IV; todos = sin distinción por tier)
+aprobaciones:
+  - que: "Tiering"
+    tier1: "Comité de Riesgos"
+    resto: "Comité de Modelos. Cambios de más de una categoría: Comité de Modelos con al menos un Gerente de División"
+  - que: "Plan Director de Modelos"
+    todos: "Comité de Modelos y, luego, Comité de Riesgos"
+  - que: "Aprobación técnica"
+    tier1: "Comité de Modelos y, luego, Comité de Riesgos"
+    resto: "Comité de Modelos o Comité de Modelos Ad Hoc"
+  - que: "Integración a la gestión"
+    tier1: "Comité o foro de la política y, luego, Comité de Riesgos"
+    resto: "Comité o foro de la política"
+  - que: "Reporte de seguimiento y acciones"
+    tier1: "Comité de Modelos preaprueba; Comité de Riesgos aprueba la reestructuración o reconstrucción ante alertas rojas"
+    resto: "Comité de Modelos"
+  - que: "Validación periódica"
+    tier1: "Comité de Riesgos"
+    resto: "Comité de Modelos"
+  - que: "Baja del modelo"
+    todos: "La misma instancia que otorga la aprobación técnica"
+  - que: "Criterios y umbrales de los KPIs"
+    todos: "Comité de Riesgos"
+  - que: "Cronograma trimestral de seguimiento"
+    todos: "Comité de Riesgos"
+  - que: "Contratación de proveedores de modelos"
+    todos: "Comité de Riesgos"
+  - que: "Uso de modelos con debilidades relevantes"
+    todos: "Comité de Riesgos"
+  - que: "Excepciones al gobierno (waivers)"
+    todos: "La instancia que indique la política de cada tipología [detalle por confirmar]"
+  - que: "Norma y políticas de modelos"
+    todos: "Comité de Riesgos"
+  - que: "Estándares"
+    todos: "Gerente de Área; se ratifican en el Comité de Riesgos"
+
+# Jerarquía de comités, de mayor a menor
+comites:
+  - nombre: Comité de Riesgos
+    detalle: Aprueba todo lo relacionado con modelos Tier I y lo que exige la SBS. Sesiona con directores.
+    miembros: Directores
+    frecuencia: Trimestral
+  - nombre: Comité Integral de Modelos (CIM)
+    detalle: Comité Ad Hoc que gestiona de forma integral los temas más relevantes o estratégicos del parque de modelos. Está por encima del Comité de Modelos y por debajo del Comité de Riesgos.
+    miembros: "[Por confirmar]"
+    frecuencia: "[Por confirmar]"
+  - nombre: Comité de Modelos
+    detalle: Foro técnico corporativo que vela por el cumplimiento en el desarrollo, el monitoreo y la validación de los modelos.
+    miembros: Gerentes de área
+    frecuencia: Mensual
+    sesiones: [Riesgo de Crédito BCP, Riesgos Financieros, Riesgo de Crédito para Empresas, Riesgos No Financieros]
+
+# Tabla 16.3: aplicabilidad del gobierno según el perímetro
+ambitos:
+  perimetros:
+    - Modelo y modelo base
+    - Modelo con uso en otra población
+    - Cálculo auxiliar, módulos y submodelos
+  filas:
+    - ambito: Inventario
+      valores:
+        - {si: true, texto: "Registro obligatorio. Perímetro: Modelo; Modelo base"}
+        - {si: true, texto: "Registro obligatorio. Perímetro: Modelo (Uso)"}
+        - {si: false, texto: "Registro no obligatorio. Perímetro: Cálculo auxiliar; Módulo; Submodelo"}
+    - ambito: Tiering
+      valores: [{si: true, texto: Sí}, {si: true, texto: Sí}, {si: false, texto: No requiere}]
+    - ambito: Plan Director de Modelos
+      valores: [{si: true, texto: Sí}, {si: false, texto: No requiere incluirse}, {si: false, texto: No requiere incluirse}]
+    - ambito: Estándares
+      valores:
+        - {si: true, texto: "Sí (de desarrollo, de validación, etc.)"}
+        - {si: false, texto: No requiere estándar adicional}
+        - {si: false, texto: No requiere estándar adicional a los ya existentes}
+    - ambito: Validación
+      valores:
+        - {si: true, texto: "Sí, completa: metodológica e implementación (validación inicial y periódica)"}
+        - {si: true, texto: "Sí, como parte del informe de validación del modelo principal (validación inicial y periódica). Controles ad hoc"}
+        - {si: true, texto: "Sí, como parte de la validación del modelo (validación inicial y periódica)"}
+    - ambito: Aprobación técnica y de uso
+      valores:
+        - {si: true, texto: Sí}
+        - {si: true, texto: Sí}
+        - {si: false, texto: "No requiere aprobación adicional (está embebido en el modelo final)"}
+    - ambito: Seguimiento
+      valores: [{si: true, texto: Sí}, {si: true, texto: Sí}, {si: true, texto: "Sí, como parte del seguimiento del modelo"}]
+    - ambito: Planes de acción ante alertas de salud
+      valores: [{si: true, texto: Sí}, {si: true, texto: Sí}, {si: true, texto: "Sí, como parte del plan de acción del modelo"}]
+
+# Definición de indicadores: qué mide y por qué importa. "Cómo se calcula" sale del reporte.
+indicadores:
+  sin_seguimiento:
+    que: Modelos en los que no se hicieron revisiones ni monitoreo de su desempeño en el último periodo de seguimiento.
+    por_que: Sin seguimiento, una desviación del modelo puede pasar inadvertida mientras sigue guiando decisiones.
+  alerta_salud:
+    que: Modelos cuyo indicador de seguimiento salió del rango aceptable, lo que puede reflejar problemas en su capacidad de estimación o de discriminación.
+    por_que: Cada alerta debe activar un plan de acción predefinido según el tier, el tipo de modelo y el indicador.
+  alerta_excede_tiempo:
+    que: Modelos con alerta de salud que superaron el tiempo máximo de atención (TTM).
+    por_que: Mide si las alertas se resuelven a tiempo dentro de los plazos de time-to-market definidos.
+  alerta_sin_mitigantes:
+    que: "Modelos con alerta de salud sin mitigante: el plan de subsanación o la acción preventiva que regula y estabiliza el riesgo mientras se implementa la recomendación."
+    por_que: Si la acción correctiva no es inmediata, se requieren mitigantes temporales para seguir usando el modelo de forma segura.
+  profundidad_seguimiento:
+    que: "Nota del equipo de validación sobre la profundidad del seguimiento: controles de discriminación y precisión, base de datos, gobierno, granularidad, análisis descriptivos y representatividad."
+    por_que: Un seguimiento superficial puede no detectar el deterioro; los informes de seguimiento deben cubrir un contenido mínimo.
+  sin_val_inicial:
+    que: Modelos sin validación metodológica y de implementación de primera vez, la evaluación rigurosa previa a su aprobación para producción.
+    por_que: El informe de Validación Interna es requisito indispensable para solicitar la aprobación técnica del modelo.
+  incumple_val_periodica:
+    que: Modelos sin la validación periódica que asegura que el modelo sigue siendo adecuado, preciso y seguro para su uso continuo.
+    por_que: La validación periódica es la opinión independiente de la segunda línea sobre los modelos que ya están en uso.
+  nota_dinamica_validacion:
+    que: Nota del último proyecto de validación periódica, metodológico o de implementación.
+    por_que: Resume el resultado del último informe de validación periódica, que aprueba el Comité de Modelos o, en Tier I, el Comité de Riesgos.
+  obs_venc_validacion:
+    que: Observaciones de validación que excedieron su plazo de subsanación. Solo se consideran las de criticidad crítica, relevante y moderada.
+    por_que: Las observaciones de validación deben subsanarse en tiempo y forma; una vencida es un riesgo identificado que sigue abierto.
+  obs_venc_reg_aud:
+    que: Observaciones de la SBS que excedieron su plazo de subsanación.
+    por_que: Cada unidad debe atender en tiempo y forma las observaciones de la SBS que correspondan a su competencia.
+  impl_np_despliegue:
+    que: "Modelos desplegados en un ambiente no productivo: sin ambientes separados de desarrollo, certificación y producción, sin trazabilidad, control de cambios ni versionamiento."
+    por_que: La aprobación técnica exige que el modelo esté implementado en un sistema formal que cumpla las políticas de seguridad de acceso e integridad de datos.
+  impl_np_data:
+    que: Modelos cuya data está en un ambiente no productivo, con las mismas carencias de separación, trazabilidad y control de cambios.
+    por_que: La proveedora de datos debe garantizar la disponibilidad, la calidad y la seguridad de los datos durante todo el ciclo de vida.
+  nota_calidad_datos:
+    que: "Porcentaje de cumplimiento de siete criterios: documentación de incidencias por alertas (10%), gobierno formal y umbrales para alertas (20%), roles y atención de alertas (20%), notificación de alertas al usuario (10%), controles sobre variables input (15%), controles sobre variables de salida (20%) y monitoreo automático o reportes ad hoc (5%)."
+    por_que: La aprobación técnica exige controles operativos sobre los datos de entrada y salida, y la implementación debe garantizar la calidad de los datos.
+  incidencias_inventario:
+    que: Incidentes de riesgo de modelo, es decir, errores o sucesos en cualquier etapa del ciclo de vida que pueden causar consecuencias adversas por decisiones basadas en resultados incorrectos o en un uso inapropiado del modelo.
+    por_que: Los incidentes que se repiten sin resolverse pueden convertirse en observaciones de mayor criticidad.
+  nota_documentacion:
+    que: "Nota emitida por Control de Riesgo de Modelo sobre el cumplimiento de políticas, estándares y demás documentación de gobierno: desarrollo, validación, waivers y uso de la calculadora de valorización."
+    por_que: Control de Riesgo de Modelo supervisa el cumplimiento de las normas y políticas de modelos en todas las unidades.
+  nota_lineamientos_desarrollo:
+    que: Nota emitida por el equipo de validación sobre el cumplimiento de los 10 lineamientos de desarrollo para la Transformación de Riesgos.
+    por_que: "[Por confirmar]"
+
+# Mapa de normas y políticas de modelos. serie = prefijo del nombre del documento.
+mapa_normativo:
+  - grupo: Normas
+    docs:
+      - {codigo: 4207.010.39, serie: Grupo Crédito, nombre: Norma Corporativa de Modelos}
+  - grupo: Políticas de modelos por tipología
+    docs:
+      - {codigo: 4207.010.42, serie: Grupo Crédito, nombre: Política Corporativa de los Modelos de Riesgo de Crédito}
+      - {codigo: 4207.010.15, serie: Grupo Crédito, nombre: Gobierno de Modelos de Riesgos Financieros Corporativo}
+      - {codigo: 4202.010.13, serie: Políticas de Administración de Riesgos, nombre: Política de Modelos de Rentabilidad BCP}
+      - {codigo: 4202.010.16, serie: Políticas de Administración de Riesgos, nombre: Política de Modelos de Willingness-to-Pay BCP}
+      - {codigo: 4207.010.43, serie: Grupo Crédito, nombre: Política de los Modelos de Capital y Pruebas de Estrés Corporativo}
+      - {codigo: 4207.010.50, serie: Grupo Crédito, nombre: Política de Modelos de Detección de Fraude y Riesgo Operativo BCP y Empresas del Grupo}
+      - {codigo: 4207.010.49, serie: Grupo Crédito, nombre: Política de Modelos de Cumplimiento BCP y Empresas del Grupo}
+      - {codigo: 4202.010.15, serie: Políticas de Administración de Riesgos, nombre: Política de Modelos de Estudios Económicos BCP}
+  - grupo: Políticas del ciclo de vida de los modelos
+    docs:
+      - {codigo: 4202.010.11, serie: Políticas de Administración de Riesgos, nombre: Políticas de Time to Market para Modelos de Riesgo de Crédito}
+      - {codigo: 4207.010.51, serie: Grupo Crédito, nombre: Política de Seguimiento de Modelos – Time to Market – CoE Riesgos de Mercado}
+      - {codigo: 4207.441.01, serie: Grupo Crédito, nombre: Política de Validación Interna}
+      - {codigo: 4207.440.01, serie: Grupo Crédito, nombre: Política de Seguimiento de Incidencias}
+  - grupo: Políticas de los comités de modelos
+    docs:
+      - {codigo: 4207.010.17, serie: Grupo Crédito, nombre: Norma del Comité de Riesgo de Modelo Corporativo}
+      - {codigo: 4207.014.05, serie: Grupo Crédito, nombre: Comité de Modelos para Riesgo de Crédito – BCP y Empresas del Grupo}
+      - {codigo: 4207.010.52, serie: Grupo Crédito, nombre: Política del Comité de Modelos de Riesgos Financieros Corporativo}
+      - {codigo: 4207.010.53, serie: Grupo Crédito, nombre: Política del Comité de Modelos de Riesgos No Financieros Corporativo}
+  - grupo: Políticas de otros comités participantes
+    docs:
+      - {codigo: 4202.010.02, serie: Políticas de Administración de Riesgos, nombre: Comité de Riesgos BCP}
+      - {codigo: 4207.014.02, serie: Grupo Crédito, nombre: Reglamento del Comité de Riesgos Grupo Crédito S.A.}
+      - {codigo: 4202.014.06, serie: Políticas de Administración de Riesgos, nombre: Comité de Riesgo de Crédito Minorista BCP}
+      - {codigo: 4202.014.01, serie: Políticas de Administración de Riesgos, nombre: Comité de Riesgo de Crédito No Minorista BCP}
+      - {codigo: 4202.014.02, serie: Políticas de Administración de Riesgos, nombre: Comité de Riesgos de Tesorería y ALM BCP}
+      - {codigo: 4207.014.04, serie: Grupo Crédito, nombre: "Comité Corporativo de Riesgos de Mercado, Estructural, Negociación y Liquidez"}
+      - {codigo: 4205.014.11, serie: Políticas Corporativas Credicorp, nombre: Reglamento del Comité de Riesgos Credicorp}
+      - {codigo: 4202.014.03, serie: Políticas de Administración de Riesgos, nombre: Comité Estratégico de Riesgos No Financieros}
+      - {codigo: 4202.014.10, serie: Políticas de Administración de Riesgos, nombre: Comité Táctico de Riesgos No Financieros}
+  - grupo: Políticas sobre inteligencia artificial
+    docs:
+      - {codigo: 4180.010.05, serie: Políticas de Ciberseguridad, nombre: Políticas Generales de Seguridad de la Información}
+      - {codigo: 4204.115.13, serie: Cumplimiento y Ética Credicorp, nombre: Programa Ética e Integridad}
+      - {codigo: 4205.410.05, serie: Políticas Corporativas Credicorp, nombre: Gestión de Riesgos Programa IA Cognitiva Credicorp}
+      - {codigo: 4205.410.06, serie: Políticas Corporativas Credicorp, nombre: Gestión de Riesgo de Modelo para Modelos de IA Generativa y Agéntica Credicorp}
+
+# Flujo de información del reporte
+# alimenta = claves de indicadores; secciones = secciones del reporte que usan la fuente
+flujo_informacion:
+  responsable: "Equipo de Control MRM · Hub de Control y Modelos Financieros"
+  fuentes:
+    - nombre: "Inventario de modelos"
+      owner: "Equipo de Seguimiento / Modeladores / Owner del modelo"
+      recurrencia: Mensual
+      corte: "1ra semana de cada mes"
+      sistema: "Software MRM"
+      alimenta: [incidencias_inventario]
+      secciones: [Inventario, Gobierno]
+    - nombre: "Metadata y TTM"
+      owner: "Equipo de Seguimiento / Modeladores"
+      recurrencia: Mensual
+      corte: "1ra semana de cada mes"
+      sistema: "Metadata"
+      alimenta: [sin_seguimiento, alerta_salud, alerta_excede_tiempo, alerta_sin_mitigantes, profundidad_seguimiento]
+      secciones: [Seguimiento]
+    - nombre: "Tablón de coberturas"
+      owner: "CoE MRM · Unit Tecnología de Riesgo de Modelo / Hub Validación Riesgo de Crédito"
+      recurrencia: Mensual
+      corte: "1ra semana de cada mes"
+      sistema: "Software MRM"
+      alimenta: [sin_val_inicial, incumple_val_periodica, nota_dinamica_validacion]
+      secciones: [Validación]
+    - nombre: "Reporte de observaciones"
+      owner: "CoE MRM · Hub de Control y Modelos Financieros"
+      recurrencia: Quincenal
+      corte: "-"
+      sistema: "Software MRM"
+      alimenta: [obs_venc_validacion]
+      secciones: [Observaciones]
+    - nombre: "Observaciones SBS & AI"
+      owner: "Gerencia de Auditoría"
+      recurrencia: Mensual
+      corte: "1ra semana de cada mes"
+      sistema: "Team Central"
+      alimenta: [obs_venc_reg_aud]
+      secciones: [Observaciones]
+    - nombre: "Calidad de Datos"
+      owner: "CoE MRM · Unit Tecnología de Riesgo de Modelo"
+      recurrencia: Trimestral
+      corte: "-"
+      sistema: "Proceso interno"
+      alimenta: [nota_calidad_datos]
+      secciones: [Implementación]
+    - nombre: "Artefacto Ambientes Productivos"
+      owner: "CoE MRM · Unit Tecnología de Riesgo de Modelo"
+      recurrencia: Trimestral
+      corte: "-"
+      sistema: "Archivo compartido"
+      alimenta: [impl_np_despliegue, impl_np_data]
+      secciones: [Implementación]
+    - nombre: "Nota de Gobierno"
+      owner: "CoE MRM · Hub de Control y Modelos Financieros"
+      recurrencia: Trimestral
+      corte: "-"
+      sistema: "Proceso interno"
+      alimenta: [nota_documentacion]
+      secciones: [Gobierno]
+  pasos:
+    - t: "Recolección de las fuentes"
+      quien: "Owners de cada fuente → Equipo de Control MRM"
+      cadencia: "Mensual"
+      nota: "Cada owner entrega su información según su recurrencia y fecha de corte. El equipo de Control MRM la recolecta."
+      entra: "Las fuentes de información de cada owner"
+      sale: "Fuentes del mes listas para procesar"
+    - t: "Consolidación del input principal"
+      quien: "Equipo de Control MRM"
+      cadencia: "Mensual"
+      nota: "Se juntan y procesan todas las fuentes, se revisa su calidad y se relacionan por el ID del modelo."
+      entra: "Fuentes del mes"
+      sale: "Input principal histórico: una fila por modelo y mes"
+    - t: "Cálculo de indicadores y actualización del reporte"
+      quien: "Equipo de Control MRM"
+      cadencia: "Mensual"
+      nota: "Cada indicador recibe una puntuación de 0 a 100; con ellas se calcula el score por driver y el score MRM, y se genera el reporte."
+      entra: "Input principal histórico"
+      sale: "Reporte Score MRM actualizado"
+    - t: "Revisión de resultados"
+      quien: "Equipo de Control MRM"
+      cadencia: "Mensual"
+      nota: "El equipo de Control revisa los resultados antes de compartirlos."
+      entra: "Reporte Score MRM actualizado"
+      sale: "Resultados revisados"
+    - t: "Pre-publicación a los PO usuarios"
+      tipo: decision
+      quien: "PO usuarios de los modelos"
+      cadencia: "Mensual"
+      nota: "Los PO usuarios revisan los resultados de sus modelos. Si hay puntos por corregir o descargos, el equipo de Control los atiende y corrige el reporte."
+      entra: "Resultados revisados"
+      sale: "Reporte corregido con los descargos atendidos"
+    - t: "Envío del reporte final"
+      quien: "Equipo de Control MRM"
+      cadencia: "Mensual"
+      nota: "Se envía a los PO usuarios y a los gerentes de los equipos usuarios, modeladores, validadores y otras áreas involucradas."
+      entra: "Reporte corregido"
+      sale: "Reporte final distribuido"
+    - t: "Presentación al Comité de Modelos"
+      quien: "Equipo de Control MRM → Comité de Modelos"
+      cadencia: "Trimestral"
+      nota: "Se presenta el score MRM de los modelos Tier I y los temas relevantes del score."
+      entra: "Reporte final del trimestre"
+      sale: "Temas elevados al Comité de Modelos"
