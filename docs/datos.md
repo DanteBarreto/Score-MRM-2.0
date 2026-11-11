@@ -22,7 +22,7 @@ El proceso lee la primera hoja de cada Excel, con los títulos en la primera fil
 
 Los nombres de los archivos se definen en `archivos` de `config.yaml`.
 
-**Campos y tipos de dato:** están en el [diccionario de datos](referencia/Diccionario_de_datos.xlsx), con una hoja por archivo. Se genera desde `src/esquema.py`, que es la definición que usa el proceso.
+**Campos y tipos de dato:** están en el [anexo de la guía de Visual Studio Code](guia_vscode.md#anexo-archivos-de-entrada) y en el [diccionario de datos](referencia/Diccionario_de_datos.xlsx), con una hoja por archivo. Ambos se generan desde `src/esquema.py`, que es la definición que usa el proceso.
 
 `docs/referencia/Indicadores.xlsx` documenta las medidas de Power BI (DAX) y no se lee en el proceso.
 

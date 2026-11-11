@@ -82,7 +82,7 @@ En fechas anteriores, los bloques que vienen de archivos de detalle muestran un 
 | Carpeta y nombres de mis Excel | `config.yaml` (local) |
 | Valores por defecto para nuevos usuarios | `config.ejemplo.yaml` |
 | Equivalencias de catálogos | `homologacion` en `config.yaml` |
-| Campos, tipos de dato y catálogos de un archivo | `src/esquema.py`, y luego `python src/generar_diccionario.py` |
+| Campos, tipos de dato y catálogos de un archivo | `src/esquema.py`, y luego `python src/generar_diccionario.py` para actualizar el diccionario y el anexo de la guía |
 | Controles de calidad | `src/calidad.py` |
 | Lectura y unión de un archivo | `src/generar_reporte.py` |
 | Fórmula o nombre de un indicador | `templates/plantilla_reporte.html`, objeto `CFG` |

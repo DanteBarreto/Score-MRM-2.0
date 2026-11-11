@@ -192,5 +192,13 @@ class Generacion(unittest.TestCase):
         self.assertIn("config.ejemplo.yaml", r.stderr)
 
 
+
+class Documentacion(unittest.TestCase):
+    def test_anexo_de_la_guia_al_dia(self):
+        from generar_diccionario import GUIA, anexo
+        self.assertIn(anexo(), GUIA.read_text(encoding="utf-8"),
+                      "El anexo de docs/guia_vscode.md no coincide con esquema.py: ejecuta python src/generar_diccionario.py")
+
+
 if __name__ == "__main__":
     unittest.main()

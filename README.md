@@ -21,7 +21,7 @@ También puedes hacerlo todo con un solo comando, que explica cada paso y te pid
 python ejecutar.py
 ```
 
-La guía paso a paso, con la alternativa por terminal y la solución de errores frecuentes, está en [docs/guia_vscode.md](docs/guia_vscode.md).
+El [manual de ejecución](docs/guia_vscode.md) detalla los archivos de entrada con sus campos y tipos de dato, los pasos en Visual Studio Code, la alternativa por terminal y la solución de errores frecuentes.
 
 ## Qué muestra el reporte
 
@@ -69,7 +69,7 @@ Score-MRM-2.0/
 │   ├── generar_reporte.py     Lee, valida, une y genera el reporte
 │   ├── esquema.py             Campos y tipos de dato de cada archivo
 │   ├── calidad.py             Controles de calidad de datos
-│   └── generar_diccionario.py Crea el diccionario de datos en Excel
+│   └── generar_diccionario.py Crea el diccionario de datos y el anexo de la guía
 ├── templates/         Plantilla del reporte: diseño e indicadores
 ├── tests/             Pruebas automáticas
 ├── .vscode/           Tareas y configuración de Visual Studio Code
@@ -81,7 +81,7 @@ Score-MRM-2.0/
 
 | Documento | Para qué sirve |
 |---|---|
-| [Guía de Visual Studio Code](docs/guia_vscode.md) | Instalar, ejecutar el proceso, revisar el reporte y resolver errores |
+| [Manual de ejecución](docs/guia_vscode.md) | Archivos de entrada con sus campos y tipos de dato, instalación, ejecución, revisión del reporte y errores |
 | [Proceso](docs/proceso.md) | Qué hace cada etapa, de los Excel al reporte |
 | [Datos de entrada](docs/datos.md) | Archivos, relaciones y reglas de uso |
 | [Diccionario de datos](docs/referencia/Diccionario_de_datos.xlsx) | Campos de cada archivo con su tipo de dato |
