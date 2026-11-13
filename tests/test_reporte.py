@@ -1,6 +1,7 @@
 """Pruebas del proceso con Excel ficticios. Ejecutar con:  python -m unittest discover -s tests"""
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -84,7 +85,7 @@ class Generacion(unittest.TestCase):
         excel(self.inputs / "hist.xlsx", cols["input_principal"], [
             {**base, "FECHA": ago, "ID_MODELO": "MOD-BCP-1"}, {**base, "FECHA": ago, "ID_MODELO": "MOD-BCP-2"},
             {**base, **alerta, "FECHA": sep, "ID_MODELO": "MOD-BCP-1"}, {**base, "FECHA": sep, "ID_MODELO": "MOD-BCP-2", "PO_USUARIO": "Luis"},
-            {**base, "FECHA": sep, "ID_MODELO": "MOBA-BCP-0003", "MODEL_DEVELOPER": "GGR"}])
+            {**base, "FECHA": sep, "ID_MODELO": "MOBA-BCP-0003", "MODEL_DEVELOPER": "GGR", "ENTIDAD_MODELO": "Mibanco Perú"}])
         obs = {"FECHA_PROCESO": datetime(2026, 10, 5), "ID_Obs": 10, "ID_Model": 1}
         excel(self.inputs / "obs.xlsx", cols["observaciones"], [obs, obs, {**obs, "ID_Obs": 11, "ID_Model": 99}])
         excel(self.inputs / "cob.xlsx", cols["coberturas"], [{"Modelo_ID": 1, "Fecha": datetime(2026, 10, 5), "Fecha_descobertura_Met": "31/12/2026"}])
@@ -186,6 +187,23 @@ class Generacion(unittest.TestCase):
         for f in g["flujo_informacion"]["fuentes"]:
             self.assertLessEqual(set(f["alimenta"]), claves, f["nombre"])
 
+    def test_entidad_para_el_filtro(self):
+        d = self.datos()
+        entidad = {m["ID_MODELO"]: m["ENTIDAD_MODELO"] for m in d["modelos"] if m["FECHA"] == d["corte"]}
+        self.assertEqual(entidad, {1: "Sin información", 2: "Sin información", 3: "Mibanco Perú"})
+        html = (self.tmp / "reporte.html").read_text(encoding="utf-8")
+        for filtro in ("{ k: 'ENTIDAD_MODELO', t: 'Entidad' }", "{ k: 'TIPO_RIESGO', t: 'Tipo de riesgo' }"):
+            self.assertIn(filtro, html)
+
+    def test_input_principal_sin_columna_entidad(self):
+        # Un input anterior, sin ENTIDAD_MODELO, sigue funcionando y la revisión de calidad lo avisa
+        cols = [c for c in ARCHIVOS["input_principal"].nombres if c != "ENTIDAD_MODELO"]
+        base = {"ESTADO_ALERTA": "Sin alerta", "ESTADO_SEGUIMIENTO": "Con Seguimiento", "NOMBRE_MODELO": "Modelo", "TIER_MODELO": "I"}
+        excel(self.inputs / "hist.xlsx", cols, [{**base, "FECHA": datetime(2026, 9, 30), "ID_MODELO": 1}])
+        d = self.datos()
+        self.assertEqual(d["modelos"][0]["ENTIDAD_MODELO"], "Sin información")
+        self.assertIn("ENTIDAD_MODELO", (self.tmp / "control_calidad.txt").read_text(encoding="utf-8"))
+
     def test_input_principal_faltante(self):
         self.cfg["archivos"]["input_principal"] = "no_existe.xlsx"
         r = self.generar()
@@ -198,6 +216,69 @@ class Generacion(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("config.ejemplo.yaml", r.stderr)
 
+    @unittest.skipUnless(shutil.which("node"), "Node.js no está instalado")
+    def test_simulador_respeta_dependencias(self):
+        # Corre el JavaScript del reporte en Node, con un DOM simulado, sobre un portafolio de 10 modelos:
+        # 4 en alerta (2 exceden el TTM, 3 sin mitigante) y 6 vencidas de 10 observaciones pendientes.
+        self.datos()
+        html = (self.tmp / "reporte.html").read_text(encoding="utf-8")
+        app = next(s for s in re.findall(r"<script>(.*?)</script>", html, re.S) if "const DATOS" in s)
+        casos = SIMULADOR_JS.replace("__CASOS__", json.dumps({
+            "alertas_3": {"alerta_salud": 3}, "alertas_1": {"alerta_salud": 1}, "alertas_0": {"alerta_salud": 0},
+            "excede_mayor_que_padre": {"alerta_excede_tiempo": 9},
+            "obs_cerradas": {"obs_venc_validacion": 4}, "obs_a_tiempo": {"obs_venc_validacion": 4, "obs_venc_validacion:n": 6},
+            "obs_hijo_igual_padre": {"obs_venc_validacion:n": 0}, "obs_padre_0": {"obs_venc_validacion": 0, "obs_venc_validacion:n": 0}}))
+        js = self.tmp / "simulador.js"
+        js.write_text(DOM_SIMULADO + app + casos, encoding="utf-8")
+        r = subprocess.run(["node", str(js)], capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        res = json.loads(r.stdout.strip().splitlines()[-1])
+        # Sin cambios, y recalculando todo con los valores reales, el score simulado es el real
+        self.assertTrue(res["sin_cambios"])
+        self.assertAlmostEqual(res["forzado"], res["real"], places=9)
+        c = res["casos"]
+        # Alertas 4 -> 3: los hijos se miden sobre 3 alertas (2/3 exceden, 3/3 sin mitigante)
+        self.assertEqual(c["alertas_3"]["alerta_excede_tiempo"], [2, 3, 33.33])
+        self.assertEqual(c["alertas_3"]["alerta_sin_mitigantes"], [3, 3, 0])
+        # Alertas 4 -> 1: los hijos se recortan al nuevo máximo
+        self.assertEqual(c["alertas_1"]["alerta_excede_tiempo"], [1, 1, 0])
+        # Padre = 0: los hijos pasan a No aplica y salen del promedio del driver
+        self.assertEqual(c["alertas_0"]["alerta_excede_tiempo"], [0, 0, None])
+        self.assertEqual(c["alertas_0"]["seguimiento"], 100)
+        # Hijo > padre: se ajusta al padre
+        self.assertEqual(c["excede_mayor_que_padre"]["alerta_excede_tiempo"], [4, 4, 0])
+        # Observaciones: bajar vencidas las cierra (baja el total); con más pendientes a tiempo, se atendieron a tiempo
+        self.assertEqual(c["obs_cerradas"]["obs_venc_validacion"], [4, 8, 50])
+        self.assertEqual(c["obs_a_tiempo"]["obs_venc_validacion"], [4, 10, 60])
+        self.assertEqual(c["obs_hijo_igual_padre"]["obs_venc_validacion"], [6, 6, 0])
+        self.assertEqual(c["obs_padre_0"]["obs_venc_validacion"], [0, 0, None])
+
+
+# DOM mínimo para correr el JavaScript del reporte fuera del navegador
+DOM_SIMULADO = """
+const S = new Proxy(function () {}, { get: (t, p) => p === Symbol.toPrimitive ? () => '' : p === Symbol.iterator ? function* () {} : p === 'length' ? 0 : S,
+  apply: () => S, construct: () => S, set: () => true });
+Object.assign(globalThis, { document: S, window: globalThis, localStorage: S, matchMedia: S, getComputedStyle: S, history: S,
+  requestAnimationFrame: () => 0, addEventListener: () => {}, location: { hash: '' }, innerWidth: 1200 });
+"""
+SIMULADOR_JS = """
+const ms = Array.from({ length: 10 }, (_, k) => preparar([{ ID_MODELO: k + 1, ESTADO_SEGUIMIENTO: 'Con Seguimiento',
+  ESTADO_ALERTA: k < 4 ? 'En alerta' : 'Sin alerta', EXCEDE_TTM: k < 2 ? 'Excede TTM' : k < 4 ? 'No excede' : 'No tiene TTM',
+  PRESENCIA_MITIGANTE: k < 3 ? 'No' : k < 4 ? 'Si' : null,
+  OBS_CRIT_RELE_MODE_PENDIENTES_VI: k === 0 ? 10 : 0, OBS_CRIT_RELE_MODE_VENCIDAS_VI: k === 0 ? 6 : 0 }])[0]);
+const R = medidas(ms); SIM_BASE = R; SIM_MS = ms; SIM_AMB = {};
+const r2 = x => (x == null ? null : Math.round(x * 100) / 100);
+SIM = {}; const sinCambios = simular(R).global === R.global;
+IND.forEach(i => { const r = R.ind[i.key]; if (simulable(i, r)) { SIM[i.key] = r.v; if (SIM_OBS.includes(i.key)) SIM[i.key + ':n'] = r.d - r.v; } });
+const forzado = simular(R).global;
+const casos = {};
+for (const [nombre, sim] of Object.entries(__CASOS__)) {
+  SIM = sim; const e = simular(R), c = { seguimiento: r2(e.drv.seguimiento) };
+  ['alerta_salud', 'alerta_excede_tiempo', 'alerta_sin_mitigantes', 'obs_venc_validacion'].forEach(k => { c[k] = [e.ind[k].v, e.ind[k].d, r2(e.ind[k].p)]; });
+  casos[nombre] = c;
+}
+console.log(JSON.stringify({ sin_cambios: sinCambios, forzado, real: R.global, casos }));
+"""
 
 
 class Documentacion(unittest.TestCase):

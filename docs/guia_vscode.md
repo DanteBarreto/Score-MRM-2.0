@@ -106,8 +106,8 @@ El reporte es un solo archivo autocontenido: lleva dentro los estilos, los ícon
 
 Con el reporte abierto en el navegador:
 
-- **Filtros**, en la barra lateral: Fecha es de selección única. Tier, Banca, Producto, Model developer, Model user, PO / Usuario responsable y Proceso permiten elegir varios valores. Los umbrales del semáforo cambian según los Tier elegidos.
-- **Simulador**, en el tablero de indicadores de la sección Reporte: sube o baja el valor de un indicador para ver cómo cambian su puntuación, el score y el semáforo. **Valores iniciales** deshace la simulación. Simular no modifica ningún archivo.
+- **Filtros**, en la barra lateral: Fecha es de selección única. Entidad, Tipo de riesgo, Tier, PO / Usuario responsable, Model user, Model developer, Proceso, Banca y Producto permiten elegir varios valores. Entidad sale de la columna `ENTIDAD_MODELO` del input principal; si no la trae, los modelos aparecen como «Sin información». Los umbrales del semáforo cambian según los Tier elegidos.
+- **Simulador**, en el tablero de indicadores de la sección Reporte: sube o baja el valor de un indicador para ver cómo cambian su puntuación, el score y el semáforo. Los indicadores que dependen de él se recalculan en cascada y el recuadro **Efectos de tu simulación** explica qué cambió. **Valores iniciales** deshace la simulación. Simular no modifica ningún archivo. Las reglas están en [Indicadores](indicadores.md#simulador).
 - **Exportar CSV**: descarga los indicadores de los modelos filtrados.
 - Los bloques que vienen de los Excel de detalle solo se muestran con el **último mes** seleccionado.
 
@@ -230,7 +230,7 @@ Todos van en la carpeta de `carpeta_inputs`. El proceso lee la **primera hoja** 
 Haz clic en un archivo para ver sus campos.
 
 <details>
-<summary><b>Input principal histórico</b> · 46 campos, 46 requeridos</summary>
+<summary><b>Input principal histórico</b> · 47 campos, 46 requeridos</summary>
 
 | Campo | Tipo | Admite vacíos | Uso | Descripción |
 |---|---|---|---|---|
@@ -238,6 +238,7 @@ Haz clic en un archivo para ver sus campos.
 | `ID_MODELO` | id modelo | No | Requerido | Identificador del modelo. Llave de unión con los demás archivos |
 | `NOMBRE_MODELO` | texto | No | Requerido | Nombre del modelo |
 | `TIER_MODELO` | categoría: `I`, `II`, `III`, `IV` | No | Requerido | Nivel de materialidad |
+| `ENTIDAD_MODELO` | texto | Sí | Informativo | Entidad dueña del modelo (filtro Entidad). Si falta, se muestra como Sin información |
 | `ESTADO_MODELO` | texto | No | Requerido | Estado del modelo a la fecha de corte |
 | `TIPO_RIESGO` | texto | No | Requerido | Tipo de riesgo |
 | `PRODUCTO` | texto | No | Requerido | Producto |

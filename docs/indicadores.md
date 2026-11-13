@@ -88,6 +88,21 @@ Son "No aplica" si no hay observaciones pendientes.
 |---|---|---|
 | Cumplimiento de 10 lineamientos (%) | Promedio de `NOTA_10_LINEAMIENTOS` | El mismo promedio |
 
+## Simulador
+
+El tablero de la sección Reporte permite cambiar el valor de los indicadores y recalcula, con las mismas fórmulas del cálculo real, los indicadores que dependen de él, los drivers y el score. Sin cambios, el score simulado es exactamente el real.
+
+| Indicador que cambia el usuario | Qué se recalcula | Regla |
+|---|---|---|
+| # Modelos con alerta de salud | Exceden el tiempo máximo de atención y sin mitigante temporal | Su base pasa a ser el nuevo número de alertas. Si bajan las alertas, primero se resuelven las que no exceden el tiempo y tienen mitigante; si no alcanza, los hijos se recortan al nuevo máximo. Con 0 alertas, ambos pasan a No aplica y salen del promedio de Seguimiento |
+| Exceden el tiempo máximo / sin mitigante | Su puntuación | No pueden superar el número de alertas |
+| Observaciones vencidas (validación y SBS) | Total de pendientes | Bajar las vencidas equivale a cerrarlas: baja también el total. Para simular que se atendieron a tiempo, se suben las **pendientes a tiempo**, que se editan en la misma fila. Con 0 pendientes, el indicador pasa a No aplica |
+| Modelos no productivos (despliegue y data) | Su puntuación | Cada modelo que baja pasa a 100% productivo: primero los no productivos y luego los mixtos más avanzados, con lo que le falta a cada uno según su ratio real. Si el valor sube, los productivos pasan a no productivos |
+| Demás conteos | Su puntuación | 1 − valor / base, con la base sin cambios |
+| Notas (%) | Su puntuación | La puntuación es el valor |
+
+Los valores se ajustan solos a los límites: no negativos, enteros en los conteos y sin superar a su indicador padre. La fila de un indicador que cambió por efecto de otro se marca con borde punteado.
+
 ## Interpretaciones aplicadas
 
 - **Seguimiento:** la definición escrita citaba `ESTADO_MODELO`, pero el valor "Sin Seguimiento" está en `ESTADO_SEGUIMIENTO`.

@@ -195,6 +195,13 @@ body{background-color:var(--fondo);color:var(--tinta);font-family:var(--tblr-fon
 .sim-antes{font-size:.72rem;font-weight:600;color:var(--naranja-txt);min-height:0;margin-top:.15rem}
 .sim-antes:empty{display:none}
 .tablero tr.sim-on td:not(.drv){background:#FFF4EC}
+.tablero tr.sim-deriv td:not(.drv){background:#FFFAF5}
+.tablero tr.sim-deriv .sim{border-color:#F5B88A;border-style:dashed}
+.sim-sub{display:flex;align-items:center;justify-content:center;gap:.4rem;white-space:nowrap;margin-top:.3rem;font-size:.72rem;font-weight:600;color:var(--tinta-2)}
+.sim-sub .sim-b{height:24px;width:22px}.sim-sub .sim-in{width:3rem;padding:.1rem 0;font-size:.8rem}
+.sim-base{font-size:.72rem;color:var(--tinta-2);margin-top:.15rem}.sim-base:empty{display:none}
+.sim-efectos{font-size:.8rem;background:#FFF4EC;border:1px solid #F5C9A6;border-radius:4px;padding:.5rem .75rem;color:var(--tinta)}
+.sim-efectos ul{padding-left:1.1rem}.sim-efectos li{margin-top:.15rem}
 .tablero tr.sim-on .sim{border-color:var(--naranja)}
 .sim-nota{font-size:.8rem;color:var(--tinta-2);background:var(--fondo);border-radius:4px;padding:.45rem .7rem}
 .sim-delta{font-size:.85rem;font-weight:700;white-space:nowrap}
@@ -564,13 +571,15 @@ const CFG = {
 const IND = CFG.drivers.flatMap(d => d.ind);
 // Dimensiones del inventario usadas como filtros
 const DIMS = [
+  { k: 'ENTIDAD_MODELO', t: 'Entidad' },
+  { k: 'TIPO_RIESGO', t: 'Tipo de riesgo' },
   { k: 'TIER_MODELO', t: 'Tier' },
-  { k: 'BANCA', t: 'Banca' },
-  { k: 'PRODUCTO', t: 'Producto' },
-  { k: 'MODEL_DEVELOPER', t: 'Model developer' },
-  { k: 'MODEL_USER', t: 'Model user' },
   { k: 'PO_USUARIO', t: 'PO / Usuario responsable' },
-  { k: 'PROCESO', t: 'Proceso' }
+  { k: 'MODEL_USER', t: 'Model user' },
+  { k: 'MODEL_DEVELOPER', t: 'Model developer' },
+  { k: 'PROCESO', t: 'Proceso' },
+  { k: 'BANCA', t: 'Banca' },
+  { k: 'PRODUCTO', t: 'Producto' }
 ];
 const OBS_GRUPOS = [
   { t: 'Validación', p: 'OBS_CRIT_RELE_MODE_PENDIENTES_VI', v: 'OBS_CRIT_RELE_MODE_VENCIDAS_VI' },
@@ -632,42 +641,123 @@ const leyendaUmbral = () => `<div class="leyenda-umbral">
   <div>${dot(null)}<b class="text-secondary">No aplica</b></div>
   <div class="text-secondary small ms-auto"><i class="ti ti-adjustments me-1"></i>${esc(UMBRALES.regla)}</div></div>`;
 
-/* Simulación del tablero: el usuario cambia el VALOR de un indicador y se recalculan puntuación, semáforo y score.
+/* Simulación del tablero: el usuario cambia las variables base de los indicadores y se recalculan, en cascada,
+   los indicadores que dependen de ellas, sus puntuaciones, los drivers y el score, con las mismas fórmulas del cálculo real.
    Solo cambia lo que se ve en el tablero; los datos y el resto del reporte no se tocan.
-   - Notas (%): la puntuación es el mismo valor.
-   - Conteos: cada unidad vale 100 / d puntos, donde d es la base del indicador (modelos evaluados, modelos en alerta
-     u observaciones pendientes). Para los ratios puros equivale a recalcular 1 - valor / base; en implementación,
-     cada modelo que pasa a productivo suma lo que suma un modelo 100% productivo.
-   Cada indicador se simula por separado: bajar los modelos en alerta no cambia la base de los indicadores que dependen de ella. */
-let SIM = {}, SIM_BASE = null;
+   Variables base que edita el usuario (SIM):
+   - SIM[k]: valor de cualquier indicador (conteo o nota).
+   - SIM[k + ':n']: en observaciones, las pendientes que aún no están vencidas. Total de pendientes = vencidas + a tiempo,
+     así que bajar las vencidas equivale a cerrarlas (baja también el total). Para simular que se atendieron a tiempo,
+     se bajan las vencidas y se suben las pendientes a tiempo.
+   Reglas de dependencia:
+   - Modelos en alerta → "exceden el tiempo máximo" y "sin mitigante": su base es el número de modelos en alerta y no pueden
+     superarlo. Si bajan las alertas, primero se resuelven las alertas sin exceso y con mitigante; si no alcanza, los hijos se
+     recortan al nuevo máximo. Con 0 alertas, ambos pasan a "No aplica" y salen del promedio del driver, como en el cálculo real.
+   - Implementación: cada modelo que deja de ser no productivo o mixto pasa a 100% productivo. Primero los no productivos y
+     luego los mixtos más avanzados, cada uno con lo que le falta según su ratio real. Si el valor sube, los productivos pasan a
+     no productivos.
+   - El resto de conteos usa su fórmula real, 1 - valor / base, con la base sin cambios. Las notas usan el valor como puntuación.
+   Sin cambios, el resultado es exactamente el cálculo real. */
+let SIM = {}, SIM_BASE = null, SIM_MS = [], SIM_AMB = {};
+const SIM_HIJOS_ALERTA = ['alerta_excede_tiempo', 'alerta_sin_mitigantes'];
+const SIM_OBS = ['obs_venc_validacion', 'obs_venc_reg_aud'];
+const SIM_NOMBRE = { alerta_excede_tiempo: 'Alertas que exceden el tiempo máximo de atención', alerta_sin_mitigantes: 'Alertas sin mitigante temporal',
+  obs_venc_validacion: 'Observaciones vencidas de validación', obs_venc_reg_aud: 'Observaciones vencidas del regulador local (SBS)' };
+const SIM_AMBIENTE = { impl_np_despliegue: ['AMBIENTE_DESPLIEGUE', 'RATIO_IMPLEMENTACION'], impl_np_data: ['AMBIENTE_DATA', 'RATIO_DATA'] };
 const simulable = (i, r) => r.v != null && r.p != null && (i.tipo === 'nota' || r.d > 0);
-const simMax = (i, r) => (i.tipo === 'nota' ? 100 : Math.max(r.d, r.v));
-const simPaso = i => (i.tipo === 'nota' ? 1 : 1);
+const simPaso = () => 1;
 const redondeoVal = (i, v) => (i.tipo === 'nota' ? Math.round(v * 10) / 10 : Math.round(v));
-function puntajeSim(i, r) {
-  if (!(i.key in SIM)) return r.p;
-  const v = SIM[i.key];
-  return i.tipo === 'nota' ? clamp(v) : clamp(r.p + 100 * (r.v - v) / r.d);
+// Ganancias y pérdidas de cada modelo de implementación, en el orden en que se aplican
+function ambiente(k) {
+  if (SIM_AMB[k]) return SIM_AMB[k];
+  const [amb, rat] = SIM_AMBIENTE[k], conRatio = SIM_MS.filter(m => m[rat] != null && m[rat] !== '');
+  const r = m => +m[rat];
+  const de = (...e) => conRatio.filter(m => e.includes(m[amb]));
+  return (SIM_AMB[k] = {
+    suma: conRatio.reduce((a, m) => a + r(m), 0), n: conRatio.length,
+    gana: [...de('NO PRODUCTIVO').sort((a, b) => r(a) - r(b)), ...de('MIXTO').sort((a, b) => r(b) - r(a))].map(m => 1 - r(m)),
+    pierde: de('PRODUCTIVO').sort((a, b) => r(b) - r(a)).map(r)
+  });
 }
-function scoreSim(R) {
+// Estado simulado: valor, base y puntuación de cada indicador, drivers y score
+function simular(R) {
+  const val = k => (k in SIM ? SIM[k] : R.ind[k].v), ind = {};
+  IND.forEach(i => { const r = R.ind[i.key]; ind[i.key] = { v: r.v, d: r.d, p: r.p }; });
+  IND.forEach(i => {
+    const k = i.key, r = R.ind[k], e = ind[k];
+    if (!simulable(i, r)) return;
+    if (i.tipo === 'nota') { if (k in SIM) { e.v = SIM[k]; e.p = clamp(SIM[k]); } return; }
+    if (SIM_OBS.includes(k)) {
+      const v = val(k), n = k + ':n' in SIM ? SIM[k + ':n'] : r.d - r.v;
+      Object.assign(e, { v, d: v + n, p: ratio(v, v + n) });
+      return;
+    }
+    if (k in SIM_AMBIENTE) {
+      const a = ambiente(k), paso = r.v - val(k);
+      if (!paso) return;
+      const lista = paso > 0 ? a.gana : a.pierde, total = lista.slice(0, Math.abs(paso)).reduce((x, y) => x + y, 0);
+      Object.assign(e, { v: val(k), p: a.n ? clamp(100 * (a.suma + Math.sign(paso) * total) / a.n) : r.p });
+      return;
+    }
+    if (!SIM_HIJOS_ALERTA.includes(k)) { if (k in SIM) Object.assign(e, { v: SIM[k], p: ratio(SIM[k], r.d) }); }
+  });
+  const A = ind.alerta_salud.v;
+  SIM_HIJOS_ALERTA.forEach(k => {
+    const i = IND.find(x => x.key === k), r = R.ind[k];
+    if (!simulable(i, r) || A == null) return;
+    if (A === 0) { Object.assign(ind[k], { v: 0, d: 0, p: null }); return; }
+    const v = Math.min(val(k), A);
+    Object.assign(ind[k], { v, d: A, p: ratio(v, A) });
+  });
   const drv = {};
-  CFG.drivers.forEach(d => { drv[d.key] = avgN(d.ind.map(i => puntajeSim(i, R.ind[i.key]))); });
+  CFG.drivers.forEach(d => { drv[d.key] = avgN(d.ind.map(i => ind[i.key].p)); });
   const ds = CFG.drivers.filter(d => drv[d.key] != null), peso = ds.reduce((a, d) => a + d.peso, 0);
-  return peso ? ds.reduce((a, d) => a + d.peso * drv[d.key], 0) / peso : null;
+  return { ind, drv, global: Object.keys(SIM).length ? (peso ? ds.reduce((a, d) => a + d.peso * drv[d.key], 0) / peso : null) : R.global };
 }
+// Máximo que admite cada campo según el estado simulado
+function simMax(i, r, E, campo) {
+  if (i.tipo === 'nota') return 100;
+  if (campo === 'n') return Infinity;
+  if (SIM_HIJOS_ALERTA.includes(i.key)) return E.ind.alerta_salud.v;
+  if (i.key in SIM_AMBIENTE) return r.d;
+  if (SIM_OBS.includes(i.key)) return Infinity;
+  return Math.max(r.d, r.v);
+}
+// Indicadores que cambiaron por efecto de otro, para explicárselo al usuario
+function efectosSim(R, E) {
+  const pts = p => (p == null ? 'No aplica' : `${fmt0(p)} pts`), out = [];
+  const A0 = R.ind.alerta_salud.v, A = E.ind.alerta_salud.v;
+  SIM_HIJOS_ALERTA.forEach(k => {
+    const r = R.ind[k], e = E.ind[k];
+    if (r.p == null || A === A0) return;
+    const nombre = SIM_NOMBRE[k];
+    if (A === 0) out.push(`<b>${nombre}</b> pasa a No aplica porque no quedan modelos en alerta, y sale del promedio de Seguimiento.`);
+    else out.push(`<b>${nombre}</b>: ahora se mide sobre ${fmt0(A)} modelos en alerta (antes ${fmt0(A0)})${e.v !== val0(k, R) ? ` y baja de ${fmt0(val0(k, R))} a ${fmt0(e.v)} modelos, porque no puede superar las alertas` : ''} · ${pts(r.p)} → ${pts(e.p)}.`);
+  });
+  SIM_OBS.forEach(k => {
+    const r = R.ind[k], e = E.ind[k];
+    if (r.d == null || e.d === r.d) return;
+    out.push(`<b>${SIM_NOMBRE[k]}</b>: el total de pendientes pasa de ${fmt0(r.d)} a ${fmt0(e.d)}${e.v < r.v && e.d < r.d ? ' (las vencidas que bajan se cuentan como cerradas)' : ''} · ${pts(r.p)} → ${pts(e.p)}.`);
+  });
+  return out;
+}
+const val0 = (k, R) => (k in SIM ? SIM[k] : R.ind[k].v);
+const cajaSim = (i, v, campo, etiqueta) => `<div class="sim" data-campo="${campo}"><button type="button" class="sim-b" data-paso="-1" aria-label="Bajar ${etiqueta}">−</button>
+    <span class="sim-campo"><input type="number" class="sim-in" value="${v}" min="0" step="${simPaso(i)}" inputmode="decimal" aria-label="${etiqueta} de ${esc(i.nombre)}">${i.tipo === 'nota' && campo === 'v' ? '<span class="u">%</span>' : ''}</span>
+    <button type="button" class="sim-b" data-paso="1" aria-label="Subir ${etiqueta}">+</button></div>`;
 const celdaValor = (i, r) => {
   if (!simulable(i, r)) return fmtVal(i, r);
-  const v = redondeoVal(i, r.v), u = i.tipo === 'nota' ? '<span class="u">%</span>' : '';
-  return `<div class="sim"><button type="button" class="sim-b" data-paso="-1" aria-label="Bajar valor">−</button>
-    <span class="sim-campo"><input type="number" class="sim-in" value="${v}" min="0" max="${simMax(i, r)}" step="${simPaso(i)}" inputmode="decimal" aria-label="Valor simulado de ${esc(i.nombre)}">${u}</span>
-    <button type="button" class="sim-b" data-paso="1" aria-label="Subir valor">+</button></div><div class="sim-antes"></div>`;
+  const extra = SIM_OBS.includes(i.key)
+    ? `<div class="sim-sub"><span>A tiempo</span>${cajaSim(i, redondeoVal(i, r.d - r.v), 'n', 'Pendientes a tiempo')}</div>`
+    : '';
+  return `${cajaSim(i, redondeoVal(i, r.v), 'v', 'Valor simulado')}${extra}<div class="sim-base"></div><div class="sim-antes"></div>`;
 };
 
 // Tablero vertical: driver | indicador | valor | semáforo | puntuación
 // ms es el portafolio filtrado.
 function tablero(ms, titulo, subtitulo) {
   const R = medidas(ms), g = R.global;
-  SIM_BASE = R;
+  SIM_BASE = R; SIM_MS = ms; SIM_AMB = {};
   const filas = CFG.drivers.map(dr => {
     return dr.ind.map((i, j) => {
       const r = R.ind[i.key], s = r.p;
@@ -688,7 +778,8 @@ function tablero(ms, titulo, subtitulo) {
       <div class="card-actions score-actual"><button type="button" id="sim-reset" class="btn btn-sm btn-outline-secondary" disabled><i class="ti ti-restore me-1"></i>Valores iniciales</button>
         <span class="text-secondary fw-semibold" id="sim-etq">Score actual</span>
         <span class="num" id="sim-score" style="color:var(--${col(g)})">${fmt(g)}</span><span id="sim-pill">${pill(g)}</span><span id="sim-delta" class="sim-delta"></span></div>
-      <div class="sim-nota w-100"><i class="ti ti-adjustments-horizontal me-1"></i>Simula el score: sube o baja el <b>valor</b> de cualquier indicador con − / + o escribiendo el número. La puntuación, el semáforo y el score se recalculan al momento. Es solo una simulación: no cambia los datos ni el resto del reporte.</div>
+      <div class="sim-nota w-100"><i class="ti ti-adjustments-horizontal me-1"></i>Simula el score: sube o baja el <b>valor</b> de cualquier indicador con − / + o escribiendo el número. Los indicadores que dependen de él, la puntuación, el semáforo y el score se recalculan al momento. En observaciones, bajar las vencidas equivale a cerrarlas; para simular que se atendieron a tiempo, sube también las pendientes a tiempo. Es solo una simulación: no cambia los datos ni el resto del reporte.</div>
+      <div class="sim-efectos w-100" id="sim-efectos" aria-live="polite" hidden></div>
     </div>
     <div class="table-responsive"><table class="table card-table tablero">
       <thead><tr><th>Driver</th><th>Indicador</th><th class="text-center">Valor</th><th class="text-center">Semáforo</th><th class="text-center">Puntuación</th></tr></thead>
@@ -832,12 +923,14 @@ function serieEvolutivo() {
 }
 // Gráfico de líneas por fecha. series: [{ nombre, color, vals }]; op: { ymax, bandas, marcasY, valores, finales, tip }
 function lineas(fechas, series, op) {
-  const W = 900, H = 200, M = { t: 24, r: op.finales ? 170 : 30, b: 28, l: 34 };
+  const W = op.W || 900, H = op.H || 200, M = { t: 24, r: op.finales ? 170 : 30, b: 28, l: op.fmtV ? 44 : 34 };
   const ymin = op.ymin || 0;
   const y = v => M.t + (op.ymax - v) / (op.ymax - ymin) * (H - M.t - M.b);
-  const x = i => (fechas.length < 2 ? (M.l + W - M.r) / 2 : M.l + 50 + i * (W - M.l - M.r - 100) / (fechas.length - 1));
+  const pad = op.W ? 18 : 50;
+  const x = i => (fechas.length < 2 ? (M.l + W - M.r) / 2 : M.l + pad + i * (W - M.l - M.r - 2 * pad) / (fechas.length - 1));
   const banda = ([de, a, c]) => (a <= ymin ? '' : `<rect x="${M.l}" y="${y(a)}" width="${W - M.l - M.r}" height="${y(Math.max(de, ymin)) - y(a)}" fill="var(--${c}-bg)" fill-opacity=".6"/>`);
-  const marcaY = v => `<line class="rejilla" x1="${M.l}" x2="${W - M.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${M.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  const fv = op.fmtV || (v => v);
+  const marcaY = v => `<line class="rejilla" x1="${M.l}" x2="${W - M.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${M.l - 6}" y="${y(v) + 4}" text-anchor="end">${fv(v)}</text>`;
   const tramos = s => s.vals.slice(1).map((v, i) => `<line x1="${x(i)}" y1="${y(s.vals[i])}" x2="${x(i + 1)}" y2="${y(v)}" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round"/>`).join('');
   const area = s => `<path d="M${x(0)},${y(ymin)} ${s.vals.map((v, i) => `L${x(i)},${y(v)}`).join(' ')} L${x(s.vals.length - 1)},${y(ymin)}Z" fill="${s.color}" fill-opacity=".08"/>`;
   const puntos = s => s.vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="${fechas[i] === FIL.fecha ? 6 : 4}" fill="${s.color}" stroke="${fechas[i] === FIL.fecha ? 'var(--naranja)' : '#fff'}" stroke-width="${fechas[i] === FIL.fecha ? 3 : 2}"/>
@@ -846,9 +939,9 @@ function lineas(fechas, series, op) {
   let previo = -99;
   const finales = !op.finales ? '' : series.map(s => ({ s, v: s.vals[s.vals.length - 1] })).sort((a, b) => b.v - a.v).map(({ s, v }) => {
     previo = Math.max(y(v) + 4, previo + 14);
-    return `<text x="${x(fechas.length - 1) + 12}" y="${previo}">${esc(s.nombre)}: ${v}</text>`;
+    return `<text x="${x(fechas.length - 1) + 12}" y="${previo}">${esc(s.nombre)}: ${fv(v)}</text>`;
   }).join('');
-  const ancho = fechas.length < 2 ? W - M.l - M.r : (W - M.l - M.r - 100) / (fechas.length - 1);
+  const ancho = fechas.length < 2 ? W - M.l - M.r : (W - M.l - M.r - 2 * pad) / (fechas.length - 1);
   const columnas = fechas.map((f, i) => `<text class="${f === FIL.fecha ? 'sel' : ''}" x="${x(i)}" y="${H - 8}" text-anchor="middle">${mesTxt(f)}</text>
     <g class="col"><line class="cruz" x1="${x(i)}" x2="${x(i)}" y1="${M.t}" y2="${H - M.b}"/><rect class="hit" x="${x(i) - ancho / 2}" y="${M.t}" width="${ancho}" height="${H - M.t - M.b}" tabindex="0" data-tip="${esc(op.tip(i))}" aria-label="${esc(op.tip(i))}"/></g>`).join('');
   return `<div class="lineas"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(op.titulo)}">
@@ -872,51 +965,60 @@ function evolutivo() {
       <div class="text-secondary small mt-1">Score por fecha con los filtros aplicados</div></div><div class="card-actions">${extra}</div></div>
     <div class="card-body py-2">${grafico}</div></div>`;
 }
-function actualizarSimulacion(el) {
+function actualizarSimulacion(el, editando) {
   const R = SIM_BASE;
   if (!R) return;
+  const E = simular(R);
   el.querySelectorAll('.tablero tr[data-k]').forEach(tr => {
-    const i = IND.find(x => x.key === tr.dataset.k), r = R.ind[i.key];
+    const i = IND.find(x => x.key === tr.dataset.k), r = R.ind[i.key], e = E.ind[i.key];
     if (!simulable(i, r)) return;
-    const s = puntajeSim(i, r), on = i.key in SIM;
-    tr.classList.toggle('sim-on', on);
-    tr.querySelector('.sim-antes').textContent = on ? `Inicial: ${fmtVal(i, r)}` : '';
+    const s = e.p, propio = i.key in SIM || i.key + ':n' in SIM;
+    const cambia = e.v !== r.v || e.d !== r.d || e.p !== r.p;
+    tr.classList.toggle('sim-on', propio);
+    tr.classList.toggle('sim-deriv', cambia && !propio);
+    tr.classList.toggle('no-aplica', s == null);
+    tr.querySelectorAll('.sim').forEach(box => {
+      const campo = box.dataset.campo, inp = box.querySelector('.sim-in');
+      const v = campo === 'n' ? e.d - e.v : e.v, max = simMax(i, r, E, campo);
+      if (inp !== editando) inp.value = redondeoVal(i, v);
+      if (Number.isFinite(max)) inp.max = max; else inp.removeAttribute('max');
+    });
+    const base = SIM_HIJOS_ALERTA.includes(i.key) ? `de ${fmt0(E.ind.alerta_salud.v)} en alerta`
+      : SIM_OBS.includes(i.key) ? `Total pendientes: ${fmt0(e.d)}` : '';
+    tr.querySelector('.sim-base').textContent = base;
+    tr.querySelector('.sim-antes').textContent = cambia || propio ? `Inicial: ${fmtVal(i, r)}${SIM_OBS.includes(i.key) ? ` de ${fmt0(r.d)}` : ''}` : '';
     const pts = tr.querySelector('td.pts');
     pts.textContent = s == null ? 'No aplica' : fmt0(s); pts.style.color = `var(--${col(s)})`;
     const d = tr.querySelector('td.luz .dot'); if (d) d.outerHTML = dot(s);
     const b = tr.querySelector('td.luz .ir-sem'); if (b) b.dataset.tip = b.dataset.tip.replace(/: [^\n]*/, `: ${SEM_TXT[sem(s)]}`);
   });
-  const hay = Object.keys(SIM).length, g = hay ? scoreSim(R) : R.global;
+  const hay = Object.keys(SIM).length, g = E.global;
   el.querySelector('#sim-etq').textContent = hay ? 'Score simulado' : 'Score actual';
   const n = el.querySelector('#sim-score'); n.textContent = fmt(g); n.style.color = `var(--${col(g)})`;
   el.querySelector('#sim-pill').innerHTML = pill(g);
   el.querySelector('#sim-delta').innerHTML = hay ? `${variacion(g, R.global)} <span class="text-secondary">vs ${fmt(R.global)}</span>` : '';
   el.querySelector('#sim-reset').disabled = !hay;
+  const ef = efectosSim(R, E), caja = el.querySelector('#sim-efectos');
+  caja.innerHTML = ef.length ? `<div class="fw-semibold mb-1"><i class="ti ti-arrows-split-2 me-1"></i>Efectos de tu simulación en otros indicadores</div><ul class="mb-0">${ef.map(x => `<li>${x}</li>`).join('')}</ul>` : '';
+  caja.hidden = !ef.length;
   el.querySelector('.tablero').closest('.card').classList.toggle('simulando', !!hay);
 }
 function conectarSimulador(el) {
-  const fijar = (tr, v, normalizar) => {
-    const i = IND.find(x => x.key === tr.dataset.k), r = SIM_BASE.ind[i.key], inp = tr.querySelector('.sim-in');
-    if (v === '' || isNaN(v)) { if (normalizar) { delete SIM[i.key]; inp.value = redondeoVal(i, r.v); } actualizarSimulacion(el); return; }
-    v = redondeoVal(i, Math.max(0, Math.min(simMax(i, r), +v)));
-    if (normalizar || +inp.value !== v) inp.value = v;
-    if (v === redondeoVal(i, r.v)) delete SIM[i.key]; else SIM[i.key] = v;
-    actualizarSimulacion(el);
+  const fijar = (tr, box, v, normalizar) => {
+    const i = IND.find(x => x.key === tr.dataset.k), r = SIM_BASE.ind[i.key], inp = box.querySelector('.sim-in');
+    const campo = box.dataset.campo, clave = campo === 'n' ? i.key + ':n' : i.key, base = campo === 'n' ? r.d - r.v : r.v;
+    if (v === '' || isNaN(v)) { if (normalizar) delete SIM[clave]; actualizarSimulacion(el, normalizar ? null : inp); return; }
+    v = redondeoVal(i, Math.max(0, Math.min(simMax(i, r, simular(SIM_BASE), campo), +v)));
+    if (v === redondeoVal(i, base)) delete SIM[clave]; else SIM[clave] = v;
+    actualizarSimulacion(el, normalizar ? null : inp);
   };
   el.querySelectorAll('.tablero tr[data-k] .sim').forEach(box => {
     const tr = box.closest('tr'), inp = box.querySelector('.sim-in');
-    box.querySelectorAll('.sim-b').forEach(b => b.onclick = () => fijar(tr, +inp.value + +b.dataset.paso * +inp.step, true));
-    inp.oninput = () => fijar(tr, inp.value, false);
-    inp.onchange = () => fijar(tr, inp.value, true);
+    box.querySelectorAll('.sim-b').forEach(b => b.onclick = () => fijar(tr, box, +inp.value + +b.dataset.paso * +inp.step, true));
+    inp.oninput = () => fijar(tr, box, inp.value, false);
+    inp.onchange = () => fijar(tr, box, inp.value, true);
   });
-  el.querySelector('#sim-reset').onclick = () => {
-    SIM = {};
-    el.querySelectorAll('.tablero tr[data-k]').forEach(tr => {
-      const i = IND.find(x => x.key === tr.dataset.k), r = SIM_BASE.ind[i.key], inp = tr.querySelector('.sim-in');
-      if (inp) inp.value = redondeoVal(i, r.v);
-    });
-    actualizarSimulacion(el);
-  };
+  el.querySelector('#sim-reset').onclick = () => { SIM = {}; actualizarSimulacion(el); };
   actualizarSimulacion(el);
 }
 function vistaResumen(ms) {
@@ -1031,15 +1133,27 @@ const apiladas = (filas, max) => `<div class="barras">${filas.map(f => `<div cla
 const leyendaColores = items => `<div class="leg">${items.map(i => `<span><i style="background:${i.c}"></i>${esc(i.n)}</span>`).join('')}</div>`;
 
 // Serie por fecha. defs: [[nombre, condición de modelo o columna a sumar]]; respeta todos los filtros salvo la fecha
-function evolutivoConteos(defs, titulo) {
+function evolutivoConteos(defs, titulo, compacto) {
   const fechas = DATOS.fechas, por = fechas.map(f => TODOS.filter(m => m.FECHA === f && pasaFiltros(m)));
   const series = defs.map(([nombre, f], i) => ({ nombre, color: SEG_SERIES[i], vals: por.map(ms => (typeof f === 'string' ? sum(ms, f) : cuenta(ms, f))) }));
   const ymax = Math.max(5, Math.ceil(Math.max(...series.flatMap(s => s.vals)) / 5) * 5);
   const tip = i => `${mesTxt(fechas[i])}\n${series.map(s => `${s.nombre}: ${s.vals[i]}`).join('\n')}`;
-  return lineas(fechas, series, { ymax, finales: true, marcasY: [0, Math.round(ymax / 2), ymax], titulo, tip })
-    + `<div class="mt-2">${leyendaColores(series.map(s => ({ n: s.nombre, c: s.color })))}</div>`;
+  const tam = compacto ? { W: 520, H: 240, finales: false } : { finales: true };
+  return lineas(fechas, series, { ymax, ...tam, marcasY: [0, Math.round(ymax / 2), ymax], titulo, tip })
+    + `<div class="mt-2">${leyendaColores(series.map(s => ({ n: compacto ? `${s.nombre}: ${s.vals[s.vals.length - 1]}` : s.nombre, c: s.color })))}</div>`;
 }
 const notaFechas = () => 'Modelos por fecha';
+// Porcentaje de modelos que cumplen cada condición, por fecha: cumplen / total de modelos
+function evolutivoPorcentajes(defs, titulo) {
+  const fechas = DATOS.fechas, por = fechas.map(f => TODOS.filter(m => m.FECHA === f && pasaFiltros(m)));
+  const series = defs.map(([nombre, f], i) => ({ nombre, color: SEG_SERIES[i], vals: por.map(ms => (ms.length ? Math.round(1000 * cuenta(ms, f) / ms.length) / 10 : 0)),
+    n: por.map(ms => [cuenta(ms, f), ms.length]) }));
+  const minimo = Math.min(...series.flatMap(s => s.vals)), ymin = Math.max(0, Math.floor((minimo - 5) / 10) * 10);
+  const pct = v => `${fmt(v)}%`;
+  const tip = i => `${mesTxt(fechas[i])}\n${series.map(s => `${s.nombre}: ${pct(s.vals[i])} (${s.n[i][0]} de ${s.n[i][1]} modelos)`).join('\n')}`;
+  return lineas(fechas, series, { ymin, ymax: 100, W: 520, H: 240, marcasY: [ymin, Math.round((ymin + 100) / 2), 100], titulo, tip, fmtV: pct })
+    + `<div class="mt-2">${leyendaColores(series.map(s => ({ n: `${s.nombre}: ${pct(s.vals[s.vals.length - 1])}`, c: s.color })))}</div>`;
+}
 const evolutivoAlertas = () => evolutivoConteos([['En alerta', enAlerta], ['Sin seguimiento', es('ESTADO_SEGUIMIENTO', 'Sin Seguimiento')], ['Exceden TTM', excede], ['Sin mitigante', sinMitigante]], 'Evolutivo de modelos en alerta y sin seguimiento');
 function bloqueSeguimiento(ms, alertas) {
   const est = [['Con Seguimiento', 'var(--g)'], ['Sin Seguimiento', 'var(--r)'], ['Sin información', 'var(--n)'], ['No aplica', 'var(--n)']];
@@ -1196,8 +1310,11 @@ function vistaValidacion(ms) {
   const el = document.getElementById('v-validacion');
   if (!ms.length) { el.innerHTML = vacio; return; }
   // El evolutivo sale del input, así que se muestra en todas las fechas
-  const evo = `<div class="row row-cards mb-3">${bloque('col-12', 'Evolutivo de modelos sin validación', 'ti-chart-line',
-    cuerpo(evolutivoConteos([['Sin validación inicial', es('VALIDACION_COMPLETA', 'Sin validación')], ['Sin validación periódica', es('VALIDACION_PERIODICA', 'Descoberturado')]], 'Evolutivo de modelos sin validación')), notaFechas())}</div>`;
+  const evo = `<div class="row row-cards mb-3">${bloque('col-lg-6', 'Evolutivo de la cobertura de validación', 'ti-chart-line',
+    cuerpo(evolutivoPorcentajes([['Validación inicial', es('VALIDACION_COMPLETA', 'Con validación')], ['Validación periódica', es('VALIDACION_PERIODICA', 'Coberturado')]], 'Evolutivo de la cobertura de validación')),
+    'Modelos validados o coberturados entre el total de modelos, por fecha')}
+    ${bloque('col-lg-6', 'Evolutivo de modelos sin validación', 'ti-chart-line',
+    cuerpo(evolutivoConteos([['Sin validación inicial', es('VALIDACION_COMPLETA', 'Sin validación')], ['Sin validación periódica', es('VALIDACION_PERIODICA', 'Descoberturado')]], 'Evolutivo de modelos sin validación', true)), notaFechas())}</div>`;
   if (FIL.fecha !== ULTIMA) { soloUltimaFecha(el); el.insertAdjacentHTML('afterbegin', evo); return; }
   const fs = ms.flatMap(m => (COB[m.ID_MODELO] ? [{ ...COB[m.ID_MODELO], m }] : []));
   const N = fs.length;
