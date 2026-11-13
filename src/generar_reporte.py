@@ -278,6 +278,7 @@ def main():
     filas = lector.leer("input_principal", obligatorio=True)
     for f in filas:
         f["CODIGO_MODELO"], f["ID_MODELO"] = f["ID_MODELO"], num_id(f["ID_MODELO"])
+        f["ENTIDAD_MODELO"] = f.get("ENTIDAD_MODELO") or "Sin información"  # columna informativa: filtro Entidad
     sin_id = sum(f["ID_MODELO"] is None for f in filas)
     if sin_id:
         sys.exit(f"{sin_id} filas del input principal no tienen un ID_MODELO con número")
@@ -291,7 +292,7 @@ def main():
     ultimo = {f["ID_MODELO"]: f for f in filas if f["FECHA"] == corte}
     ids = set(ultimo)
     control = {"hist": filas, "ultimo": ultimo, "corte": corte}
-    datos = {"fechas": fechas, "modelos": [{c: m[c] for c in [*COLUMNAS, "CODIGO_MODELO"]} for m in filas], "corte": corte}
+    datos = {"fechas": fechas, "modelos": [{c: m.get(c) for c in [*COLUMNAS, "CODIGO_MODELO"]} for m in filas], "corte": corte}
 
     obs = lector.leer("observaciones")
     datos["observaciones"], datos["obs_meta"] = leer_observaciones(obs, ids) if obs else ([], None)

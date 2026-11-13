@@ -63,6 +63,7 @@ FECHA | fecha | no | R | Fecha de corte, fin de mes
 ID_MODELO | id modelo | no | R | Identificador del modelo. Llave de unión con los demás archivos
 NOMBRE_MODELO | texto | no | R | Nombre del modelo
 TIER_MODELO | categoría: I; II; III; IV | no | R | Nivel de materialidad
+ENTIDAD_MODELO | texto | sí | - | Entidad dueña del modelo (filtro Entidad). Si falta, se muestra como Sin información
 ESTADO_MODELO | texto | no | R | Estado del modelo a la fecha de corte
 TIPO_RIESGO | texto | no | R | Tipo de riesgo
 PRODUCTO | texto | no | R | Producto

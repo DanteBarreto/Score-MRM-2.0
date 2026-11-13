@@ -32,7 +32,9 @@ La versión 2 incorpora el input principal histórico y siete archivos de detall
 | Inventario | Sección nueva: modelos con modelo input, explorador, mapa por proceso (incluye los modelos sin modelo input) y altas y bajas del último mes frente al anterior |
 | Gobierno | Flujos interactivos del gobierno de modelos, matriz de aprobaciones, jerarquía de comités, aplicabilidad por perímetro, definición de indicadores, mapa normativo desplegable, flujo de información con owners y recurrencias, y nota de gobierno por PO usuario |
 | Reporte | Simulador en el tablero de indicadores: se cambia el valor de un indicador y se recalculan puntuación, score y semáforo. Se retiran el botón de impresión y el gráfico de nota dinámica |
-| Filtros | Selección múltiple en todos, salvo Fecha. Se retira el filtro Modelo |
+| Filtros | Selección múltiple en todos, salvo Fecha. Se retira el filtro Modelo. Se agregan Entidad (columna nueva `ENTIDAD_MODELO` del input principal, opcional) y Tipo de riesgo |
+| Validación | Evolutivo de la cobertura de validación (% de modelos validados o coberturados) junto al evolutivo de modelos sin validación |
+| Simulador | Recalcula en cascada los indicadores que dependen del que se cambia y explica los efectos |
 | Semáforo | Umbrales según los Tier elegidos: Tier I 85/90, II 80/85, III 75/80, IV 60/75; solo Tier I y II 81/86; otras combinaciones según el Tier más crítico; sin filtro 70/80 |
 | Todas las tablas | Muestran el código completo del modelo (`MOD-BCP-XXXX`) |
 
